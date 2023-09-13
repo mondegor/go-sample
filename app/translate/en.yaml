@@ -1,0 +1,32 @@
+---
+messages:
+
+errors:
+  errMessageToUser:
+    reason: Internal server error (en)
+    details:
+      - Contact support in telegram (en)
+
+  errSystem:
+    reason: System server error (en)
+    details:
+      - Contact support in telegram (en)
+
+  errInternal:
+    reason: Internal server error (en)
+    details:
+      - Contact support in telegram (en)
+
+  errHttpRequestParseData:
+    reason: Request body is not valid (en)
+    details:
+      - Check fields REST API endpoint (en)
+
+  errServiceEntityTemporarilyUnavailable:
+    reason: Service Resource Temporarily Unavailable
+
+  errHttpResourceNotFound:
+    reason: That resource is not found (en)
+
+  errValidationMax:
+    reason: Значение поля не может быть более 32 символов (end)

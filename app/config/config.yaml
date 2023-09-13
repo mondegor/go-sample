@@ -1,0 +1,52 @@
+---
+app_path:
+debug: true
+
+logger:
+  level: debug
+
+server:
+  readTimeout: 30
+  writeTimeout: 30
+  shutdownTimeout: 30
+
+listen:
+  type: port
+  sock_name: app.sock
+  bind_ip: 0.0.0.0
+  port: 8080
+
+storage:
+  type: postgres
+  host: 127.0.0.1
+  port: 5432
+  username: user_pg
+  password: 123456
+  database: db_pg
+  maxPoolSize: 2
+  timeout: 30
+
+#sentry:
+#  use: false
+#  dsn: http://a3f690a558be44f6888cb421bcb283bb@127.0.0.1:9050/2
+
+cors:
+  allowed_origins:
+    - http://localhost:3000
+    - http://127.0.0.1:3000
+  allowed_methods:
+    - GET
+    - POST
+    - PATCH
+    - DELETE
+  allowed_headers:
+    - Content-Type
+  # exposed_headers:
+  allow_credentials: true
+
+translation:
+  dir_path: ./translate
+  file_type: yaml
+  lang_codes: # the first language is used as fallback
+    - en
+    - ru

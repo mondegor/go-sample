@@ -1,0 +1,32 @@
+---
+messages:
+
+errors:
+  errSystem:
+    reason: System server error (ru)
+    details:
+      - Contact support in telegram (ru)
+
+  errInternal:
+    reason: Internal server error (ru)
+    details:
+      - Contact support in telegram (ru)
+
+  errHttpRequestParseData:
+    reason: Request body is not valid (ru)
+    details:
+      - Check fields REST API endpoint (ru)
+      - Check fields REST API endpoint1 (ru)
+
+  errServiceEntityTemporarilyUnavailable:
+    reason: Ресурс сервиса временно не доступен
+    details: [ detail1, detail2 ]
+
+  errHttpResourceNotFound:
+    reason: That resource is not found (ru)
+
+  errValidationMax:
+    reason: Значение поля не может быть более 32 символов
+
+  errCatalogProductArticleAlreadyExists:
+    reason: Product article '{{ .name }}' is already exists"
