@@ -7,9 +7,11 @@ import (
     "go-sample/internal/usecase"
     "net/http"
 
+    "github.com/mondegor/go-components/mrcom"
     "github.com/mondegor/go-storage/mrentity"
     "github.com/mondegor/go-webcore/mrcore"
     "github.com/mondegor/go-webcore/mrctx"
+    "github.com/mondegor/go-webcore/mrview"
 )
 
 const (
@@ -18,9 +20,11 @@ const (
     catalogTrademarkChangeStatusURL = "/v1/catalog/trademarks/:id/status"
 )
 
-type CatalogTrademark struct {
-    service usecase.CatalogTrademarkService
-}
+type (
+	CatalogTrademark struct {
+        service usecase.CatalogTrademarkService
+    }
+)
 
 func NewCatalogTrademark(service usecase.CatalogTrademarkService) *CatalogTrademark {
     return &CatalogTrademark{
@@ -89,7 +93,7 @@ func (ht *CatalogTrademark) Create() mrcore.HttpHandlerFunc {
             return err
         }
 
-        response := view.CreateItemResponse{
+        response := mrview.CreateItemResponse{
             ItemId: fmt.Sprintf("%d", item.Id),
             Message: mrctx.Locale(c.Context()).TranslateMessage(
                 "msgCatalogTrademarkSuccessCreated",
@@ -127,7 +131,7 @@ func (ht *CatalogTrademark) Store() mrcore.HttpHandlerFunc {
 
 func (ht *CatalogTrademark) ChangeStatus() mrcore.HttpHandlerFunc {
     return func(c mrcore.ClientData) error {
-        request := view.ChangeItemStatus{}
+        request := mrcom.ChangeItemStatusRequest{}
 
         if err := c.ParseAndValidate(&request); err != nil {
             return err

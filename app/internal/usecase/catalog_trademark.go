@@ -11,12 +11,14 @@ import (
     "github.com/mondegor/go-webcore/mrtool"
 )
 
-type CatalogTrademark struct {
-    storage CatalogTrademarkStorage
-    eventBox mrcore.EventBox
-    serviceHelper *mrtool.ServiceHelper
-    statusFlow mrcom.ItemStatusFlow
-}
+type (
+	CatalogTrademark struct {
+        storage CatalogTrademarkStorage
+        eventBox mrcore.EventBox
+        serviceHelper *mrtool.ServiceHelper
+        statusFlow mrcom.ItemStatusFlow
+    }
+)
 
 func NewCatalogTrademark(storage CatalogTrademarkStorage,
                          eventBox mrcore.EventBox,

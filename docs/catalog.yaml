@@ -95,7 +95,7 @@ paths:
   /v1/catalog/categories/{categoryId}:
     get:
       summary: Метод получения категории
-      description: Метод предназначен для получения информации о категории из БД
+      description: Метод предназначен для получения информации об указанной категории из БД
       operationId: getCatalogCategory
       tags:
         - CatalogCategory
@@ -109,7 +109,7 @@ paths:
         - $ref: "#/components/parameters/App.Request.Path.categoryId"
 
       responses:
-        "204":
+        "200":
           description: Получена информация о категории
           content:
             application/json;charset=UTF-8:
@@ -126,7 +126,7 @@ paths:
 
     put:
       summary: Метод сохранения категории
-      description: Метод предназначен для сохранения информации о категории в БД
+      description: Метод предназначен для сохранения информации об указанной категории в БД
       operationId: storeCatalogCategory
       tags:
         - CatalogCategory
@@ -164,7 +164,7 @@ paths:
 
     delete:
       summary: Метод удаления категории
-      description: Метод предназначен для удаления информации о категории из БД
+      description: Метод предназначен для удаления информации об указанной категории из БД
       operationId: removeCatalogCategory
       tags:
         - CatalogCategory
@@ -184,6 +184,98 @@ paths:
           $ref: "#/components/responses/App.Response.Error401"
         "403":
           $ref: "#/components/responses/App.Response.Error403"
+        "404":
+          $ref: "#/components/responses/App.Response.Error404"
+        "500":
+          $ref: "#/components/responses/App.Response.Error5XX"
+
+  /v1/catalog/categories/{categoryId}/image:
+    get:
+      summary: Метод получения изображения категории
+      description: Метод предназначен для получения изображения указанной категории из файлового хранилища
+      operationId: getCatalogCategoryImage
+      tags:
+        - CatalogCategory
+
+      parameters:
+        - $ref: "#/components/parameters/App.Request.Header.acceptLanguage"
+        - $ref: "#/components/parameters/App.Request.Header.correlationId"
+        - $ref: "#/components/parameters/App.Request.Path.categoryId"
+
+      responses:
+        "200":
+          description: Получено изображение категории
+          content:
+            image/png:
+              schema:
+                $ref: "#/components/schemas/App.Response.Model.BinaryFile"
+            image/jpeg:
+              schema:
+                $ref: "#/components/schemas/App.Response.Model.BinaryFile"
+        "404":
+          $ref: "#/components/responses/App.Response.Error404"
+        "500":
+          $ref: "#/components/responses/App.Response.Error5XX"
+
+    patch:
+      summary: Метод загруки изображения для категории
+      description: Метод предназначен для загруки нового изображения для указанной категории в файловое хранилище
+      operationId: uploadCatalogCategoryImage
+      tags:
+        - CatalogCategory
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: "#/components/parameters/App.Request.Header.acceptLanguage"
+        - $ref: "#/components/parameters/App.Request.Header.correlationId"
+        - $ref: "#/components/parameters/App.Request.Path.categoryId"
+
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                categoryImage:
+                  description: |-
+                    - Бинарный файл с расширением JPEG, PNG
+                    - Если указать пустую строку, то изображение должно быть удалено
+                  type: string
+                  format: binary
+                  maxLength: 102400 # 100Kb
+
+      responses:
+        "204":
+          description: Изображение категории было сохранено
+        "400": # Загруженная картинка некорректная (битый файл, расширение, ...)
+          $ref: "#/components/responses/App.Response.Error400"
+        "401":
+          $ref: "#/components/responses/App.Response.Error401"
+        "500":
+          $ref: "#/components/responses/App.Response.Error5XX"
+
+    delete:
+      summary: Метод удаления изображения для категории
+      description: Метод предназначен для удаления изображения указанной категории из БД
+      operationId: removeCatalogCategoryImage
+      tags:
+        - CatalogCategory
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: "#/components/parameters/App.Request.Header.acceptLanguage"
+        - $ref: "#/components/parameters/App.Request.Header.correlationId"
+        - $ref: "#/components/parameters/App.Request.Path.categoryId"
+
+      responses:
+        "204":
+          description: Изображение категории успешно удалено
+        "401":
+          $ref: "#/components/responses/App.Response.Error401"
         "404":
           $ref: "#/components/responses/App.Response.Error404"
         "500":
@@ -316,7 +408,7 @@ paths:
         - $ref: "#/components/parameters/App.Request.Path.trademarkId"
 
       responses:
-        "204":
+        "200":
           description: Получена информация о торговой марке
           content:
             application/json;charset=UTF-8:
@@ -532,7 +624,7 @@ paths:
         - $ref: "#/components/parameters/App.Request.Path.productId"
 
       responses:
-        "204":
+        "200":
           description: Получена информация о товаре
           content:
             application/json;charset=UTF-8:
@@ -809,6 +901,10 @@ components:
           description: Описание ошибки
           type: string
           example: "Атрибут не может быть пустым. Указано недопустимое значение атрибута"
+
+    App.Response.Model.BinaryFile:
+      type: string
+      format: binary
 
     App.Response.Model.CreateEntity:
       type: object

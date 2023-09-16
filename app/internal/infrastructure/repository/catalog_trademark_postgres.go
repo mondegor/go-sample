@@ -11,10 +11,12 @@ import (
     "github.com/mondegor/go-webcore/mrcore"
 )
 
-type CatalogTrademark struct {
-    client *mrpostgres.ConnAdapter
-    builder squirrel.StatementBuilderType
-}
+type (
+	CatalogTrademark struct {
+        client *mrpostgres.ConnAdapter
+        builder squirrel.StatementBuilderType
+    }
+)
 
 func NewCatalogTrademark(client *mrpostgres.ConnAdapter,
                          queryBuilder squirrel.StatementBuilderType) *CatalogTrademark {
@@ -45,6 +47,8 @@ func (re *CatalogTrademark) LoadAll(ctx context.Context, listFilter *entity.Cata
     if err != nil {
         return err
     }
+
+    defer cursor.Close()
 
     for cursor.Next() {
         var row entity.CatalogTrademark
@@ -172,6 +176,7 @@ func (re *CatalogTrademark) Update(ctx context.Context, row *entity.CatalogTrade
         UPDATE public.catalog_trademarks
         SET
             tag_version = tag_version + 1,
+            datetime_updated = NOW(),
             trademark_caption = $4
         WHERE trademark_id = $1 AND tag_version = $2 AND trademark_status <> $3;`
 
@@ -202,6 +207,7 @@ func (re *CatalogTrademark) UpdateStatus(ctx context.Context, row *entity.Catalo
         UPDATE public.catalog_trademarks
         SET
             tag_version = tag_version + 1,
+            datetime_updated = NOW(),
             trademark_status = $4
         WHERE
             trademark_id = $1 AND tag_version = $2 AND trademark_status <> $3;`
@@ -231,6 +237,7 @@ func (re *CatalogTrademark) Delete(ctx context.Context, id mrentity.KeyInt32) er
         UPDATE public.catalog_trademarks
         SET
             tag_version = tag_version + 1,
+            datetime_updated = NOW(),
             trademark_status = $2
         WHERE
             trademark_id = $1 AND trademark_status <> $2;`

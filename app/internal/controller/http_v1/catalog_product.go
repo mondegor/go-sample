@@ -7,10 +7,12 @@ import (
     "go-sample/internal/usecase"
     "net/http"
 
+    "github.com/mondegor/go-components/mrcom"
     "github.com/mondegor/go-storage/mrentity"
     "github.com/mondegor/go-sysmess/mrerr"
     "github.com/mondegor/go-webcore/mrcore"
     "github.com/mondegor/go-webcore/mrctx"
+    "github.com/mondegor/go-webcore/mrview"
 )
 
 const (
@@ -20,11 +22,13 @@ const (
     catalogProductMoveURL = "/v1/catalog/cat/:cid/products/:id/move"
 )
 
-type CatalogProduct struct {
-    service usecase.CatalogProductService
-    serviceCategory usecase.CatalogCategoryService
-    serviceTrademark usecase.CatalogTrademarkService
-}
+type (
+    CatalogProduct struct {
+        service usecase.CatalogProductService
+        serviceCategory usecase.CatalogCategoryService
+        serviceTrademark usecase.CatalogTrademarkService
+    }
+)
 
 func NewCatalogProduct(service usecase.CatalogProductService,
                        serviceCategory usecase.CatalogCategoryService,
@@ -112,7 +116,7 @@ func (ht *CatalogProduct) Create() mrcore.HttpHandlerFunc {
             return err
         }
 
-        response := view.CreateItemResponse{
+        response := mrview.CreateItemResponse{
             ItemId: fmt.Sprintf("%d", item.Id),
             Message: mrctx.Locale(c.Context()).TranslateMessage(
                 "msgCatalogProductSuccessCreated",
@@ -157,7 +161,7 @@ func (ht *CatalogProduct) Store() mrcore.HttpHandlerFunc {
 
 func (ht *CatalogProduct) ChangeStatus() mrcore.HttpHandlerFunc {
     return func(c mrcore.ClientData) error {
-        request := view.ChangeItemStatus{}
+        request := mrcom.ChangeItemStatusRequest{}
 
         if err := c.ParseAndValidate(&request); err != nil {
             return err

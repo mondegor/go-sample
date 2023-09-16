@@ -7,13 +7,16 @@ import (
     "github.com/mondegor/go-storage/mrentity"
 )
 
-const ModelNameCatalogProduct = "CatalogProduct"
+const (
+	ModelNameCatalogProduct = "CatalogProduct"
+)
 
 type (
     CatalogProduct struct { // DB: catalog_products
         Id         mrentity.KeyInt32 `json:"id"` // product_id
         Version    mrentity.Version `json:"version"` // tag_version
         CreatedAt  time.Time `json:"createdAt"` // datetime_created
+        UpdateAt   time.Time `json:"updateAt"` // datetime_updated
         CategoryId mrentity.KeyInt32 `json:"categoryId"` // catalog_categories::category_id
 
         TrademarkId    mrentity.KeyInt32 `json:"trademarkId" db:"trademark_id"` // catalog_trademarks::trademark_id

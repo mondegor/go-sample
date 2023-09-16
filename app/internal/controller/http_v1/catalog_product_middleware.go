@@ -6,7 +6,9 @@ import (
     "github.com/mondegor/go-webcore/mrctx"
 )
 
-type ctxParentIdKey struct {}
+type (
+	ctxParentIdKey struct {}
+)
 
 func (ht *CatalogProduct) CategoryMiddleware(next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
     return func(c mrcore.ClientData) error {

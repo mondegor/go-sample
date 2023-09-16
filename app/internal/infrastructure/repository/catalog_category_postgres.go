@@ -11,10 +11,12 @@ import (
     "github.com/mondegor/go-webcore/mrcore"
 )
 
-type CatalogCategory struct {
-    client *mrpostgres.ConnAdapter
-    builder squirrel.StatementBuilderType
-}
+type (
+    CatalogCategory struct {
+        client *mrpostgres.ConnAdapter
+        builder squirrel.StatementBuilderType
+    }
+)
 
 func NewCatalogCategory(client *mrpostgres.ConnAdapter,
                         queryBuilder squirrel.StatementBuilderType) *CatalogCategory {
@@ -31,6 +33,7 @@ func (re *CatalogCategory) LoadAll(ctx context.Context, listFilter *entity.Catal
             tag_version,
             datetime_created,
             category_caption,
+            image_path,
             category_status`).
         From("public.catalog_categories").
         Where(squirrel.NotEq{"category_status": mrcom.ItemStatusRemoved}).
@@ -46,6 +49,8 @@ func (re *CatalogCategory) LoadAll(ctx context.Context, listFilter *entity.Catal
         return err
     }
 
+    defer cursor.Close()
+
     for cursor.Next() {
         var row entity.CatalogCategory
 
@@ -54,6 +59,7 @@ func (re *CatalogCategory) LoadAll(ctx context.Context, listFilter *entity.Catal
             &row.Version,
             &row.CreatedAt,
             &row.Caption,
+            &row.ImagePath,
             &row.Status,
         )
 
@@ -73,13 +79,14 @@ func (re *CatalogCategory) LoadAll(ctx context.Context, listFilter *entity.Catal
 
 // LoadOne
 // uses: row{Id}
-// modifies: row{Version, CreatedAt, Caption, Status}
+// modifies: row{Version, CreatedAt, Caption, ImagePath, Status}
 func (re *CatalogCategory) LoadOne(ctx context.Context, row *entity.CatalogCategory) error {
     sql := `
         SELECT
             tag_version,
             datetime_created,
             category_caption,
+            image_path,
             category_status
         FROM
             public.catalog_categories
@@ -94,6 +101,7 @@ func (re *CatalogCategory) LoadOne(ctx context.Context, row *entity.CatalogCateg
         &row.Version,
         &row.CreatedAt,
         &row.Caption,
+        &row.ImagePath,
         &row.Status,
     )
 }
@@ -172,6 +180,7 @@ func (re *CatalogCategory) Update(ctx context.Context, row *entity.CatalogCatego
         UPDATE public.catalog_categories
         SET
             tag_version = tag_version + 1,
+            datetime_updated = NOW(),
             category_caption = $4
         WHERE category_id = $1 AND tag_version = $2 AND category_status <> $3;`
 
@@ -202,6 +211,7 @@ func (re *CatalogCategory) UpdateStatus(ctx context.Context, row *entity.Catalog
         UPDATE public.catalog_categories
         SET
             tag_version = tag_version + 1,
+            datetime_updated = NOW(),
             category_status = $4
         WHERE
             category_id = $1 AND tag_version = $2 AND category_status <> $3;`
@@ -231,6 +241,7 @@ func (re *CatalogCategory) Delete(ctx context.Context, id mrentity.KeyInt32) err
         UPDATE public.catalog_categories
         SET
             tag_version = tag_version + 1,
+            datetime_updated = NOW(),
             category_status = $2
         WHERE
             category_id = $1 AND category_status <> $2;`

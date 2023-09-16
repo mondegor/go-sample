@@ -13,14 +13,16 @@ import (
     "github.com/mondegor/go-webcore/mrtool"
 )
 
-type CatalogProduct struct {
-    componentOrderer mrcom_orderer.Component
-    storage CatalogProductStorage
-    storageCatalogTrademark CatalogTrademarkStorage
-    eventBox mrcore.EventBox
-    serviceHelper *mrtool.ServiceHelper
-    statusFlow mrcom.ItemStatusFlow
-}
+type (
+	CatalogProduct struct {
+        componentOrderer mrcom_orderer.Component
+        storage CatalogProductStorage
+        storageCatalogTrademark CatalogTrademarkStorage
+        eventBox mrcore.EventBox
+        serviceHelper *mrtool.ServiceHelper
+        statusFlow mrcom.ItemStatusFlow
+    }
+)
 
 func NewCatalogProduct(componentOrderer mrcom_orderer.Component,
                        storage CatalogProductStorage,

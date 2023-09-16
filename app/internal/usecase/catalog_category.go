@@ -11,12 +11,14 @@ import (
     "github.com/mondegor/go-webcore/mrtool"
 )
 
-type CatalogCategory struct {
-    storage CatalogCategoryStorage
-    eventBox mrcore.EventBox
-    serviceHelper *mrtool.ServiceHelper
-    statusFlow mrcom.ItemStatusFlow
-}
+type (
+	CatalogCategory struct {
+        storage CatalogCategoryStorage
+        eventBox mrcore.EventBox
+        serviceHelper *mrtool.ServiceHelper
+        statusFlow mrcom.ItemStatusFlow
+    }
+)
 
 func NewCatalogCategory(storage CatalogCategoryStorage,
                         eventBox mrcore.EventBox,

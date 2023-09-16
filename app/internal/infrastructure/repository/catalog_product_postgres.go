@@ -12,10 +12,12 @@ import (
     "github.com/mondegor/go-webcore/mrcore"
 )
 
-type CatalogProduct struct {
-    client *mrpostgres.ConnAdapter
-    builder squirrel.StatementBuilderType
-}
+type (
+    CatalogProduct struct {
+        client *mrpostgres.ConnAdapter
+        builder squirrel.StatementBuilderType
+    }
+)
 
 func NewCatalogProduct(client *mrpostgres.ConnAdapter,
                        queryBuilder squirrel.StatementBuilderType) *CatalogProduct {
@@ -65,6 +67,8 @@ func (re *CatalogProduct) LoadAll(ctx context.Context, listFilter *entity.Catalo
     if err != nil {
         return err
     }
+
+    defer cursor.Close()
 
     for cursor.Next() {
         row := entity.CatalogProduct{CategoryId: listFilter.CategoryId}
@@ -231,6 +235,7 @@ func (re *CatalogProduct) UpdateStatus(ctx context.Context, row *entity.CatalogP
         UPDATE public.catalog_products
         SET
             tag_version = tag_version + 1,
+            datetime_updated = NOW(),
             product_status = $4
         WHERE
             product_id = $1 AND tag_version = $2 AND product_status <> $3;`
@@ -260,6 +265,7 @@ func (re *CatalogProduct) Delete(ctx context.Context, id mrentity.KeyInt32) erro
         UPDATE public.catalog_products
         SET
             tag_version = tag_version + 1,
+            datetime_updated = NOW(),
             product_article = NULL,
             prev_field_id = NULL,
             next_field_id = NULL,
