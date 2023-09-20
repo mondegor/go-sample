@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.3
 info:
-  version: 0.1.1
+  version: 0.1.2
   title: API управления каталогом товаров
   description: REST API управления каталогом товаров в формате OpenAPI v3
   license:
