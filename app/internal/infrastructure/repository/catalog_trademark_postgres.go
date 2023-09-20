@@ -7,18 +7,17 @@ import (
     "github.com/Masterminds/squirrel"
     "github.com/mondegor/go-components/mrcom"
     "github.com/mondegor/go-storage/mrentity"
-    "github.com/mondegor/go-storage/mrpostgres"
-    "github.com/mondegor/go-webcore/mrcore"
+    "github.com/mondegor/go-storage/mrstorage"
 )
 
 type (
-	CatalogTrademark struct {
-        client *mrpostgres.ConnAdapter
+    CatalogTrademark struct {
+        client mrstorage.DbConn
         builder squirrel.StatementBuilderType
     }
 )
 
-func NewCatalogTrademark(client *mrpostgres.ConnAdapter,
+func NewCatalogTrademark(client mrstorage.DbConn,
                          queryBuilder squirrel.StatementBuilderType) *CatalogTrademark {
     return &CatalogTrademark{
         client: client,
@@ -61,15 +60,7 @@ func (re *CatalogTrademark) LoadAll(ctx context.Context, listFilter *entity.Cata
             &row.Status,
         )
 
-        if err != nil {
-            return mrcore.FactoryErrStorageFetchDataFailed.Wrap(err)
-        }
-
         *rows = append(*rows, row)
-    }
-
-    if err = cursor.Err(); err != nil {
-        return mrcore.FactoryErrStorageFetchDataFailed.Wrap(err)
     }
 
     return nil
@@ -180,7 +171,7 @@ func (re *CatalogTrademark) Update(ctx context.Context, row *entity.CatalogTrade
             trademark_caption = $4
         WHERE trademark_id = $1 AND tag_version = $2 AND trademark_status <> $3;`
 
-    commandTag, err := re.client.Exec(
+    return re.client.Exec(
         ctx,
         sql,
         row.Id,
@@ -188,16 +179,6 @@ func (re *CatalogTrademark) Update(ctx context.Context, row *entity.CatalogTrade
         mrcom.ItemStatusRemoved,
         row.Caption,
     )
-
-    if err != nil {
-        return err
-    }
-
-    if commandTag.RowsAffected() < 1 {
-        return mrcore.FactoryErrStorageRowsNotAffected.New()
-    }
-
-    return nil
 }
 
 // UpdateStatus
@@ -212,7 +193,7 @@ func (re *CatalogTrademark) UpdateStatus(ctx context.Context, row *entity.Catalo
         WHERE
             trademark_id = $1 AND tag_version = $2 AND trademark_status <> $3;`
 
-    commandTag, err := re.client.Exec(
+    return re.client.Exec(
         ctx,
         sql,
         row.Id,
@@ -220,16 +201,6 @@ func (re *CatalogTrademark) UpdateStatus(ctx context.Context, row *entity.Catalo
         mrcom.ItemStatusRemoved,
         row.Status,
     )
-
-    if err != nil {
-        return err
-    }
-
-    if commandTag.RowsAffected() < 1 {
-        return mrcore.FactoryErrStorageRowsNotAffected.New()
-    }
-
-    return nil
 }
 
 func (re *CatalogTrademark) Delete(ctx context.Context, id mrentity.KeyInt32) error {
@@ -242,20 +213,10 @@ func (re *CatalogTrademark) Delete(ctx context.Context, id mrentity.KeyInt32) er
         WHERE
             trademark_id = $1 AND trademark_status <> $2;`
 
-    commandTag, err := re.client.Exec(
+    return re.client.Exec(
         ctx,
         sql,
         id,
         mrcom.ItemStatusRemoved,
     )
-
-    if err != nil {
-        return err
-    }
-
-    if commandTag.RowsAffected() < 1 {
-        return mrcore.FactoryErrStorageRowsNotAffected.New()
-    }
-
-    return nil
 }

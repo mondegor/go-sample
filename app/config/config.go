@@ -8,14 +8,15 @@ import (
 )
 
 const (
-	appName = "go-sample"
-    appVersion = "v0.1.0"
+    appName = "Go Sample"
+    appVersion = "v0.1.1"
 )
 
 type (
     Config struct {
         AppName string
         AppVersion string
+        AppInfo string
         AppPath string `yaml:"app_path"`
         ConfigPath string
         Debug bool `yaml:"debug" env:"APPX_DEBUG"`
@@ -45,6 +46,7 @@ type (
     }
 
     Log struct {
+        Prefix string `yaml:"prefix"`
         Level string `yaml:"level" env:"APPX_LOG_LEVEL"`
     }
 
@@ -67,6 +69,7 @@ type (
 
     FileStorage struct {
         DownloadDir string `yaml:"download_dir" env:"APPX_FS_DOWNLOAD_DIR"`
+        CatalogCategoryImageDir string `yaml:"catalog_category_image_dir"`
     }
 
     S3 struct {

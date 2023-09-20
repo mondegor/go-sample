@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	ModelNameCatalogTrademark = "CatalogTrademark"
+    ModelNameCatalogTrademark = "CatalogTrademark"
 )
 
 type (

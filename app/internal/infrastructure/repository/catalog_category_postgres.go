@@ -7,18 +7,17 @@ import (
     "github.com/Masterminds/squirrel"
     "github.com/mondegor/go-components/mrcom"
     "github.com/mondegor/go-storage/mrentity"
-    "github.com/mondegor/go-storage/mrpostgres"
-    "github.com/mondegor/go-webcore/mrcore"
+    "github.com/mondegor/go-storage/mrstorage"
 )
 
 type (
     CatalogCategory struct {
-        client *mrpostgres.ConnAdapter
+        client mrstorage.DbConn
         builder squirrel.StatementBuilderType
     }
 )
 
-func NewCatalogCategory(client *mrpostgres.ConnAdapter,
+func NewCatalogCategory(client mrstorage.DbConn,
                         queryBuilder squirrel.StatementBuilderType) *CatalogCategory {
     return &CatalogCategory{
         client: client,
@@ -63,15 +62,7 @@ func (re *CatalogCategory) LoadAll(ctx context.Context, listFilter *entity.Catal
             &row.Status,
         )
 
-        if err != nil {
-            return mrcore.FactoryErrStorageFetchDataFailed.Wrap(err)
-        }
-
         *rows = append(*rows, row)
-    }
-
-    if err = cursor.Err(); err != nil {
-        return mrcore.FactoryErrStorageFetchDataFailed.Wrap(err)
     }
 
     return nil
@@ -184,7 +175,7 @@ func (re *CatalogCategory) Update(ctx context.Context, row *entity.CatalogCatego
             category_caption = $4
         WHERE category_id = $1 AND tag_version = $2 AND category_status <> $3;`
 
-    commandTag, err := re.client.Exec(
+    return re.client.Exec(
         ctx,
         sql,
         row.Id,
@@ -192,16 +183,6 @@ func (re *CatalogCategory) Update(ctx context.Context, row *entity.CatalogCatego
         mrcom.ItemStatusRemoved,
         row.Caption,
     )
-
-    if err != nil {
-        return err
-    }
-
-    if commandTag.RowsAffected() < 1 {
-        return mrcore.FactoryErrStorageRowsNotAffected.New()
-    }
-
-    return nil
 }
 
 // UpdateStatus
@@ -216,7 +197,7 @@ func (re *CatalogCategory) UpdateStatus(ctx context.Context, row *entity.Catalog
         WHERE
             category_id = $1 AND tag_version = $2 AND category_status <> $3;`
 
-    commandTag, err := re.client.Exec(
+    return re.client.Exec(
         ctx,
         sql,
         row.Id,
@@ -224,16 +205,6 @@ func (re *CatalogCategory) UpdateStatus(ctx context.Context, row *entity.Catalog
         mrcom.ItemStatusRemoved,
         row.Status,
     )
-
-    if err != nil {
-        return err
-    }
-
-    if commandTag.RowsAffected() < 1 {
-        return mrcore.FactoryErrStorageRowsNotAffected.New()
-    }
-
-    return nil
 }
 
 func (re *CatalogCategory) Delete(ctx context.Context, id mrentity.KeyInt32) error {
@@ -246,20 +217,10 @@ func (re *CatalogCategory) Delete(ctx context.Context, id mrentity.KeyInt32) err
         WHERE
             category_id = $1 AND category_status <> $2;`
 
-    commandTag, err := re.client.Exec(
+    return re.client.Exec(
         ctx,
         sql,
         id,
         mrcom.ItemStatusRemoved,
     )
-
-    if err != nil {
-        return err
-    }
-
-    if commandTag.RowsAffected() < 1 {
-        return mrcore.FactoryErrStorageRowsNotAffected.New()
-    }
-
-    return nil
 }

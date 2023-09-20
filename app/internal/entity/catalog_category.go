@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	ModelNameCatalogCategory = "CatalogCategory"
+    ModelNameCatalogCategory = "CatalogCategory"
 )
 
 type (

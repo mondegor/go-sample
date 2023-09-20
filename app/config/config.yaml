@@ -3,6 +3,7 @@ app_path:
 debug: true
 
 logger:
+  prefix: go-sample
   level: debug
 
 server:
@@ -33,6 +34,7 @@ redis:
 
 fs:
   download_dir: "./downloads"
+  catalog_category_image_dir: "catalog/categories"
 
 s3:
   host: 127.0.0.1

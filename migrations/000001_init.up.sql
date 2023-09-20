@@ -12,7 +12,7 @@ CREATE TABLE catalog_categories (
     datetime_created timestamp NOT NULL DEFAULT now(),
     datetime_updated timestamp NULL,
     category_caption character varying(128) NOT NULL,
-    image_path character varying(128) NOT NULL,
+    image_path character varying(128) NOT NULL DEFAULT '',
     category_status item_status NOT NULL,
     CONSTRAINT catalog_categories_pkey PRIMARY KEY (category_id)
 );

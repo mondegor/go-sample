@@ -3,11 +3,11 @@ package view
 import "github.com/mondegor/go-storage/mrentity"
 
 type (
-    CreateCatalogCategory struct {
+    CreateCatalogCategoryRequest struct {
         Caption  string `json:"caption" validate:"required,max=128"`
     }
 
-    StoreCatalogCategory struct {
+    StoreCatalogCategoryRequest struct {
         Version  mrentity.Version `json:"version" validate:"required,gte=1"`
         Caption  string `json:"caption" validate:"required,max=128"`
     }

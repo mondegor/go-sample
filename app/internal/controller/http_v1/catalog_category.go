@@ -48,7 +48,7 @@ func (ht *CatalogCategory) AddHandlers(router mrcore.HttpRouter) {
     router.HttpHandlerFunc(http.MethodPut, catalogCategoryChangeStatusURL, ht.ChangeStatus())
 
     router.HttpHandlerFunc(http.MethodGet, catalogCategoryItemImageURL, ht.GetImage())
-    router.HttpHandlerFunc(http.MethodPatch, catalogCategoryItemImageURL, ht.UploadImage())
+    router.HttpHandlerFunc(http.MethodPut, catalogCategoryItemImageURL, ht.UploadImage())
     router.HttpHandlerFunc(http.MethodDelete, catalogCategoryItemImageURL, ht.RemoveImage())
 }
 
@@ -86,7 +86,7 @@ func (ht *CatalogCategory) Get() mrcore.HttpHandlerFunc {
 
 func (ht *CatalogCategory) Create() mrcore.HttpHandlerFunc {
     return func(c mrcore.ClientData) error {
-        request := view.CreateCatalogCategory{}
+        request := view.CreateCatalogCategoryRequest{}
 
         if err := c.ParseAndValidate(&request); err != nil {
             return err
@@ -116,7 +116,7 @@ func (ht *CatalogCategory) Create() mrcore.HttpHandlerFunc {
 
 func (ht *CatalogCategory) Store() mrcore.HttpHandlerFunc {
     return func(c mrcore.ClientData) error {
-        request := view.StoreCatalogCategory{}
+        request := view.StoreCatalogCategoryRequest{}
 
         if err := c.ParseAndValidate(&request); err != nil {
             return err
@@ -176,12 +176,7 @@ func (ht *CatalogCategory) Remove() mrcore.HttpHandlerFunc {
 
 func (ht *CatalogCategory) GetImage() mrcore.HttpHandlerFunc {
     return func(c mrcore.ClientData) error {
-        item := entity.CatalogCategoryImageObject{
-            CategoryId: ht.getItemId(c),
-            File: mrstorage.File{},
-        }
-
-        err := ht.serviceImage.Load(c.Context(), &item)
+        item, err := ht.serviceImage.Get(c.Context(), ht.getItemId(c))
 
         if err != nil {
             return err

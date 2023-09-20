@@ -6,18 +6,17 @@ import (
     "github.com/Masterminds/squirrel"
     "github.com/mondegor/go-components/mrcom"
     "github.com/mondegor/go-storage/mrentity"
-    "github.com/mondegor/go-storage/mrpostgres"
-    "github.com/mondegor/go-webcore/mrcore"
+    "github.com/mondegor/go-storage/mrstorage"
 )
 
 type (
     CatalogCategoryImage struct {
-        client *mrpostgres.ConnAdapter
+        client mrstorage.DbConn
         builder squirrel.StatementBuilderType
     }
 )
 
-func NewCatalogCategoryImage(client *mrpostgres.ConnAdapter,
+func NewCatalogCategoryImage(client mrstorage.DbConn,
                              queryBuilder squirrel.StatementBuilderType) *CatalogCategoryImage {
     return &CatalogCategoryImage{
         client: client,
@@ -54,23 +53,13 @@ func (re *CatalogCategoryImage) Update(ctx context.Context, categoryId mrentity.
             image_path = $3
         WHERE category_id = $1 AND category_status <> $2;`
 
-    commandTag, err := re.client.Exec(
+    return re.client.Exec(
         ctx,
         sql,
         categoryId,
         mrcom.ItemStatusRemoved,
         imagePath,
     )
-
-    if err != nil {
-        return err
-    }
-
-    if commandTag.RowsAffected() < 1 {
-        return mrcore.FactoryErrStorageRowsNotAffected.New()
-    }
-
-    return nil
 }
 
 func (re *CatalogCategoryImage) Delete(ctx context.Context, categoryId mrentity.KeyInt32) error {

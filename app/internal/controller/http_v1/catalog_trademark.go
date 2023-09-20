@@ -21,7 +21,7 @@ const (
 )
 
 type (
-	CatalogTrademark struct {
+    CatalogTrademark struct {
         service usecase.CatalogTrademarkService
     }
 )
@@ -77,7 +77,7 @@ func (ht *CatalogTrademark) Get() mrcore.HttpHandlerFunc {
 
 func (ht *CatalogTrademark) Create() mrcore.HttpHandlerFunc {
     return func(c mrcore.ClientData) error {
-        request := view.CreateCatalogTrademark{}
+        request := view.CreateCatalogTrademarkRequest{}
 
         if err := c.ParseAndValidate(&request); err != nil {
             return err
@@ -107,7 +107,7 @@ func (ht *CatalogTrademark) Create() mrcore.HttpHandlerFunc {
 
 func (ht *CatalogTrademark) Store() mrcore.HttpHandlerFunc {
     return func(c mrcore.ClientData) error {
-        request := view.StoreCatalogTrademark{}
+        request := view.StoreCatalogTrademarkRequest{}
 
         if err := c.ParseAndValidate(&request); err != nil {
             return err

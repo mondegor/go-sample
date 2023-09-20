@@ -18,13 +18,13 @@ import (
 )
 
 var (
-	configPath string
+    configPath string
     logLevel string
 )
 
 func init() {
-   flag.StringVar(&configPath,"config-path", "./config/config.yaml", "Path to application config file")
-   flag.StringVar(&logLevel, "log-level", "", "Logging level")
+    flag.StringVar(&configPath,"config-path", "./config/config.yaml", "Path to application config file")
+    flag.StringVar(&logLevel, "log-level", "", "Logging level")
 }
 
 func main() {
@@ -70,7 +70,7 @@ func main() {
     catalogCategoryStorage := repository.NewCatalogCategory(postgresAdapter, queryBuilder)
     catalogCategoryImageStorage := repository.NewCatalogCategoryImage(postgresAdapter, queryBuilder)
     catalogCategoryService := usecase.NewCatalogCategory(catalogCategoryStorage, logger, serviceHelper)
-    catalogCategoryImageService := usecase.NewCatalogCategoryImage(catalogCategoryImageStorage, fileStorage, lockerAdapter, logger, serviceHelper)
+    catalogCategoryImageService := usecase.NewCatalogCategoryImage(cfg.FileStorage.CatalogCategoryImageDir, catalogCategoryImageStorage, fileStorage, lockerAdapter, logger, serviceHelper)
     catalogCategoryHttp := http_v1.NewCatalogCategory(catalogCategoryService, catalogCategoryImageService)
 
     catalogTrademarkStorage := repository.NewCatalogTrademark(postgresAdapter, queryBuilder)

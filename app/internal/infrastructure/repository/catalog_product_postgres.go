@@ -8,18 +8,17 @@ import (
     "github.com/mondegor/go-components/mrcom"
     mrcom_orderer "github.com/mondegor/go-components/mrcom/orderer"
     "github.com/mondegor/go-storage/mrentity"
-    "github.com/mondegor/go-storage/mrpostgres"
-    "github.com/mondegor/go-webcore/mrcore"
+    "github.com/mondegor/go-storage/mrstorage"
 )
 
 type (
     CatalogProduct struct {
-        client *mrpostgres.ConnAdapter
+        client mrstorage.DbConn
         builder squirrel.StatementBuilderType
     }
 )
 
-func NewCatalogProduct(client *mrpostgres.ConnAdapter,
+func NewCatalogProduct(client mrstorage.DbConn,
                        queryBuilder squirrel.StatementBuilderType) *CatalogProduct {
     return &CatalogProduct{
         client: client,
@@ -84,15 +83,7 @@ func (re *CatalogProduct) LoadAll(ctx context.Context, listFilter *entity.Catalo
             &row.Status,
         )
 
-        if err != nil {
-            return mrcore.FactoryErrStorageFetchDataFailed.Wrap(err)
-        }
-
         *rows = append(*rows, row)
-    }
-
-    if err = cursor.Err(); err != nil {
-        return mrcore.FactoryErrStorageFetchDataFailed.Wrap(err)
     }
 
     return nil
@@ -225,7 +216,7 @@ func (re *CatalogProduct) Update(ctx context.Context, row *entity.CatalogProduct
         Where(squirrel.Eq{"tag_version": row.Version}).
         Where(squirrel.NotEq{"product_status": mrcom.ItemStatusRemoved})
 
-    return re.client.SqUpdate(ctx, query)
+    return re.client.SqExec(ctx, query)
 }
 
 // UpdateStatus
@@ -240,7 +231,7 @@ func (re *CatalogProduct) UpdateStatus(ctx context.Context, row *entity.CatalogP
         WHERE
             product_id = $1 AND tag_version = $2 AND product_status <> $3;`
 
-    commandTag, err := re.client.Exec(
+    return re.client.Exec(
         ctx,
         sql,
         row.Id,
@@ -248,16 +239,6 @@ func (re *CatalogProduct) UpdateStatus(ctx context.Context, row *entity.CatalogP
         mrcom.ItemStatusRemoved,
         row.Status,
     )
-
-    if err != nil {
-        return err
-    }
-
-    if commandTag.RowsAffected() < 1 {
-        return mrcore.FactoryErrStorageRowsNotAffected.New()
-    }
-
-    return nil
 }
 
 func (re *CatalogProduct) Delete(ctx context.Context, id mrentity.KeyInt32) error {
@@ -274,20 +255,10 @@ func (re *CatalogProduct) Delete(ctx context.Context, id mrentity.KeyInt32) erro
         WHERE
             product_id = $1 AND product_status <> $2;`
 
-    commandTag, err := re.client.Exec(
+    return re.client.Exec(
         ctx,
         sql,
         id,
         mrcom.ItemStatusRemoved,
     )
-
-    if err != nil {
-        return err
-    }
-
-    if commandTag.RowsAffected() < 1 {
-        return mrcore.FactoryErrStorageRowsNotAffected.New()
-    }
-
-    return nil
 }

@@ -9,8 +9,8 @@ import (
 
 type (
     CatalogCategoryImageService interface {
-        // Load - WARNING you don't forget to call item.File.Body.Close()
-        Load(ctx context.Context, item *entity.CatalogCategoryImageObject) error
+        // Get - WARNING you don't forget to call item.File.Body.Close()
+        Get(ctx context.Context, categoryId mrentity.KeyInt32) (*entity.CatalogCategoryImageObject, error)
         Store(ctx context.Context, item *entity.CatalogCategoryImageObject) error
         Remove(ctx context.Context, categoryId mrentity.KeyInt32) error
     }

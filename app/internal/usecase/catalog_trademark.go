@@ -12,7 +12,7 @@ import (
 )
 
 type (
-	CatalogTrademark struct {
+    CatalogTrademark struct {
         storage CatalogTrademarkStorage
         eventBox mrcore.EventBox
         serviceHelper *mrtool.ServiceHelper
@@ -32,11 +32,11 @@ func NewCatalogTrademark(storage CatalogTrademarkStorage,
 }
 
 func (uc *CatalogTrademark) GetList(ctx context.Context, listFilter *entity.CatalogTrademarkListFilter) ([]entity.CatalogTrademark, error) {
-    items := make([]entity.CatalogTrademark, 0, 16)
+    items := make([]entity.CatalogTrademark, 0, 4)
     err := uc.storage.LoadAll(ctx, listFilter, &items)
 
     if err != nil {
-        return nil, mrcore.FactoryErrServiceEntityTemporarilyUnavailable.Wrap(err, entity.ModelNameCatalogTrademark)
+        return nil, mrcore.FactoryErrServiceTemporarilyUnavailable.Wrap(err, entity.ModelNameCatalogTrademark)
     }
 
     return items, nil
@@ -78,7 +78,7 @@ func (uc *CatalogTrademark) Create(ctx context.Context, item *entity.CatalogTrad
 
 func (uc *CatalogTrademark) Store(ctx context.Context, item *entity.CatalogTrademark) error {
     if item.Id < 1 || item.Version < 1 {
-        return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"item.Id": item.Id, "Item.Version": item.Version})
+        return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"item.Id": item.Id, "Version": item.Version})
     }
 
     err := uc.storage.Update(ctx, item)
@@ -98,7 +98,7 @@ func (uc *CatalogTrademark) Store(ctx context.Context, item *entity.CatalogTrade
 
 func (uc *CatalogTrademark) ChangeStatus(ctx context.Context, item *entity.CatalogTrademark) error {
     if item.Id < 1 || item.Version < 1 {
-        return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"item.Id": item.Id, "Item.Version": item.Version})
+        return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"item.Id": item.Id, "Version": item.Version})
     }
 
     currentStatus, err := uc.storage.FetchStatus(ctx, item)

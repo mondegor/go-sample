@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.3
 info:
-  version: 0.1.0
+  version: 0.1.1
   title: API управления каталогом товаров
   description: REST API управления каталогом товаров в формате OpenAPI v3
   license:
@@ -189,6 +189,45 @@ paths:
         "500":
           $ref: "#/components/responses/App.Response.Error5XX"
 
+  /v1/catalog/categories/{categoryId}/status:
+    put:
+      summary: Метод изменения статуса категории
+      description: Метод предназначен для изменения статуса категории в БД
+      operationId: changeCatalogCategoryStatus
+      tags:
+        - CatalogCategory
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: "#/components/parameters/App.Request.Header.acceptLanguage"
+        - $ref: "#/components/parameters/App.Request.Header.correlationId"
+        - $ref: "#/components/parameters/App.Request.Path.categoryId"
+
+      requestBody:
+        required: true
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: "#/components/schemas/App.Request.Model.ChangeEntityStatus"
+
+      responses:
+        "204":
+          description: Статус категории успешно изменён
+        "400":
+          # Указанный статус содержит недопустимое значение
+          # В данный статус переключение невозможно
+          $ref: "#/components/responses/App.Response.Error400"
+        "401":
+          $ref: "#/components/responses/App.Response.Error401"
+        "403":
+          $ref: "#/components/responses/App.Response.Error403"
+        "404":
+          $ref: "#/components/responses/App.Response.Error404"
+        "500":
+          $ref: "#/components/responses/App.Response.Error5XX"
+
   /v1/catalog/categories/{categoryId}/image:
     get:
       summary: Метод получения изображения категории
@@ -239,9 +278,7 @@ paths:
             schema:
               properties:
                 categoryImage:
-                  description: |-
-                    - Бинарный файл с расширением JPEG, PNG
-                    - Если указать пустую строку, то изображение должно быть удалено
+                  description: Бинарный файл с расширением JPEG, PNG
                   type: string
                   format: binary
                   maxLength: 102400 # 100Kb
@@ -249,7 +286,8 @@ paths:
       responses:
         "204":
           description: Изображение категории было сохранено
-        "400": # Загруженная картинка некорректная (битый файл, расширение, ...)
+        "400":
+          # Загруженная картинка некорректная (битый файл, расширение, ...)
           $ref: "#/components/responses/App.Response.Error400"
         "401":
           $ref: "#/components/responses/App.Response.Error401"
@@ -276,45 +314,6 @@ paths:
           description: Изображение категории успешно удалено
         "401":
           $ref: "#/components/responses/App.Response.Error401"
-        "404":
-          $ref: "#/components/responses/App.Response.Error404"
-        "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
-
-  /v1/catalog/categories/{categoryId}/status:
-    put:
-      summary: Метод изменения статуса категории
-      description: Метод предназначен для изменения статуса категории в БД
-      operationId: changeCatalogCategoryStatus
-      tags:
-        - CatalogCategory
-
-      security:
-        - bearerAuth: []
-
-      parameters:
-        - $ref: "#/components/parameters/App.Request.Header.acceptLanguage"
-        - $ref: "#/components/parameters/App.Request.Header.correlationId"
-        - $ref: "#/components/parameters/App.Request.Path.categoryId"
-
-      requestBody:
-        required: true
-        content:
-          application/json;charset=UTF-8:
-            schema:
-              $ref: "#/components/schemas/App.Request.Model.ChangeEntityStatus"
-
-      responses:
-        "204":
-          description: Статус категории успешно изменён
-        "400":
-          # Указанный статус содержит недопустимое значение
-          # В данный статус переключение невозможно
-          $ref: "#/components/responses/App.Response.Error400"
-        "401":
-          $ref: "#/components/responses/App.Response.Error401"
-        "403":
-          $ref: "#/components/responses/App.Response.Error403"
         "404":
           $ref: "#/components/responses/App.Response.Error404"
         "500":
@@ -927,12 +926,10 @@ components:
           type: number
           example: 7
         status:
+          description: Статус в который переключается ресурс
           type: string
-          enum:
-            - DRAFT
-            - ENABLED
-            - DISABLED
-          example: "DRAFT"
+          maxLength: 64
+          example: "ENABLED"
 
     App.Request.Model.MoveEntity:
       type: object
@@ -960,9 +957,15 @@ components:
           format: date-time
           example: "2023-01-01T12:00:00.000+02:00"
         caption: # get, create, store
+          description: Название записи
           type: string
           maxLength: 64
-          example: "Название записи"
+          example: "Электроника"
+        imagePath: # get
+          description: Относительный путь к логотипу
+          type: string
+          maxLength: 128
+          example: "Относительный путь к картинке"
         status: # get, changeStatus
           description: |-
             Текущий статус записи:
@@ -992,9 +995,10 @@ components:
           format: date-time
           example: "2023-01-01T12:00:00.000+02:00"
         caption: # get, create, store
+          description: Название записи
           type: string
           maxLength: 64
-          example: "Название записи"
+          example: "Торговая марка"
         status: # get, changeStatus
           description: |-
             Текущий статус записи:
@@ -1037,9 +1041,10 @@ components:
           maxLength: 32
           example: "item-01843"
         caption: # get, create, store
+          description: Название записи
           type: string
           maxLength: 128
-          example: "Название записи"
+          example: "Мобильный телефон 0001"
         price: # get, create, store
           type: integer # Money
           maxLength: 10

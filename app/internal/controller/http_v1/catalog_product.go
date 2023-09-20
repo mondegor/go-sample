@@ -88,7 +88,7 @@ func (ht *CatalogProduct) Get() mrcore.HttpHandlerFunc {
 
 func (ht *CatalogProduct) Create() mrcore.HttpHandlerFunc {
     return func(c mrcore.ClientData) error {
-        request := view.CreateCatalogProduct{}
+        request := view.CreateCatalogProductRequest{}
 
         if err := c.ParseAndValidate(&request); err != nil {
             return err
@@ -130,7 +130,7 @@ func (ht *CatalogProduct) Create() mrcore.HttpHandlerFunc {
 
 func (ht *CatalogProduct) Store() mrcore.HttpHandlerFunc {
     return func(c mrcore.ClientData) error {
-        request := view.StoreCatalogProduct{}
+        request := view.StoreCatalogProductRequest{}
 
         if err := c.ParseAndValidate(&request); err != nil {
             return err
@@ -197,7 +197,7 @@ func (ht *CatalogProduct) Remove() mrcore.HttpHandlerFunc {
 
 func (ht *CatalogProduct) Move() mrcore.HttpHandlerFunc {
     return func(c mrcore.ClientData) error {
-        request := view.MoveCatalogProduct{}
+        request := view.MoveCatalogProductRequest{}
 
         if err := c.ParseAndValidate(&request); err != nil {
             return err

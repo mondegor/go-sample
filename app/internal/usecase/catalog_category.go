@@ -12,7 +12,7 @@ import (
 )
 
 type (
-	CatalogCategory struct {
+    CatalogCategory struct {
         storage CatalogCategoryStorage
         eventBox mrcore.EventBox
         serviceHelper *mrtool.ServiceHelper
@@ -32,11 +32,11 @@ func NewCatalogCategory(storage CatalogCategoryStorage,
 }
 
 func (uc *CatalogCategory) GetList(ctx context.Context, listFilter *entity.CatalogCategoryListFilter) ([]entity.CatalogCategory, error) {
-    items := make([]entity.CatalogCategory, 0, 16)
+    items := make([]entity.CatalogCategory, 0, 4)
     err := uc.storage.LoadAll(ctx, listFilter, &items)
 
     if err != nil {
-        return nil, mrcore.FactoryErrServiceEntityTemporarilyUnavailable.Wrap(err, entity.ModelNameCatalogCategory)
+        return nil, mrcore.FactoryErrServiceTemporarilyUnavailable.Wrap(err, entity.ModelNameCatalogCategory)
     }
 
     return items, nil
@@ -88,7 +88,7 @@ func (uc *CatalogCategory) Create(ctx context.Context, item *entity.CatalogCateg
 
 func (uc *CatalogCategory) Store(ctx context.Context, item *entity.CatalogCategory) error {
     if item.Id < 1 || item.Version < 1 {
-        return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"item.Id": item.Id, "Item.Version": item.Version})
+        return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"item.Id": item.Id, "Version": item.Version})
     }
 
     err := uc.storage.Update(ctx, item)
@@ -108,7 +108,7 @@ func (uc *CatalogCategory) Store(ctx context.Context, item *entity.CatalogCatego
 
 func (uc *CatalogCategory) ChangeStatus(ctx context.Context, item *entity.CatalogCategory) error {
     if item.Id < 1 || item.Version < 1 {
-        return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"item.Id": item.Id, "Item.Version": item.Version})
+        return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"item.Id": item.Id, "Version": item.Version})
     }
 
     currentStatus, err := uc.storage.FetchStatus(ctx, item)

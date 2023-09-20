@@ -14,7 +14,7 @@ import (
 )
 
 type (
-	CatalogProduct struct {
+    CatalogProduct struct {
         componentOrderer mrcom_orderer.Component
         storage CatalogProductStorage
         storageCatalogTrademark CatalogTrademarkStorage
@@ -40,11 +40,11 @@ func NewCatalogProduct(componentOrderer mrcom_orderer.Component,
 }
 
 func (uc *CatalogProduct) GetList(ctx context.Context, listFilter *entity.CatalogProductListFilter) ([]entity.CatalogProduct, error) {
-    items := make([]entity.CatalogProduct, 0, 16)
+    items := make([]entity.CatalogProduct, 0, 4)
     err := uc.storage.LoadAll(ctx, listFilter, &items)
 
     if err != nil {
-        return nil, mrcore.FactoryErrServiceEntityTemporarilyUnavailable.Wrap(err, entity.ModelNameCatalogProduct)
+        return nil, mrcore.FactoryErrServiceTemporarilyUnavailable.Wrap(err, entity.ModelNameCatalogProduct)
     }
 
     return items, nil
@@ -114,7 +114,7 @@ func (uc *CatalogProduct) Create(ctx context.Context, item *entity.CatalogProduc
 
 func (uc *CatalogProduct) Store(ctx context.Context, item *entity.CatalogProduct) error {
     if item.Id < 1 || item.Version < 1 {
-        return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"item.Id": item.Id, "Item.Version": item.Version})
+        return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"item.Id": item.Id, "Version": item.Version})
     }
 
     err := uc.checkArticle(ctx, item)
@@ -140,7 +140,7 @@ func (uc *CatalogProduct) Store(ctx context.Context, item *entity.CatalogProduct
 
 func (uc *CatalogProduct) ChangeStatus(ctx context.Context, item *entity.CatalogProduct) error {
     if item.Id < 1 || item.Version < 1 {
-        return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"item.Id": item.Id, "Item.Version": item.Version})
+        return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"item.Id": item.Id, "Version": item.Version})
     }
 
     currentStatus, err := uc.storage.FetchStatus(ctx, item)
@@ -208,7 +208,7 @@ func (uc *CatalogProduct) checkArticle(ctx context.Context, item *entity.Catalog
             return nil
         }
 
-        return mrcore.FactoryErrServiceEntityTemporarilyUnavailable.Wrap(err, entity.ModelNameCatalogProduct)
+        return mrcore.FactoryErrServiceTemporarilyUnavailable.Wrap(err, entity.ModelNameCatalogProduct)
     }
 
     if item.Id == id {
