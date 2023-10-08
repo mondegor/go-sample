@@ -4,8 +4,8 @@ import (
     "context"
     "go-sample/internal/entity"
 
-    "github.com/mondegor/go-components/mrcom"
     mrcom_orderer "github.com/mondegor/go-components/mrcom/orderer"
+    mrcom_status "github.com/mondegor/go-components/mrcom/status"
     "github.com/mondegor/go-storage/mrentity"
     "github.com/mondegor/go-sysmess/mrerr"
     "github.com/mondegor/go-webcore/mrcore"
@@ -20,22 +20,24 @@ type (
         storageCatalogTrademark CatalogTrademarkStorage
         eventBox mrcore.EventBox
         serviceHelper *mrtool.ServiceHelper
-        statusFlow mrcom.ItemStatusFlow
+        statusFlow mrcom_status.StatusFlow
     }
 )
 
-func NewCatalogProduct(componentOrderer mrcom_orderer.Component,
-                       storage CatalogProductStorage,
-                       storageCatalogTrademark CatalogTrademarkStorage,
-                       eventBox mrcore.EventBox,
-                       serviceHelper *mrtool.ServiceHelper) *CatalogProduct {
+func NewCatalogProduct(
+    componentOrderer mrcom_orderer.Component,
+    storage CatalogProductStorage,
+    storageCatalogTrademark CatalogTrademarkStorage,
+    eventBox mrcore.EventBox,
+    serviceHelper *mrtool.ServiceHelper,
+) *CatalogProduct {
     return &CatalogProduct{
         componentOrderer: componentOrderer,
         storage: storage,
         storageCatalogTrademark: storageCatalogTrademark,
         eventBox: eventBox,
         serviceHelper: serviceHelper,
-        statusFlow: mrcom.ItemStatusFlowDefault,
+        statusFlow: mrcom_status.ItemStatusFlow,
     }
 }
 
@@ -84,7 +86,7 @@ func (uc *CatalogProduct) Create(ctx context.Context, item *entity.CatalogProduc
         return err
     }
 
-    item.Status = mrcom.ItemStatusDraft
+    item.Status = mrcom_status.ItemStatusDraft
     err = uc.storage.Insert(ctx, item)
 
     if err != nil {

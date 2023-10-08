@@ -4,7 +4,7 @@ import (
     "context"
     "go-sample/internal/entity"
 
-    "github.com/mondegor/go-components/mrcom"
+    mrcom_status "github.com/mondegor/go-components/mrcom/status"
     "github.com/mondegor/go-storage/mrentity"
 )
 
@@ -21,7 +21,7 @@ type (
     CatalogTrademarkStorage interface {
         LoadAll(ctx context.Context, listFilter *entity.CatalogTrademarkListFilter, rows *[]entity.CatalogTrademark) error
         LoadOne(ctx context.Context, row *entity.CatalogTrademark) error
-        FetchStatus(ctx context.Context, row *entity.CatalogTrademark) (mrcom.ItemStatus, error)
+        FetchStatus(ctx context.Context, row *entity.CatalogTrademark) (mrcom_status.ItemStatus, error)
         IsExists(ctx context.Context, id mrentity.KeyInt32) error
         Insert(ctx context.Context, row *entity.CatalogTrademark) error
         Update(ctx context.Context, row *entity.CatalogTrademark) error

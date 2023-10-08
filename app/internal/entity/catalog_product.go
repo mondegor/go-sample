@@ -3,7 +3,7 @@ package entity
 import (
     "time"
 
-    "github.com/mondegor/go-components/mrcom"
+    mrcom_status "github.com/mondegor/go-components/mrcom/status"
     "github.com/mondegor/go-storage/mrentity"
 )
 
@@ -24,12 +24,12 @@ type (
         Caption   string `json:"caption" db:"product_caption"`
         Price     Money `json:"price" db:"product_price"` // (coins)
 
-        Status    mrcom.ItemStatus `json:"status"` // product_status
+        Status    mrcom_status.ItemStatus `json:"status"` // product_status
     }
 
     CatalogProductListFilter struct {
         CategoryId mrentity.KeyInt32
         Trademarks []mrentity.KeyInt32
-        Statuses   []mrcom.ItemStatus
+        Statuses   []mrcom_status.ItemStatus
     }
 )

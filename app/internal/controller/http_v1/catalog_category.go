@@ -7,7 +7,6 @@ import (
     "go-sample/internal/usecase"
     "net/http"
 
-    "github.com/mondegor/go-components/mrcom"
     "github.com/mondegor/go-storage/mrentity"
     "github.com/mondegor/go-storage/mrstorage"
     "github.com/mondegor/go-webcore/mrcore"
@@ -29,8 +28,10 @@ type (
     }
 )
 
-func NewCatalogCategory(service usecase.CatalogCategoryService,
-                        serviceImage usecase.CatalogCategoryImageService) *CatalogCategory {
+func NewCatalogCategory(
+    service usecase.CatalogCategoryService,
+    serviceImage usecase.CatalogCategoryImageService,
+) *CatalogCategory {
     return &CatalogCategory{
         service: service,
         serviceImage: serviceImage,
@@ -67,7 +68,7 @@ func (ht *CatalogCategory) GetList() mrcore.HttpHandlerFunc {
 func (ht *CatalogCategory) newListFilter(c mrcore.ClientData) *entity.CatalogCategoryListFilter {
     var listFilter entity.CatalogCategoryListFilter
 
-    parseFilterStatuses(c, &listFilter.Statuses)
+    view.ParseFilterItemStatusList(c, &listFilter.Statuses)
 
     return &listFilter
 }
@@ -140,7 +141,7 @@ func (ht *CatalogCategory) Store() mrcore.HttpHandlerFunc {
 
 func (ht *CatalogCategory) ChangeStatus() mrcore.HttpHandlerFunc {
     return func(c mrcore.ClientData) error {
-        request := mrcom.ChangeItemStatusRequest{}
+        request := view.ChangeItemStatusRequest{}
 
         if err := c.ParseAndValidate(&request); err != nil {
             return err

@@ -4,7 +4,7 @@ import (
     "context"
 
     "github.com/Masterminds/squirrel"
-    "github.com/mondegor/go-components/mrcom"
+    mrcom_status "github.com/mondegor/go-components/mrcom/status"
     "github.com/mondegor/go-storage/mrentity"
     "github.com/mondegor/go-storage/mrstorage"
 )
@@ -16,8 +16,10 @@ type (
     }
 )
 
-func NewCatalogCategoryImage(client mrstorage.DbConn,
-                             queryBuilder squirrel.StatementBuilderType) *CatalogCategoryImage {
+func NewCatalogCategoryImage(
+    client mrstorage.DbConn,
+    queryBuilder squirrel.StatementBuilderType,
+) *CatalogCategoryImage {
     return &CatalogCategoryImage{
         client: client,
         builder: queryBuilder,
@@ -37,7 +39,7 @@ func (re *CatalogCategoryImage) Fetch(ctx context.Context, categoryId mrentity.K
         ctx,
         sql,
         categoryId,
-        mrcom.ItemStatusRemoved,
+        mrcom_status.ItemStatusRemoved,
     ).Scan(
         &imagePath,
     )
@@ -57,7 +59,7 @@ func (re *CatalogCategoryImage) Update(ctx context.Context, categoryId mrentity.
         ctx,
         sql,
         categoryId,
-        mrcom.ItemStatusRemoved,
+        mrcom_status.ItemStatusRemoved,
         imagePath,
     )
 }

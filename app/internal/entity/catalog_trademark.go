@@ -3,7 +3,7 @@ package entity
 import (
     "time"
 
-    "github.com/mondegor/go-components/mrcom"
+    mrcom_status "github.com/mondegor/go-components/mrcom/status"
     "github.com/mondegor/go-storage/mrentity"
 )
 
@@ -18,10 +18,10 @@ type (
         CreatedAt time.Time `json:"createdAt"` // datetime_created
         UpdateAt  time.Time `json:"updateAt"` // datetime_updated
         Caption   string `json:"caption"` // type_caption
-        Status    mrcom.ItemStatus `json:"status"` // type_status
+        Status    mrcom_status.ItemStatus `json:"status"` // type_status
     }
 
     CatalogTrademarkListFilter struct {
-        Statuses  []mrcom.ItemStatus
+        Statuses  []mrcom_status.ItemStatus
     }
 )

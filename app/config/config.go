@@ -9,7 +9,7 @@ import (
 
 const (
     appName = "Go Sample"
-    appVersion = "v0.1.2"
+    appVersion = "v0.1.3"
 )
 
 type (
@@ -108,15 +108,11 @@ func New(filePath string) (*Config, error) {
         ConfigPath: filePath,
     }
 
-    err := cleanenv.ReadConfig(filePath, cfg)
-
-    if err != nil {
+    if err := cleanenv.ReadConfig(filePath, cfg); err != nil {
         return nil, fmt.Errorf("while reading config '%s', error '%s' occurred", filePath, err)
     }
 
-    err = cleanenv.ReadEnv(cfg)
-
-    if err != nil {
+    if err := cleanenv.ReadEnv(cfg); err != nil {
         return nil, err
     }
 

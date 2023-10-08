@@ -7,7 +7,6 @@ import (
     "go-sample/internal/usecase"
     "net/http"
 
-    "github.com/mondegor/go-components/mrcom"
     "github.com/mondegor/go-storage/mrentity"
     "github.com/mondegor/go-webcore/mrcore"
     "github.com/mondegor/go-webcore/mrctx"
@@ -26,7 +25,9 @@ type (
     }
 )
 
-func NewCatalogTrademark(service usecase.CatalogTrademarkService) *CatalogTrademark {
+func NewCatalogTrademark(
+    service usecase.CatalogTrademarkService,
+) *CatalogTrademark {
     return &CatalogTrademark{
         service: service,
     }
@@ -58,7 +59,7 @@ func (ht *CatalogTrademark) GetList() mrcore.HttpHandlerFunc {
 func (ht *CatalogTrademark) newListFilter(c mrcore.ClientData) *entity.CatalogTrademarkListFilter {
     var listFilter entity.CatalogTrademarkListFilter
 
-    parseFilterStatuses(c, &listFilter.Statuses)
+    view.ParseFilterItemStatusList(c, &listFilter.Statuses)
 
     return &listFilter
 }
@@ -131,7 +132,7 @@ func (ht *CatalogTrademark) Store() mrcore.HttpHandlerFunc {
 
 func (ht *CatalogTrademark) ChangeStatus() mrcore.HttpHandlerFunc {
     return func(c mrcore.ClientData) error {
-        request := mrcom.ChangeItemStatusRequest{}
+        request := view.ChangeItemStatusRequest{}
 
         if err := c.ParseAndValidate(&request); err != nil {
             return err

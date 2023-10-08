@@ -5,8 +5,8 @@ import (
     "go-sample/internal/entity"
 
     "github.com/Masterminds/squirrel"
-    "github.com/mondegor/go-components/mrcom"
     mrcom_orderer "github.com/mondegor/go-components/mrcom/orderer"
+    mrcom_status "github.com/mondegor/go-components/mrcom/status"
     "github.com/mondegor/go-storage/mrentity"
     "github.com/mondegor/go-storage/mrstorage"
 )
@@ -18,8 +18,10 @@ type (
     }
 )
 
-func NewCatalogProduct(client mrstorage.DbConn,
-                       queryBuilder squirrel.StatementBuilderType) *CatalogProduct {
+func NewCatalogProduct(
+    client mrstorage.DbConn,
+    queryBuilder squirrel.StatementBuilderType,
+) *CatalogProduct {
     return &CatalogProduct{
         client: client,
         builder: queryBuilder,
@@ -32,7 +34,7 @@ func (re *CatalogProduct) GetMetaData(categoryId mrentity.KeyInt32) mrcom_ordere
         "product_id",
         []any{
             squirrel.Eq{"category_id": categoryId},
-            squirrel.NotEq{"product_status": mrcom.ItemStatusRemoved},
+            squirrel.NotEq{"product_status": mrcom_status.ItemStatusRemoved},
         },
     )
 }
@@ -50,7 +52,7 @@ func (re *CatalogProduct) LoadAll(ctx context.Context, listFilter *entity.Catalo
             product_status`).
         From("public.catalog_products").
         Where(squirrel.Eq{"category_id": listFilter.CategoryId}).
-        Where(squirrel.NotEq{"product_status": mrcom.ItemStatusRemoved}).
+        Where(squirrel.NotEq{"product_status": mrcom_status.ItemStatusRemoved}).
         OrderBy("order_field ASC, product_caption ASC, product_id ASC")
 
     if len(listFilter.Trademarks) > 0 {
@@ -111,7 +113,7 @@ func (re *CatalogProduct) LoadOne(ctx context.Context, row *entity.CatalogProduc
         sql,
         row.Id,
         row.CategoryId,
-        mrcom.ItemStatusRemoved,
+        mrcom_status.ItemStatusRemoved,
     ).Scan(
         &row.Version,
         &row.CreatedAt,
@@ -145,21 +147,21 @@ func (re *CatalogProduct) FetchIdByArticle(ctx context.Context, article string) 
 
 // FetchStatus
 // uses: row{Id, Version}
-func (re *CatalogProduct) FetchStatus(ctx context.Context, row *entity.CatalogProduct) (mrcom.ItemStatus, error) {
+func (re *CatalogProduct) FetchStatus(ctx context.Context, row *entity.CatalogProduct) (mrcom_status.ItemStatus, error) {
     sql := `
         SELECT product_status
         FROM
             public.catalog_products
         WHERE product_id = $1 AND tag_version = $2 AND product_status <> $3;`
 
-    var status mrcom.ItemStatus
+    var status mrcom_status.ItemStatus
 
     err := re.client.QueryRow(
         ctx,
         sql,
         row.Id,
         row.Version,
-        mrcom.ItemStatusRemoved,
+        mrcom_status.ItemStatusRemoved,
     ).Scan(
         &status,
     )
@@ -214,7 +216,7 @@ func (re *CatalogProduct) Update(ctx context.Context, row *entity.CatalogProduct
         SetMap(filledFields).
         Where(squirrel.Eq{"product_id": row.Id}).
         Where(squirrel.Eq{"tag_version": row.Version}).
-        Where(squirrel.NotEq{"product_status": mrcom.ItemStatusRemoved})
+        Where(squirrel.NotEq{"product_status": mrcom_status.ItemStatusRemoved})
 
     return re.client.SqExec(ctx, query)
 }
@@ -236,7 +238,7 @@ func (re *CatalogProduct) UpdateStatus(ctx context.Context, row *entity.CatalogP
         sql,
         row.Id,
         row.Version,
-        mrcom.ItemStatusRemoved,
+        mrcom_status.ItemStatusRemoved,
         row.Status,
     )
 }
@@ -259,6 +261,6 @@ func (re *CatalogProduct) Delete(ctx context.Context, id mrentity.KeyInt32) erro
         ctx,
         sql,
         id,
-        mrcom.ItemStatusRemoved,
+        mrcom_status.ItemStatusRemoved,
     )
 }

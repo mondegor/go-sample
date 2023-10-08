@@ -26,12 +26,14 @@ type (
     }
 )
 
-func NewCatalogCategoryImage(baseImageUrl string,
-                             storage CatalogCategoryImageStorage,
-                             storageFiles mrstorage.FileProvider,
-                             locker mrcore.Locker,
-                             eventBox mrcore.EventBox,
-                             serviceHelper *mrtool.ServiceHelper) *CatalogCategoryImage {
+func NewCatalogCategoryImage(
+    baseImageUrl string,
+    storage CatalogCategoryImageStorage,
+    storageFiles mrstorage.FileProvider,
+    locker mrcore.Locker,
+    eventBox mrcore.EventBox,
+    serviceHelper *mrtool.ServiceHelper,
+) *CatalogCategoryImage {
     return &CatalogCategoryImage{
         baseImageUrl: baseImageUrl,
         storage: storage,

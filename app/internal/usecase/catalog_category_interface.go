@@ -4,7 +4,7 @@ import (
     "context"
     "go-sample/internal/entity"
 
-    "github.com/mondegor/go-components/mrcom"
+    mrcom_status "github.com/mondegor/go-components/mrcom/status"
     "github.com/mondegor/go-storage/mrentity"
 )
 
@@ -22,7 +22,7 @@ type (
     CatalogCategoryStorage interface {
         LoadAll(ctx context.Context, listFilter *entity.CatalogCategoryListFilter, rows *[]entity.CatalogCategory) error
         LoadOne(ctx context.Context, row *entity.CatalogCategory) error
-        FetchStatus(ctx context.Context, row *entity.CatalogCategory) (mrcom.ItemStatus, error)
+        FetchStatus(ctx context.Context, row *entity.CatalogCategory) (mrcom_status.ItemStatus, error)
         IsExists(ctx context.Context, id mrentity.KeyInt32) error
         Insert(ctx context.Context, row *entity.CatalogCategory) error
         Update(ctx context.Context, row *entity.CatalogCategory) error

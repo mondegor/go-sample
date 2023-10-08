@@ -4,8 +4,8 @@ import (
     "context"
     "go-sample/internal/entity"
 
-    "github.com/mondegor/go-components/mrcom"
     mrcom_orderer "github.com/mondegor/go-components/mrcom/orderer"
+    mrcom_status "github.com/mondegor/go-components/mrcom/status"
     "github.com/mondegor/go-storage/mrentity"
 )
 
@@ -25,7 +25,7 @@ type (
         LoadAll(ctx context.Context, listFilter *entity.CatalogProductListFilter, rows *[]entity.CatalogProduct) error
         LoadOne(ctx context.Context, row *entity.CatalogProduct) error
         FetchIdByArticle(ctx context.Context, article string) (mrentity.KeyInt32, error)
-        FetchStatus(ctx context.Context, row *entity.CatalogProduct) (mrcom.ItemStatus, error)
+        FetchStatus(ctx context.Context, row *entity.CatalogProduct) (mrcom_status.ItemStatus, error)
         Insert(ctx context.Context, row *entity.CatalogProduct) error
         Update(ctx context.Context, row *entity.CatalogProduct) error
         UpdateStatus(ctx context.Context, row *entity.CatalogProduct) error

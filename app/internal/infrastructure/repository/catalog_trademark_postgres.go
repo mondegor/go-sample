@@ -5,7 +5,7 @@ import (
     "go-sample/internal/entity"
 
     "github.com/Masterminds/squirrel"
-    "github.com/mondegor/go-components/mrcom"
+    mrcom_status "github.com/mondegor/go-components/mrcom/status"
     "github.com/mondegor/go-storage/mrentity"
     "github.com/mondegor/go-storage/mrstorage"
 )
@@ -17,8 +17,10 @@ type (
     }
 )
 
-func NewCatalogTrademark(client mrstorage.DbConn,
-                         queryBuilder squirrel.StatementBuilderType) *CatalogTrademark {
+func NewCatalogTrademark(
+    client mrstorage.DbConn,
+    queryBuilder squirrel.StatementBuilderType,
+) *CatalogTrademark {
     return &CatalogTrademark{
         client: client,
         builder: queryBuilder,
@@ -34,7 +36,7 @@ func (re *CatalogTrademark) LoadAll(ctx context.Context, listFilter *entity.Cata
             trademark_caption,
             trademark_status`).
         From("public.catalog_trademarks").
-        Where(squirrel.NotEq{"trademark_status": mrcom.ItemStatusRemoved}).
+        Where(squirrel.NotEq{"trademark_status": mrcom_status.ItemStatusRemoved}).
         OrderBy("trademark_caption ASC, trademark_id ASC")
 
     if len(listFilter.Statuses) > 0 {
@@ -84,7 +86,7 @@ func (re *CatalogTrademark) LoadOne(ctx context.Context, row *entity.CatalogTrad
         ctx,
         sql,
         row.Id,
-        mrcom.ItemStatusRemoved,
+        mrcom_status.ItemStatusRemoved,
     ).Scan(
         &row.Version,
         &row.CreatedAt,
@@ -95,21 +97,21 @@ func (re *CatalogTrademark) LoadOne(ctx context.Context, row *entity.CatalogTrad
 
 // FetchStatus
 // uses: row{Id, Version}
-func (re *CatalogTrademark) FetchStatus(ctx context.Context, row *entity.CatalogTrademark) (mrcom.ItemStatus, error) {
+func (re *CatalogTrademark) FetchStatus(ctx context.Context, row *entity.CatalogTrademark) (mrcom_status.ItemStatus, error) {
     sql := `
         SELECT trademark_status
         FROM
             public.catalog_trademarks
         WHERE trademark_id = $1 AND tag_version = $2 AND trademark_status <> $3;`
 
-    var status mrcom.ItemStatus
+    var status mrcom_status.ItemStatus
 
     err := re.client.QueryRow(
         ctx,
         sql,
         row.Id,
         row.Version,
-        mrcom.ItemStatusRemoved,
+        mrcom_status.ItemStatusRemoved,
     ).Scan(
         &status,
     )
@@ -130,7 +132,7 @@ func (re *CatalogTrademark) IsExists(ctx context.Context, id mrentity.KeyInt32) 
         ctx,
         sql,
         id,
-        mrcom.ItemStatusRemoved,
+        mrcom_status.ItemStatusRemoved,
     ).Scan(
         &id,
     )
@@ -176,7 +178,7 @@ func (re *CatalogTrademark) Update(ctx context.Context, row *entity.CatalogTrade
         sql,
         row.Id,
         row.Version,
-        mrcom.ItemStatusRemoved,
+        mrcom_status.ItemStatusRemoved,
         row.Caption,
     )
 }
@@ -198,7 +200,7 @@ func (re *CatalogTrademark) UpdateStatus(ctx context.Context, row *entity.Catalo
         sql,
         row.Id,
         row.Version,
-        mrcom.ItemStatusRemoved,
+        mrcom_status.ItemStatusRemoved,
         row.Status,
     )
 }
@@ -217,6 +219,6 @@ func (re *CatalogTrademark) Delete(ctx context.Context, id mrentity.KeyInt32) er
         ctx,
         sql,
         id,
-        mrcom.ItemStatusRemoved,
+        mrcom_status.ItemStatusRemoved,
     )
 }

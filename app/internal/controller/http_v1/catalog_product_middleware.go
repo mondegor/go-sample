@@ -13,9 +13,8 @@ type (
 func (ht *CatalogProduct) CategoryMiddleware(next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
     return func(c mrcore.ClientData) error {
         id := c.RequestPath().GetInt("cid")
-        err := ht.serviceCategory.CheckAvailability(c.Request().Context(), mrentity.KeyInt32(id))
 
-        if err != nil {
+        if err := ht.serviceCategory.CheckAvailability(c.Request().Context(), mrentity.KeyInt32(id)); err != nil {
             return err
         }
 

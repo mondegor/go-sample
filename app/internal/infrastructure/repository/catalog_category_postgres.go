@@ -5,7 +5,7 @@ import (
     "go-sample/internal/entity"
 
     "github.com/Masterminds/squirrel"
-    "github.com/mondegor/go-components/mrcom"
+    mrcom_status "github.com/mondegor/go-components/mrcom/status"
     "github.com/mondegor/go-storage/mrentity"
     "github.com/mondegor/go-storage/mrstorage"
 )
@@ -17,8 +17,10 @@ type (
     }
 )
 
-func NewCatalogCategory(client mrstorage.DbConn,
-                        queryBuilder squirrel.StatementBuilderType) *CatalogCategory {
+func NewCatalogCategory(
+    client mrstorage.DbConn,
+    queryBuilder squirrel.StatementBuilderType,
+) *CatalogCategory {
     return &CatalogCategory{
         client: client,
         builder: queryBuilder,
@@ -35,7 +37,7 @@ func (re *CatalogCategory) LoadAll(ctx context.Context, listFilter *entity.Catal
             image_path,
             category_status`).
         From("public.catalog_categories").
-        Where(squirrel.NotEq{"category_status": mrcom.ItemStatusRemoved}).
+        Where(squirrel.NotEq{"category_status": mrcom_status.ItemStatusRemoved}).
         OrderBy("category_caption ASC, category_id ASC")
 
     if len(listFilter.Statuses) > 0 {
@@ -87,7 +89,7 @@ func (re *CatalogCategory) LoadOne(ctx context.Context, row *entity.CatalogCateg
         ctx,
         sql,
         row.Id,
-        mrcom.ItemStatusRemoved,
+        mrcom_status.ItemStatusRemoved,
     ).Scan(
         &row.Version,
         &row.CreatedAt,
@@ -99,21 +101,21 @@ func (re *CatalogCategory) LoadOne(ctx context.Context, row *entity.CatalogCateg
 
 // FetchStatus
 // uses: row{Id, Version}
-func (re *CatalogCategory) FetchStatus(ctx context.Context, row *entity.CatalogCategory) (mrcom.ItemStatus, error) {
+func (re *CatalogCategory) FetchStatus(ctx context.Context, row *entity.CatalogCategory) (mrcom_status.ItemStatus, error) {
     sql := `
         SELECT category_status
         FROM
             public.catalog_categories
         WHERE category_id = $1 AND tag_version = $2 AND category_status <> $3;`
 
-    var status mrcom.ItemStatus
+    var status mrcom_status.ItemStatus
 
     err := re.client.QueryRow(
         ctx,
         sql,
         row.Id,
         row.Version,
-        mrcom.ItemStatusRemoved,
+        mrcom_status.ItemStatusRemoved,
     ).Scan(
         &status,
     )
@@ -134,7 +136,7 @@ func (re *CatalogCategory) IsExists(ctx context.Context, id mrentity.KeyInt32) e
         ctx,
         sql,
         id,
-        mrcom.ItemStatusRemoved,
+        mrcom_status.ItemStatusRemoved,
     ).Scan(
         &id,
     )
@@ -180,7 +182,7 @@ func (re *CatalogCategory) Update(ctx context.Context, row *entity.CatalogCatego
         sql,
         row.Id,
         row.Version,
-        mrcom.ItemStatusRemoved,
+        mrcom_status.ItemStatusRemoved,
         row.Caption,
     )
 }
@@ -202,7 +204,7 @@ func (re *CatalogCategory) UpdateStatus(ctx context.Context, row *entity.Catalog
         sql,
         row.Id,
         row.Version,
-        mrcom.ItemStatusRemoved,
+        mrcom_status.ItemStatusRemoved,
         row.Status,
     )
 }
@@ -221,6 +223,6 @@ func (re *CatalogCategory) Delete(ctx context.Context, id mrentity.KeyInt32) err
         ctx,
         sql,
         id,
-        mrcom.ItemStatusRemoved,
+        mrcom_status.ItemStatusRemoved,
     )
 }

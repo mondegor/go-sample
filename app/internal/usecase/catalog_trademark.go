@@ -4,7 +4,7 @@ import (
     "context"
     "go-sample/internal/entity"
 
-    "github.com/mondegor/go-components/mrcom"
+    mrcom_status "github.com/mondegor/go-components/mrcom/status"
     "github.com/mondegor/go-storage/mrentity"
     "github.com/mondegor/go-sysmess/mrerr"
     "github.com/mondegor/go-webcore/mrcore"
@@ -16,18 +16,20 @@ type (
         storage CatalogTrademarkStorage
         eventBox mrcore.EventBox
         serviceHelper *mrtool.ServiceHelper
-        statusFlow mrcom.ItemStatusFlow
+        statusFlow mrcom_status.StatusFlow
     }
 )
 
-func NewCatalogTrademark(storage CatalogTrademarkStorage,
-                         eventBox mrcore.EventBox,
-                         serviceHelper *mrtool.ServiceHelper) *CatalogTrademark {
+func NewCatalogTrademark(
+    storage CatalogTrademarkStorage,
+    eventBox mrcore.EventBox,
+    serviceHelper *mrtool.ServiceHelper,
+) *CatalogTrademark {
     return &CatalogTrademark{
         storage: storage,
         eventBox: eventBox,
         serviceHelper: serviceHelper,
-        statusFlow: mrcom.ItemStatusFlowDefault,
+        statusFlow: mrcom_status.ItemStatusFlow,
     }
 }
 
@@ -60,7 +62,7 @@ func (uc *CatalogTrademark) GetItem(ctx context.Context, id mrentity.KeyInt32) (
 // Create
 // modifies: item{Id}
 func (uc *CatalogTrademark) Create(ctx context.Context, item *entity.CatalogTrademark) error {
-    item.Status = mrcom.ItemStatusDraft
+    item.Status = mrcom_status.ItemStatusDraft
     err := uc.storage.Insert(ctx, item)
 
     if err != nil {
