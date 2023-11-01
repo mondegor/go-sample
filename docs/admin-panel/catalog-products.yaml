@@ -1,0 +1,568 @@
+---
+openapi: 3.0.3
+info:
+  version: 0.1.1
+  title: Private API управления каталогом товаров
+  description: Private REST API управления каталогом товаров в формате OpenAPI v3
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  contact:
+    name: Nazarov Andrey
+servers:
+  - url: http://localhost:8080
+    description: Local Host
+tags:
+  - name: CatalogProduct
+    description: Admin Products
+
+paths:
+  /adm/v1/catalog/products:
+    get:
+      summary: Метод получения списка товаров категории
+      description: Метод предназначен для получения списка всех товаров указанной категории, сохранённых в БД
+      operationId: getCatalogProducts
+      tags:
+        - CatalogProduct
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: "#/components/parameters/App.Request.Header.acceptLanguage"
+        - $ref: "#/components/parameters/App.Request.Header.correlationId"
+        - $ref: "#/components/parameters/App.Request.Query.categoryId"
+        - $ref: "#/components/parameters/App.Request.Query.Trademarks"
+        - $ref: "#/components/parameters/App.Request.Query.ItemStatuses"
+        - $ref: "#/components/parameters/App.Request.Query.SortField"
+        - $ref: "#/components/parameters/App.Request.Query.SortDirection"
+        - $ref: "#/components/parameters/App.Request.Query.PageIndex"
+        - $ref: "#/components/parameters/App.Request.Query.PageSize"
+
+      responses:
+        "200":
+          description: Получен список товаров
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/App.Catalog.Model.ProductList"
+        "401":
+          $ref: "#/components/responses/App.Response.Error401"
+        "403":
+          $ref: "#/components/responses/App.Response.Error403"
+        "500":
+          $ref: "#/components/responses/App.Response.Error5XX"
+
+    post:
+      summary: Метод добавления нового товара
+      description: Метод предназначен для создания информации о новом товаре в БД
+      operationId: createCatalogProduct
+      tags:
+        - CatalogProduct
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: "#/components/parameters/App.Request.Header.acceptLanguage"
+        - $ref: "#/components/parameters/App.Request.Header.correlationId"
+
+      requestBody:
+        required: true
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: "#/components/schemas/App.Catalog.Model.Product"
+
+      responses:
+        "201":
+          description: Информация о товаре успешно добавлена
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/App.Response.Model.CreateEntity"
+        "400":
+          # Артикул не может быть пустым
+          # Указанный артикул уже существует
+          # Артикул не может быть более 32 символов
+          # Артикул должен соответствовать следующему шаблону "[a-zA-Z0-9][a-zA-Z0-9_.+-]*[a-zA-Z0-9]"
+          # Заголовок записи не может быть пустым
+          # Заголовок записи не может быть более 128 символов
+          # Категория товара содержит недопустимое значение
+          $ref: "#/components/responses/App.Response.Error400"
+        "401":
+          $ref: "#/components/responses/App.Response.Error401"
+        "403":
+          $ref: "#/components/responses/App.Response.Error403"
+        "500":
+          $ref: "#/components/responses/App.Response.Error5XX"
+
+  /adm/v1/catalog/products/{productId}:
+    get:
+      summary: Метод получения товара
+      description: Метод предназначен для получения информации о товаре из БД
+      operationId: getCatalogProduct
+      tags:
+        - CatalogProduct
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: "#/components/parameters/App.Request.Header.acceptLanguage"
+        - $ref: "#/components/parameters/App.Request.Header.correlationId"
+        - $ref: "#/components/parameters/App.Request.Path.productId"
+
+      responses:
+        "200":
+          description: Получена информация о товаре
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/App.Catalog.Model.Product"
+        "401":
+          $ref: "#/components/responses/App.Response.Error401"
+        "403":
+          $ref: "#/components/responses/App.Response.Error403"
+        "404":
+          $ref: "#/components/responses/App.Response.Error404"
+        "500":
+          $ref: "#/components/responses/App.Response.Error5XX"
+
+    put:
+      summary: Метод сохранения товара
+      description: Метод предназначен для сохранения информации о товаре в БД
+      operationId: storeCatalogProduct
+      tags:
+        - CatalogProduct
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: "#/components/parameters/App.Request.Header.acceptLanguage"
+        - $ref: "#/components/parameters/App.Request.Header.correlationId"
+        - $ref: "#/components/parameters/App.Request.Path.productId"
+
+      requestBody:
+        required: true
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: "#/components/schemas/App.Catalog.Model.Product"
+
+      responses:
+        "204":
+          description: Информация о товаре успешно сохранена
+        "400":
+          # Артикул не может быть пустым
+          # Указанный артикул уже существует
+          # Артикул не может быть более 32 символов
+          # Артикул должен соответствовать следующему шаблону "[a-zA-Z0-9][a-zA-Z0-9_.+-]*[a-zA-Z0-9]"
+          # Заголовок записи не может быть пустым
+          # Заголовок записи не может быть более 128 символов
+          # Категория товара содержит недопустимое значение
+          $ref: "#/components/responses/App.Response.Error400"
+        "401":
+          $ref: "#/components/responses/App.Response.Error401"
+        "403":
+          $ref: "#/components/responses/App.Response.Error403"
+        "404":
+          $ref: "#/components/responses/App.Response.Error404"
+        "500":
+          $ref: "#/components/responses/App.Response.Error5XX"
+
+    delete:
+      summary: Метод удаления товара
+      description: Метод предназначен для удаления информации о товаре из БД
+      operationId: removeCatalogProduct
+      tags:
+        - CatalogProduct
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: "#/components/parameters/App.Request.Header.acceptLanguage"
+        - $ref: "#/components/parameters/App.Request.Header.correlationId"
+        - $ref: "#/components/parameters/App.Request.Path.productId"
+
+      responses:
+        "204":
+          description: Информация о товаре успешно удалена
+        "401":
+          $ref: "#/components/responses/App.Response.Error401"
+        "403":
+          $ref: "#/components/responses/App.Response.Error403"
+        "404":
+          $ref: "#/components/responses/App.Response.Error404"
+        "500":
+          $ref: "#/components/responses/App.Response.Error5XX"
+
+  /adm/v1/catalog/products/{productId}/status:
+    put:
+      summary: Метод изменения статуса товара
+      description: Метод предназначен для изменения статуса товара в БД
+      operationId: changeCatalogProductStatus
+      tags:
+        - CatalogProduct
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: "#/components/parameters/App.Request.Header.acceptLanguage"
+        - $ref: "#/components/parameters/App.Request.Header.correlationId"
+        - $ref: "#/components/parameters/App.Request.Path.productId"
+
+      requestBody:
+        required: true
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: "#/components/schemas/App.Request.Model.ChangeItemStatus"
+
+      responses:
+        "204":
+          description: Статус товара успешно изменён
+        "400":
+          # Указанный статус содержит недопустимое значение
+          # В данный статус переключение невозможно
+          $ref: "#/components/responses/App.Response.Error400"
+        "401":
+          $ref: "#/components/responses/App.Response.Error401"
+        "403":
+          $ref: "#/components/responses/App.Response.Error403"
+        "404":
+          $ref: "#/components/responses/App.Response.Error404"
+        "500":
+          $ref: "#/components/responses/App.Response.Error5XX"
+
+  /adm/v1/catalog/products/{productId}/move:
+    patch:
+      summary: Метод перемещения товара
+      description: Метод предназначен для изменения позиции товара в рамках категории в БД
+      operationId: moveCatalogProduct
+      tags:
+        - CatalogProduct
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: "#/components/parameters/App.Request.Header.acceptLanguage"
+        - $ref: "#/components/parameters/App.Request.Header.correlationId"
+        - $ref: "#/components/parameters/App.Request.Path.productId"
+
+      requestBody:
+        required: true
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: "#/components/schemas/App.Request.Model.MoveEntity"
+
+      responses:
+        "204":
+          description: Статус поля формы успешно изменён
+        "400":
+          # Поле, после которого необходимо вставить указанное поле не найдено
+          $ref: "#/components/responses/App.Response.Error400"
+        "401":
+          $ref: "#/components/responses/App.Response.Error401"
+        "403":
+          $ref: "#/components/responses/App.Response.Error403"
+        "404":
+          $ref: "#/components/responses/App.Response.Error404"
+        "500":
+          $ref: "#/components/responses/App.Response.Error5XX"
+
+components:
+
+  parameters:
+    App.Request.Header.acceptLanguage:
+      description: https://developer.mozilla.org/ru/docs/Web/HTTP/Headers/Accept-Language
+      name: Accept-Language
+      in: header
+      schema:
+        type: string
+      example: "ru;q=0.9, fr-CH, fr;q=0.8, en;q=0.7, *;q=0.5"
+
+    App.Request.Header.correlationId:
+      name: CorrelationID
+      in: header
+      schema:
+        type: string
+        format: uuid
+        minLength: 36
+        maxLength: 36
+      example: "f7479171-83d2-4f64-84ac-892f8c0aaf48"
+
+    App.Request.Path.productId:
+      name: productId
+      in: path
+      required: true
+      description: Идентификатор товара
+      schema:
+        type: integer
+      example: 729114
+
+    App.Request.Query.categoryId:
+      name: categoryId
+      in: query
+      required: false
+      description: Идентификатор категории
+      schema:
+        type: integer
+      example: 21
+
+    App.Request.Query.Trademarks:
+      name: trademarks
+      in: query
+      required: false
+      description: Список идентификаторов торговых марок через ","
+      schema:
+        type: string
+      example: "1736,1691"
+
+    App.Request.Query.ItemStatuses:
+      name: statuses
+      in: query
+      required: false
+      description: Список статусов через ","
+      schema:
+        type: string
+      example: "DRAFT,ENABLED"
+
+    App.Request.Query.SortField:
+      name: sortField
+      in: query
+      required: false
+      description: Название поля, по которому происходит сортировка
+      schema:
+        type: string
+      example: "caption"
+
+    App.Request.Query.SortDirection:
+      name: sortDirection
+      in: query
+      required: false
+      description: |-
+        Направление сортировки:
+        - ASC - по возрастанию;
+        - DESC - по убыванию;
+      schema:
+        type: string
+        enum:
+          - ASC
+          - DESC
+      example: "DESC"
+
+    App.Request.Query.PageIndex:
+      name: pageIndex
+      in: query
+      required: false
+      description: Индекс страницы с записями
+      schema:
+        type: integer
+      example: 2
+
+    App.Request.Query.PageSize:
+      name: pageSize
+      in: query
+      required: false
+      description: Количество записей на страницу
+      schema:
+        type: integer
+      example: 50
+
+  schemas:
+    App.Response.Model.Error: # RFC 7807 (Problem Details for HTTP APIs)
+      type: object
+      required:
+        - title
+        - detail
+        - request
+        - time
+      properties:
+        title:
+          description: Краткое описание проблемы, понятное человеку
+          type: string
+          example: "Entity not found"
+        detail:
+          description: Описание конкретно возникшей ошибки, понятное человеку
+          type: string
+          example: "Entity [User] with id = [123456] not found. You MUST use PUT to add entity instead of GET"
+        request:
+          description: Метод и URL запроса
+          type: string
+          example: "PUT /users/123456"
+        time:
+          description: Время возникновения ошибки с точностью до миллисекунд
+          type: string
+          format: date-time
+          example: "2023-01-01T12:00:00.000+02:00"
+        errorTraceId:
+          description: Идентификатор конкретного возникновения ошибки
+          type: string
+          example: "5add1be1-90ab5d42-02fa8b1f-672503f2"
+
+    App.Response.Model.ErrorAttribute:
+      type: object
+      required:
+        - id
+        - value
+      properties:
+        id:
+          description: Название атрибута, где произошла ошибка
+          type: string
+          example: "attributeName"
+        value:
+          description: Описание ошибки
+          type: string
+          example: "Атрибут не может быть пустым. Указано недопустимое значение атрибута"
+
+    App.Response.Model.CreateEntity:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          description: Идентификатор созданного ресурса
+          type: integer
+          example: 1000
+        message:
+          type: string
+          example: "Ресурс был успешно создан"
+
+    App.Request.Model.ChangeItemStatus:
+      type: object
+      properties:
+        version:
+          description: Текущая версия ресурса
+          type: integer
+          example: 7
+        status:
+          $ref: "#/components/schemas/App.Field.ItemStatus"
+
+    App.Field.ItemStatus:
+      description: |-
+        Текущий статус записи:
+        - DRAFT - черновик;
+        - ENABLED - используется;
+        - DISABLED - отключен;
+      type: string
+      enum:
+        - DRAFT
+        - ENABLED
+        - DISABLED
+      example: "ENABLED"
+
+    App.Request.Model.MoveEntity:
+      type: object
+      required:
+        - afterId
+      properties:
+        afterId:
+          description: Идентификатор записи, после которой необходимо вставить указанную запись
+          type: number
+          example: 7
+
+    App.Catalog.Model.ProductList:
+      type: object
+      required:
+        - items
+        - total
+      properties:
+        items:
+          description: Список записей ограниченный фильтром и pageSize
+          type: array
+          items:
+            $ref: "#/components/schemas/App.Catalog.Model.Product"
+        total:
+          description: Количество записей в БД с учётом указанных в запросе фильтров
+          type: integer
+          example: 584
+
+    App.Catalog.Model.Product:
+      type: object
+      properties:
+        id: # productId, get
+          type: integer
+          example: 729114
+        version: # get, store, changeStatus, remove
+          description: Текущая версия записи
+          type: number
+          example: 7
+        createdAt: # get
+          description: Дата и время сохранения записи
+          type: string
+          format: date-time
+          example: "2023-01-01T12:00:00.000+02:00"
+        catagoryId: # get, create, store
+          type: integer
+          example: 21
+        trademarkId: # get, create, store
+          type: integer
+          example: 1736
+        article: # get, create, store
+          description: Уникальный артикул записи
+          type: string
+          # pattern: [a-zA-Z0-9][a-zA-Z0-9_.+-]*[a-zA-Z0-9]
+          minLength: 4
+          maxLength: 32
+          example: "item-01843"
+        caption: # get, create, store
+          description: Название записи
+          type: string
+          maxLength: 128
+          example: "Мобильный телефон 0001"
+        price: # get, create, store
+          type: integer # Money
+          maxLength: 10
+          example: 8234500 # 82345 coins
+        status: # get, changeStatus
+          $ref: "#/components/schemas/App.Field.ItemStatus"
+
+  responses:
+    App.Response.Error400:
+      description: Некорректные входные данные. Возвращается список атрибутов с ошибками
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/App.Response.Model.ErrorAttribute"
+
+    App.Response.Error401:
+      description: Пользователь не был аутентифицирован
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/App.Response.Model.Error"
+
+    App.Response.Error403:
+      description: Пользователю с текущими правами доступ отклонён
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/App.Response.Model.Error"
+
+    App.Response.Error404:
+      description: Запрашиваемый ресурс не был найден
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/App.Response.Model.Error"
+
+    App.Response.Error5XX:
+      description: Внутренняя ошибка сервера
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/App.Response.Model.Error"
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

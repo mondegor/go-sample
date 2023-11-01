@@ -4,16 +4,22 @@ import (
     "context"
     "flag"
     "go-sample/config"
-    "go-sample/internal/controller/http_v1"
+    http_v1_adm "go-sample/internal/controller/http_v1/admin-panel"
+    http_v1_public "go-sample/internal/controller/http_v1/public"
+    entity_adm "go-sample/internal/entity/admin-panel"
     "go-sample/internal/factory"
-    "go-sample/internal/infrastructure/repository"
-    "go-sample/internal/usecase"
+    repository_adm "go-sample/internal/infrastructure/repository/admin-panel"
+    repository_public "go-sample/internal/infrastructure/repository/public"
+    usecase_adm "go-sample/internal/usecase/admin-panel"
+    usecase_public "go-sample/internal/usecase/public"
     "log"
     "net/http"
 
-    sq "github.com/Masterminds/squirrel"
-    mrcom_orderer "github.com/mondegor/go-components/mrcom/orderer"
+    "github.com/mondegor/go-components/mrorderer"
+    "github.com/mondegor/go-storage/mrentity"
+    "github.com/mondegor/go-storage/mrpostgres"
     "github.com/mondegor/go-storage/mrredislock"
+    "github.com/mondegor/go-storage/mrsql"
     "github.com/mondegor/go-webcore/mrtool"
 )
 
@@ -62,29 +68,107 @@ func main() {
     appHelper.ExitOnError(err)
 
     lockerAdapter := mrredislock.NewLockerAdapter(redisAdapter.Cli())
-    queryBuilder := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 
-    itemOrdererStorage := mrcom_orderer.NewRepository(postgresAdapter, queryBuilder)
-    itemOrdererComponent := mrcom_orderer.NewComponent(itemOrdererStorage, logger)
+    mrpostgresWhere := mrpostgres.NewSqlBuilderWhere()
+    mrpostgresPager := mrpostgres.NewSqlBuilderPager(1000)
 
-    catalogCategoryStorage := repository.NewCatalogCategory(postgresAdapter, queryBuilder)
-    catalogCategoryImageStorage := repository.NewCatalogCategoryImage(postgresAdapter, queryBuilder)
-    catalogCategoryService := usecase.NewCatalogCategory(catalogCategoryStorage, logger, serviceHelper)
-    catalogCategoryImageService := usecase.NewCatalogCategoryImage(cfg.FileStorage.CatalogCategoryImageDir, catalogCategoryImageStorage, fileStorage, lockerAdapter, logger, serviceHelper)
-    catalogCategoryHttp := http_v1.NewCatalogCategory(catalogCategoryService, catalogCategoryImageService)
+    itemOrdererStorage := mrorderer.NewRepository(postgresAdapter)
+    itemOrdererComponent := mrorderer.NewComponent(itemOrdererStorage, logger)
 
-    catalogTrademarkStorage := repository.NewCatalogTrademark(postgresAdapter, queryBuilder)
-    catalogTrademarkService := usecase.NewCatalogTrademark(catalogTrademarkStorage, logger, serviceHelper)
-    catalogTrademarkHttp := http_v1.NewCatalogTrademark(catalogTrademarkService)
+    modulesAccess, err := factory.NewModulesAccess(cfg, logger)
+    appHelper.ExitOnError(err)
 
-    catalogProductStorage := repository.NewCatalogProduct(postgresAdapter, queryBuilder)
-    catalogProductService := usecase.NewCatalogProduct(itemOrdererComponent, catalogProductStorage, catalogTrademarkStorage, logger, serviceHelper)
-    catalogProductHttp := http_v1.NewCatalogProduct(catalogProductService, catalogCategoryService, catalogTrademarkService)
+    sectionPublic := factory.NewClientSectionPublic(cfg, modulesAccess)
+    sectionAdminPanel := factory.NewClientSectionAdminPanel(cfg, modulesAccess)
+
+    // section: public
+    publicCatalogCategoryStorage := repository_public.NewCatalogCategory(
+        postgresAdapter,
+        mrsql.NewBuilderSelect(
+            mrpostgresWhere,
+            mrpostgres.NewSqlBuilderOrderBy("category_caption", mrentity.SortDirectionASC),
+            mrpostgresPager,
+        ),
+    )
+    publicCatalogCategoryService := usecase_public.NewCatalogCategory(publicCatalogCategoryStorage, serviceHelper)
+    publicCatalogCategoryHttp := http_v1_public.NewCatalogCategory(sectionAdminPanel, publicCatalogCategoryService)
+
+    fileService := usecase_public.NewFileItem(fileStorage)
+    publicImageHttp := http_v1_public.NewImageItem(sectionPublic, fileService)
+
+    // section: admin-panel
+    catalogCategoryEntityMetaOrderBy, err := mrsql.NewEntityMetaOrderBy(entity_adm.CatalogCategory{})
+    appHelper.ExitOnError(err)
+
+    catalogCategoryStorage := repository_adm.NewCatalogCategory(
+        postgresAdapter,
+        mrsql.NewBuilderSelect(
+            mrpostgresWhere,
+            mrpostgres.NewSqlBuilderOrderByWithFieldMap(
+                catalogCategoryEntityMetaOrderBy.FieldMap,
+                catalogCategoryEntityMetaOrderBy.DefaultDbField,
+                mrentity.SortDirectionASC,
+            ),
+            mrpostgresPager,
+        ),
+    )
+    catalogCategoryImageStorage := repository_adm.NewCatalogCategoryImage(postgresAdapter)
+    catalogCategoryService := usecase_adm.NewCatalogCategory(catalogCategoryStorage, logger, serviceHelper)
+    catalogCategoryImageService := usecase_adm.NewCatalogCategoryImage(cfg.FileStorage.CatalogCategoryImageDir, catalogCategoryImageStorage, fileStorage, lockerAdapter, logger, serviceHelper)
+    catalogCategoryHttp := http_v1_adm.NewCatalogCategory(sectionAdminPanel, catalogCategoryService, catalogCategoryImageService)
+
+    catalogTrademarkEntityMetaOrderBy, err := mrsql.NewEntityMetaOrderBy(entity_adm.CatalogTrademark{})
+    appHelper.ExitOnError(err)
+
+    catalogTrademarkStorage := repository_adm.NewCatalogTrademark(
+        postgresAdapter,
+        mrsql.NewBuilderSelect(
+            mrpostgresWhere,
+            mrpostgres.NewSqlBuilderOrderByWithFieldMap(
+                catalogTrademarkEntityMetaOrderBy.FieldMap,
+                catalogTrademarkEntityMetaOrderBy.DefaultDbField,
+                mrentity.SortDirectionASC,
+            ),
+            mrpostgresPager,
+        ),
+    )
+    catalogTrademarkService := usecase_adm.NewCatalogTrademark(catalogTrademarkStorage, logger, serviceHelper)
+    catalogTrademarkHttp := http_v1_adm.NewCatalogTrademark(sectionAdminPanel, catalogTrademarkService)
+
+    catalogProductEntityMetaOrderBy, err := mrsql.NewEntityMetaOrderBy(entity_adm.CatalogProduct{})
+    appHelper.ExitOnError(err)
+
+    catalogProductEntityMetaUpdate, err := mrsql.NewEntityMetaUpdate(entity_adm.CatalogProduct{})
+    appHelper.ExitOnError(err)
+
+    catalogProductStorage := repository_adm.NewCatalogProduct(
+        postgresAdapter,
+        mrsql.NewBuilderSelect(
+            mrpostgresWhere,
+            mrpostgres.NewSqlBuilderOrderByWithFieldMap(
+                catalogProductEntityMetaOrderBy.FieldMap,
+                catalogProductEntityMetaOrderBy.DefaultDbField,
+                mrentity.SortDirectionASC,
+            ),
+            mrpostgresPager,
+        ),
+        mrsql.NewBuilderUpdateWithMeta(
+            catalogProductEntityMetaUpdate,
+            mrpostgres.NewSqlBuilderSet(),
+        ),
+    )
+    catalogProductService := usecase_adm.NewCatalogProduct(itemOrdererComponent, catalogProductStorage, catalogTrademarkStorage, logger, serviceHelper)
+    catalogProductHttp := http_v1_adm.NewCatalogProduct(sectionAdminPanel, catalogProductService, catalogCategoryService, catalogTrademarkService)
 
     router, err := factory.NewHttpRouter(cfg, logger)
     appHelper.ExitOnError(err)
 
     router.Register(
+        // section: public
+        publicCatalogCategoryHttp,
+        publicImageHttp,
+
+        // section: admin-panel
         catalogCategoryHttp,
         catalogTrademarkHttp,
         catalogProductHttp,

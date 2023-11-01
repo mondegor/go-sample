@@ -1,0 +1,9 @@
+---
+privileges:
+  - apiAdm
+
+permissions:
+  - modCatalogCategory
+  - modCatalogProduct
+  - modCatalogTrademark
+  - modImageItem

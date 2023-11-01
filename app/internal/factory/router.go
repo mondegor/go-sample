@@ -36,10 +36,7 @@ func NewHttpRouter(cfg *config.Config, logger mrcore.Logger) (mrcore.HttpRouter,
     router.RegisterMiddleware(
         mrserver.NewCors(corsOptions),
         mrserver.MiddlewareFirst(logger),
-        mrserver.MiddlewareUserIp(),
         mrserver.MiddlewareAcceptLanguage(responseTranslator),
-        mrserver.MiddlewarePlatform(mrcore.PlatformWeb),
-        mrserver.MiddlewareAuthenticateUser(),
     )
 
     router.HandlerFunc(http.MethodGet, "/", mrserver.MainPage)

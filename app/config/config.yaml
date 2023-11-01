@@ -68,3 +68,29 @@ translation:
   lang_codes: # the first language is used as fallback
     - en
     - ru
+
+client_sections:
+  public:
+    name: public
+    caption: Public API
+    privilege: apiPublic
+  admin_panel:
+    name: adm
+    caption: Admin Panel API
+    privilege: apiAdm
+
+modules_access:
+  roles:
+    dir_path: "./roles"
+    file_type: yaml
+    list: # the first role use as default
+      - guests
+      - administrators
+  privileges:
+    - apiPublic
+    - apiAdm
+  permissions:
+    - modCatalogCategory
+    - modCatalogProduct
+    - modCatalogTrademark
+    - modImageItem

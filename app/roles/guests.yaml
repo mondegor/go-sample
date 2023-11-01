@@ -1,0 +1,7 @@
+---
+privileges:
+  - apiPublic
+
+permissions:
+  - modCatalogCategory
+  - modImageItem

@@ -30,6 +30,8 @@ type (
         // Sentry `yaml:"sentry"`
         Cors `yaml:"cors"`
         Translation `yaml:"translation"`
+        ClientSections `yaml:"client_sections"`
+        ModulesAccess `yaml:"modules_access"`
     }
 
     Server struct {
@@ -98,6 +100,30 @@ type (
         DirPath string `yaml:"dir_path"`
         FileType string `yaml:"file_type"`
         LangCodes []string `yaml:"lang_codes"`
+    }
+
+    ClientSections struct {
+        Public ClientSection `yaml:"public"`
+        AdminPanel ClientSection `yaml:"admin_panel"`
+        ProviderAccount ClientSection `yaml:"provider_account"`
+    }
+
+    ClientSection struct {
+        Name string
+        Caption string
+        Privilege string
+    }
+
+    ModulesAccess struct {
+        Roles `yaml:"roles"`
+        Privileges []string `yaml:"privileges"`
+        Permissions []string `yaml:"permissions"`
+    }
+
+    Roles struct {
+        DirPath string `yaml:"dir_path"`
+        FileType string `yaml:"file_type"`
+        List []string `yaml:"list"`
     }
 )
 
