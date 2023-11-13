@@ -7,6 +7,6 @@ import (
 type (
 	CategoryListResponse struct {
 		Items []entity.Category `json:"items"`
-		Total int64					`json:"total"`
+		Total int64             `json:"total"`
 	}
 )

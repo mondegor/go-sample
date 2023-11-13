@@ -11,8 +11,8 @@ import (
 func NewBuilderImagesURL(cfg *config.Config) mrcore.BuilderPath {
 	return mrlib.NewBuilderPath(
 		strings.TrimRight(cfg.DownloadImages.Host, "/") +
-		"/" +
-		strings.TrimLeft(cfg.DownloadImages.BasePath, "/") +
-		"/",
+			"/" +
+			strings.TrimLeft(cfg.DownloadImages.BasePath, "/") +
+			"/",
 	)
 }

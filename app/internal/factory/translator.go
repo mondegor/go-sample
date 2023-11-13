@@ -12,8 +12,8 @@ func NewTranslator(cfg *config.Config, logger mrcore.Logger) (*mrlang.Translator
 
 	return mrlang.NewTranslator(
 		mrlang.TranslatorOptions{
-			DirPath: cfg.Translation.DirPath,
-			FileType: cfg.Translation.FileType,
+			DirPath:   cfg.Translation.DirPath,
+			FileType:  cfg.Translation.FileType,
 			LangCodes: cfg.Translation.LangCodes,
 		},
 	)

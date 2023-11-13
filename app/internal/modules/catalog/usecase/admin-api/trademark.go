@@ -13,10 +13,10 @@ import (
 
 type (
 	Trademark struct {
-		storage TrademarkStorage
-		eventBox mrcore.EventBox
+		storage       TrademarkStorage
+		eventBox      mrcore.EventBox
 		serviceHelper *mrtool.ServiceHelper
-		statusFlow mrenum.StatusFlow
+		statusFlow    mrenum.StatusFlow
 	}
 )
 
@@ -26,10 +26,10 @@ func NewTrademark(
 	serviceHelper *mrtool.ServiceHelper,
 ) *Trademark {
 	return &Trademark{
-		storage: storage,
-		eventBox: eventBox,
+		storage:       storage,
+		eventBox:      eventBox,
 		serviceHelper: serviceHelper,
-		statusFlow: mrenum.ItemStatusFlow,
+		statusFlow:    mrenum.ItemStatusFlow,
 	}
 }
 

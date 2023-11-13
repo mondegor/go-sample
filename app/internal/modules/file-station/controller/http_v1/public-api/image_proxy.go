@@ -12,8 +12,8 @@ import (
 
 type (
 	ImageProxy struct {
-		section mrcore.ClientSection
-		service usecase.FileProviderAdapterService
+		section   mrcore.ClientSection
+		service   usecase.FileProviderAdapterService
 		imagesURL string
 	}
 )
@@ -24,14 +24,14 @@ func NewImageProxy(
 	basePath string, // :TODO: to URL
 ) *ImageProxy {
 	return &ImageProxy{
-		section: section,
-		service: service,
+		section:   section,
+		service:   service,
 		imagesURL: fmt.Sprintf("/%s/*path", strings.Trim(basePath, "/")),
 	}
 }
 
 func (ht *ImageProxy) AddHandlers(router mrcore.HttpRouter) {
-	moduleAccessFunc := func (next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
+	moduleAccessFunc := func(next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
 		return ht.section.MiddlewareWithPermission(global.PermissionFileStationImageProxy, next)
 	}
 

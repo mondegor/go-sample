@@ -12,7 +12,7 @@ import (
 
 type (
 	Category struct {
-		storage CategoryStorage
+		storage       CategoryStorage
 		serviceHelper *mrtool.ServiceHelper
 	}
 )
@@ -22,7 +22,7 @@ func NewCategory(
 	serviceHelper *mrtool.ServiceHelper,
 ) *Category {
 	return &Category{
-		storage: storage,
+		storage:       storage,
 		serviceHelper: serviceHelper,
 	}
 }

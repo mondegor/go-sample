@@ -17,18 +17,18 @@ import (
 )
 
 const (
-	categoryURL = "/v1/catalog/categories"
-	categoryItemURL = "/v1/catalog/categories/:id"
+	categoryURL             = "/v1/catalog/categories"
+	categoryItemURL         = "/v1/catalog/categories/:id"
 	categoryChangeStatusURL = "/v1/catalog/categories/:id/status"
-	categoryItemImageURL = "/v1/catalog/categories/:id/image"
+	categoryItemImageURL    = "/v1/catalog/categories/:id/image"
 )
 
 type (
 	Category struct {
-		section mrcore.ClientSection
-		service usecase.CategoryService
+		section      mrcore.ClientSection
+		service      usecase.CategoryService
 		serviceImage usecase.CategoryImageService
-		listSorter mrview.ListSorter
+		listSorter   mrview.ListSorter
 	}
 )
 
@@ -39,15 +39,15 @@ func NewCategory(
 	listSorter mrview.ListSorter,
 ) *Category {
 	return &Category{
-		section: section,
-		service: service,
+		section:      section,
+		service:      service,
 		serviceImage: serviceImage,
-		listSorter: listSorter,
+		listSorter:   listSorter,
 	}
 }
 
 func (ht *Category) AddHandlers(router mrcore.HttpRouter) {
-	moduleAccessFunc := func (next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
+	moduleAccessFunc := func(next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
 		return ht.section.MiddlewareWithPermission(global.PermissionCatalogCategory, next)
 	}
 
@@ -91,10 +91,10 @@ func (ht *Category) listParams(c mrcore.ClientData) entity.CategoryParams {
 	return entity.CategoryParams{
 		Filter: entity.CategoryListFilter{
 			SearchText: view_shared.ParseFilterString(c, global.ParamNameFilterSearchText),
-			Statuses: view_shared.ParseFilterStatusList(c, global.ParamNameFilterStatuses),
+			Statuses:   view_shared.ParseFilterStatusList(c, global.ParamNameFilterStatuses),
 		},
 		Sorter: view_shared.ParseListSorter(c, ht.listSorter),
-		Pager: view_shared.ParseListPager(c),
+		Pager:  view_shared.ParseListPager(c),
 	}
 }
 
@@ -150,9 +150,9 @@ func (ht *Category) Store() mrcore.HttpHandlerFunc {
 		}
 
 		item := entity.Category{
-			ID:		 ht.getItemID(c),
+			ID:         ht.getItemID(c),
 			TagVersion: request.Version,
-			Caption:	request.Caption,
+			Caption:    request.Caption,
 		}
 
 		if err := ht.service.Store(c.Context(), &item); err != nil {
@@ -172,9 +172,9 @@ func (ht *Category) ChangeStatus() mrcore.HttpHandlerFunc {
 		}
 
 		item := entity.Category{
-			ID:		 ht.getItemID(c),
+			ID:         ht.getItemID(c),
 			TagVersion: request.Version,
-			Status:	 request.Status,
+			Status:     request.Status,
 		}
 
 		if err := ht.service.ChangeStatus(c.Context(), &item); err != nil {
@@ -228,7 +228,7 @@ func (ht *Category) UploadImage() mrcore.HttpHandlerFunc {
 			FileInfo: mrtype.FileInfo{
 				ContentType:  hdr.Header.Get("Content-Type"),
 				OriginalName: hdr.Filename,
-				Size:		 hdr.Size,
+				Size:         hdr.Size,
 			},
 			Body: file,
 		}

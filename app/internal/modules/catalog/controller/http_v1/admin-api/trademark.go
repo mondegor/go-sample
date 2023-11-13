@@ -16,15 +16,15 @@ import (
 )
 
 const (
-	trademarkURL = "/v1/catalog/trademarks"
-	trademarkItemURL = "/v1/catalog/trademarks/:id"
+	trademarkURL             = "/v1/catalog/trademarks"
+	trademarkItemURL         = "/v1/catalog/trademarks/:id"
 	trademarkChangeStatusURL = "/v1/catalog/trademarks/:id/status"
 )
 
 type (
 	Trademark struct {
-		section mrcore.ClientSection
-		service usecase.TrademarkService
+		section    mrcore.ClientSection
+		service    usecase.TrademarkService
 		listSorter mrview.ListSorter
 	}
 )
@@ -35,14 +35,14 @@ func NewTrademark(
 	listSorter mrview.ListSorter,
 ) *Trademark {
 	return &Trademark{
-		section: section,
-		service: service,
+		section:    section,
+		service:    service,
 		listSorter: listSorter,
 	}
 }
 
 func (ht *Trademark) AddHandlers(router mrcore.HttpRouter) {
-	moduleAccessFunc := func (next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
+	moduleAccessFunc := func(next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
 		return ht.section.MiddlewareWithPermission(global.PermissionCatalogTrademark, next)
 	}
 
@@ -78,10 +78,10 @@ func (ht *Trademark) listParams(c mrcore.ClientData) entity.TrademarkParams {
 	return entity.TrademarkParams{
 		Filter: entity.TrademarkListFilter{
 			SearchText: view_shared.ParseFilterString(c, global.ParamNameFilterSearchText),
-			Statuses: view_shared.ParseFilterStatusList(c, global.ParamNameFilterStatuses),
+			Statuses:   view_shared.ParseFilterStatusList(c, global.ParamNameFilterStatuses),
 		},
 		Sorter: view_shared.ParseListSorter(c, ht.listSorter),
-		Pager: view_shared.ParseListPager(c),
+		Pager:  view_shared.ParseListPager(c),
 	}
 }
 
@@ -135,9 +135,9 @@ func (ht *Trademark) Store() mrcore.HttpHandlerFunc {
 		}
 
 		item := entity.Trademark{
-			ID:		 ht.getItemID(c),
+			ID:         ht.getItemID(c),
 			TagVersion: request.Version,
-			Caption:	request.Caption,
+			Caption:    request.Caption,
 		}
 
 		if err := ht.service.Store(c.Context(), &item); err != nil {
@@ -157,9 +157,9 @@ func (ht *Trademark) ChangeStatus() mrcore.HttpHandlerFunc {
 		}
 
 		item := entity.Trademark{
-			ID:		 ht.getItemID(c),
+			ID:         ht.getItemID(c),
 			TagVersion: request.Version,
-			Status:	 request.Status,
+			Status:     request.Status,
 		}
 
 		if err := ht.service.ChangeStatus(c.Context(), &item); err != nil {

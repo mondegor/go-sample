@@ -13,14 +13,14 @@ import (
 )
 
 const (
-	categoryURL = "/v1/catalog/categories"
+	categoryURL     = "/v1/catalog/categories"
 	categoryItemURL = "/v1/catalog/categories/:id"
 )
 
 type (
 	Category struct {
-		section mrcore.ClientSection
-		service usecase.CategoryService
+		section   mrcore.ClientSection
+		service   usecase.CategoryService
 		imagesURL mrcore.BuilderPath
 	}
 )
@@ -31,14 +31,14 @@ func NewCategory(
 	imagesURL mrcore.BuilderPath,
 ) *Category {
 	return &Category{
-		section: section,
-		service: service,
+		section:   section,
+		service:   service,
 		imagesURL: imagesURL,
 	}
 }
 
 func (ht *Category) AddHandlers(router mrcore.HttpRouter) {
-	moduleAccessFunc := func (next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
+	moduleAccessFunc := func(next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
 		return ht.section.MiddlewareWithPermission(global.PermissionCatalogCategory, next)
 	}
 

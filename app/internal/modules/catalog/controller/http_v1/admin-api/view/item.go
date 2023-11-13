@@ -7,7 +7,7 @@ import (
 
 type (
 	ChangeItemStatusRequest struct {
-		Version int32 `json:"version" validate:"required,gte=1"`
+		Version int32             `json:"version" validate:"required,gte=1"`
 		Status  mrenum.ItemStatus `json:"status" validate:"required"`
 	}
 
@@ -16,7 +16,7 @@ type (
 	}
 
 	CreateItemResponse struct {
-		ItemID string `json:"id"`
+		ItemID  string `json:"id"`
 		Message string `json:"message,omitempty"`
 	}
 )

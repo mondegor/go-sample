@@ -6,16 +6,16 @@ import (
 
 type (
 	CreateTrademarkRequest struct {
-		Caption   string `json:"caption" validate:"required,max=128"`
+		Caption string `json:"caption" validate:"required,max=128"`
 	}
 
 	StoreTrademarkRequest struct {
-		Version   int32 `json:"version" validate:"required,gte=1"`
-		Caption   string `json:"caption" validate:"required,max=128"`
+		Version int32  `json:"version" validate:"required,gte=1"`
+		Caption string `json:"caption" validate:"required,max=128"`
 	}
 
 	TrademarkListResponse struct {
 		Items []entity.Trademark `json:"items"`
-		Total int64					 `json:"total"`
+		Total int64              `json:"total"`
 	}
 )

@@ -13,11 +13,11 @@ func NewModulesAccess(cfg *config.Config, logger mrcore.Logger) (*mrperms.Module
 
 	m, err := mrperms.NewModulesAccess(
 		mrperms.ModulesAccessOptions{
-			RolesDirPath: cfg.ModulesAccess.Roles.DirPath,
+			RolesDirPath:  cfg.ModulesAccess.Roles.DirPath,
 			RolesFileType: cfg.ModulesAccess.Roles.FileType,
-			Roles: cfg.ModulesAccess.Roles.List,
-			Privileges: cfg.ModulesAccess.Privileges,
-			Permissions: cfg.ModulesAccess.Permissions,
+			Roles:         cfg.ModulesAccess.Roles.List,
+			Privileges:    cfg.ModulesAccess.Privileges,
+			Permissions:   cfg.ModulesAccess.Permissions,
 		},
 	)
 

@@ -9,14 +9,14 @@ import (
 	"github.com/mondegor/go-webcore/mrcore"
 )
 
-func NewS3Minio(cfg *config.Config, logger mrcore.Logger) (*mrminio.ConnAdapter , error) {
+func NewS3Minio(cfg *config.Config, logger mrcore.Logger) (*mrminio.ConnAdapter, error) {
 	logger.Info("Create and init S3 minio connection")
 
 	opt := mrminio.Options{
-		Host:	 cfg.S3.Host,
-		Port:	 cfg.S3.Port,
+		Host:     cfg.S3.Host,
+		Port:     cfg.S3.Port,
 		UseSSL:   cfg.S3.UseSSL,
-		User:	 cfg.S3.Username,
+		User:     cfg.S3.Username,
 		Password: cfg.S3.Password,
 	}
 
@@ -33,7 +33,7 @@ func NewS3Minio(cfg *config.Config, logger mrcore.Logger) (*mrminio.ConnAdapter 
 	return conn, nil
 }
 
-func NewS3MinioFileProvider(conn *mrminio.ConnAdapter, bucketName string, logger mrcore.Logger) (mrstorage.FileProviderAPI , error) {
+func NewS3MinioFileProvider(conn *mrminio.ConnAdapter, bucketName string, logger mrcore.Logger) (mrstorage.FileProviderAPI, error) {
 	logger.Info("Init S3 minio bucket '%s' and create if not exists", bucketName)
 
 	created, err := conn.InitBucket(context.Background(), bucketName, true)

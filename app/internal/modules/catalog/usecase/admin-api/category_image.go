@@ -17,11 +17,11 @@ import (
 
 type (
 	CategoryImage struct {
-		baseImageURL string
-		storage CategoryImageStorage
-		fileAPI mrstorage.FileProviderAPI
-		locker mrcore.Locker
-		eventBox mrcore.EventBox
+		baseImageURL  string
+		storage       CategoryImageStorage
+		fileAPI       mrstorage.FileProviderAPI
+		locker        mrcore.Locker
+		eventBox      mrcore.EventBox
 		serviceHelper *mrtool.ServiceHelper
 	}
 )
@@ -35,11 +35,11 @@ func NewCategoryImage(
 	serviceHelper *mrtool.ServiceHelper,
 ) *CategoryImage {
 	return &CategoryImage{
-		baseImageURL: baseImageURL,
-		storage: storage,
-		fileAPI: fileAPI,
-		locker: locker,
-		eventBox: eventBox,
+		baseImageURL:  baseImageURL,
+		storage:       storage,
+		fileAPI:       fileAPI,
+		locker:        locker,
+		eventBox:      eventBox,
 		serviceHelper: serviceHelper,
 	}
 }
@@ -182,7 +182,7 @@ func (uc *CategoryImage) getImagePath(categoryID mrtype.KeyInt32, path string) (
 		"%s/%03x-%x%s",
 		uc.baseImageURL,
 		categoryID,
-		time.Now().UnixNano() & 0xffff,
+		time.Now().UnixNano()&0xffff,
 		ext,
 	), nil
 }

@@ -13,14 +13,14 @@ func NewPostgres(cfg *config.Config, logger mrcore.Logger) (*mrpostgres.ConnAdap
 	logger.Info("Create and init postgres connection")
 
 	opt := mrpostgres.Options{
-		Host: cfg.Storage.Host,
-		Port: cfg.Storage.Port,
-		Username: cfg.Storage.Username,
-		Password: cfg.Storage.Password,
-		Database: cfg.Storage.Database,
-		MaxPoolSize: cfg.Storage.MaxPoolSize,
+		Host:         cfg.Storage.Host,
+		Port:         cfg.Storage.Port,
+		Username:     cfg.Storage.Username,
+		Password:     cfg.Storage.Password,
+		Database:     cfg.Storage.Database,
+		MaxPoolSize:  cfg.Storage.MaxPoolSize,
 		ConnAttempts: 1,
-		ConnTimeout: time.Duration(cfg.Storage.Timeout) * time.Second,
+		ConnTimeout:  time.Duration(cfg.Storage.Timeout) * time.Second,
 	}
 
 	conn := mrpostgres.New()

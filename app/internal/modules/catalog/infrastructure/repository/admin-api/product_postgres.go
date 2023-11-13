@@ -14,7 +14,7 @@ import (
 
 type (
 	Product struct {
-		client mrstorage.DBConn
+		client    mrstorage.DBConn
 		sqlSelect mrstorage.SqlBuilderSelect
 		sqlUpdate mrstorage.SqlBuilderUpdate
 	}
@@ -26,7 +26,7 @@ func NewProduct(
 	sqlUpdate mrstorage.SqlBuilderUpdate,
 ) *Product {
 	return &Product{
-		client: client,
+		client:    client,
 		sqlSelect: sqlSelect,
 		sqlUpdate: sqlUpdate,
 	}
@@ -36,7 +36,7 @@ func (re *Product) GetMetaData(categoryID mrtype.KeyInt32) mrorderer.EntityMeta 
 	return mrorderer.NewEntityMeta(
 		"public.catalog_products",
 		"product_id",
-		re.sqlSelect.Where(func (w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
+		re.sqlSelect.Where(func(w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
 			return w.JoinAnd(
 				w.Equal("category_id", categoryID),
 				w.NotEqual("product_status", mrenum.ItemStatusRemoved),
@@ -47,7 +47,7 @@ func (re *Product) GetMetaData(categoryID mrtype.KeyInt32) mrorderer.EntityMeta 
 
 func (re *Product) NewFetchParams(params entity.ProductParams) mrstorage.SqlSelectParams {
 	return mrstorage.SqlSelectParams{
-		Where: re.sqlSelect.Where(func (w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
+		Where: re.sqlSelect.Where(func(w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
 			return w.JoinAnd(
 				w.NotEqual("product_status", mrenum.ItemStatusRemoved),
 				w.FilterEqualInt64("category_id", int64(params.Filter.CategoryID), 0),
@@ -57,13 +57,13 @@ func (re *Product) NewFetchParams(params entity.ProductParams) mrstorage.SqlSele
 				w.FilterAnyOf("product_status", params.Filter.Statuses),
 			)
 		}),
-		OrderBy: re.sqlSelect.OrderBy(func (s mrstorage.SqlBuilderOrderBy) mrstorage.SqlBuilderPartFunc {
+		OrderBy: re.sqlSelect.OrderBy(func(s mrstorage.SqlBuilderOrderBy) mrstorage.SqlBuilderPartFunc {
 			return s.Join(
 				s.Field(params.Sorter.FieldName, params.Sorter.Direction),
 				s.Field("product_id", mrenum.SortDirectionASC),
 			)
 		}),
-		Pager: re.sqlSelect.Pager(func (p mrstorage.SqlBuilderPager) mrstorage.SqlBuilderPartFunc {
+		Pager: re.sqlSelect.Pager(func(p mrstorage.SqlBuilderPager) mrstorage.SqlBuilderPartFunc {
 			return p.OffsetLimit(params.Pager.Index, params.Pager.Size)
 		}),
 	}
@@ -93,7 +93,7 @@ func (re *Product) Fetch(ctx context.Context, params mrstorage.SqlSelectParams) 
 	cursor, err := re.client.Query(
 		ctx,
 		sql,
-		whereArgs...
+		whereArgs...,
 	)
 
 	if err != nil {
@@ -297,7 +297,7 @@ func (re *Product) Update(ctx context.Context, row *entity.Product) error {
 	return re.client.Exec(
 		ctx,
 		sql,
-		mrsql.MergeArgs(args, setArgs)...
+		mrsql.MergeArgs(args, setArgs)...,
 	)
 }
 

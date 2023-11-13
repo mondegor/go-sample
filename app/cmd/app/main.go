@@ -18,11 +18,11 @@ import (
 
 var (
 	configPath string
-	logLevel string
+	logLevel   string
 )
 
 func init() {
-	flag.StringVar(&configPath,"config-path", "./config/config.yaml", "Path to application config file")
+	flag.StringVar(&configPath, "config-path", "./config/config.yaml", "Path to application config file")
 	flag.StringVar(&logLevel, "log-level", "", "Logging level")
 }
 

@@ -13,10 +13,10 @@ import (
 
 type (
 	Category struct {
-		storage		 CategoryStorage
-		eventBox		mrcore.EventBox
-		serviceHelper   *mrtool.ServiceHelper
-		statusFlow	  mrenum.StatusFlow
+		storage       CategoryStorage
+		eventBox      mrcore.EventBox
+		serviceHelper *mrtool.ServiceHelper
+		statusFlow    mrenum.StatusFlow
 	}
 )
 
@@ -26,10 +26,10 @@ func NewCategory(
 	serviceHelper *mrtool.ServiceHelper,
 ) *Category {
 	return &Category{
-		storage: storage,
-		eventBox: eventBox,
+		storage:       storage,
+		eventBox:      eventBox,
 		serviceHelper: serviceHelper,
-		statusFlow: mrenum.ItemStatusFlow,
+		statusFlow:    mrenum.ItemStatusFlow,
 	}
 }
 

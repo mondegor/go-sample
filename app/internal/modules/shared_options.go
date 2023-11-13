@@ -12,13 +12,13 @@ import (
 )
 
 type Options struct {
-	Cfg			  *config.Config
-	Logger		   mrcore.Logger
-	EventBox		 mrcore.EventBox
-	ServiceHelper	*mrtool.ServiceHelper
+	Cfg              *config.Config
+	Logger           mrcore.Logger
+	EventBox         mrcore.EventBox
+	ServiceHelper    *mrtool.ServiceHelper
 	PostgresAdapter  *mrpostgres.ConnAdapter
-	RedisAdapter	 *mrredis.ConnAdapter
-	MinioAdapter	 *mrminio.ConnAdapter
-	Locker		   mrcore.Locker
+	RedisAdapter     *mrredis.ConnAdapter
+	MinioAdapter     *mrminio.ConnAdapter
+	Locker           mrcore.Locker
 	OrdererComponent mrorderer.Component
 }

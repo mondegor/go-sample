@@ -11,7 +11,7 @@ import (
 
 type (
 	Category struct {
-		client mrstorage.DBConn
+		client    mrstorage.DBConn
 		sqlSelect mrstorage.SqlBuilderSelect
 	}
 )
@@ -21,14 +21,14 @@ func NewCategory(
 	sqlSelect mrstorage.SqlBuilderSelect,
 ) *Category {
 	return &Category{
-		client: client,
+		client:    client,
 		sqlSelect: sqlSelect,
 	}
 }
 
 func (re *Category) NewFetchParams(params entity.CategoryParams) mrstorage.SqlSelectParams {
 	return mrstorage.SqlSelectParams{
-		Where: re.sqlSelect.Where(func (w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
+		Where: re.sqlSelect.Where(func(w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
 			return w.JoinAnd(
 				w.Equal("category_status", mrenum.ItemStatusEnabled),
 				w.FilterLike("UPPER(category_caption)", strings.ToUpper(params.Filter.SearchText)),
@@ -55,7 +55,7 @@ func (re *Category) Fetch(ctx context.Context, params mrstorage.SqlSelectParams)
 	cursor, err := re.client.Query(
 		ctx,
 		sql,
-		whereArgs...
+		whereArgs...,
 	)
 
 	if err != nil {

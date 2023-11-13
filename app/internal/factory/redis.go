@@ -13,9 +13,9 @@ func NewRedis(cfg *config.Config, logger mrcore.Logger) (*mrredis.ConnAdapter, e
 	logger.Info("Create and init redis connection")
 
 	opt := mrredis.Options{
-		Host: cfg.Redis.Host,
-		Port: cfg.Redis.Port,
-		Password: cfg.Redis.Password,
+		Host:        cfg.Redis.Host,
+		Port:        cfg.Redis.Port,
+		Password:    cfg.Redis.Password,
 		ConnTimeout: time.Duration(cfg.Redis.Timeout),
 	}
 

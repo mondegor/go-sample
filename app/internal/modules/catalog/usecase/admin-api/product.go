@@ -17,12 +17,12 @@ import (
 type (
 	Product struct {
 		componentOrderer mrorderer.Component
-		storage ProductStorage
-		storageCategory CategoryStorage
+		storage          ProductStorage
+		storageCategory  CategoryStorage
 		storageTrademark TrademarkStorage
-		eventBox mrcore.EventBox
-		serviceHelper *mrtool.ServiceHelper
-		statusFlow mrenum.StatusFlow
+		eventBox         mrcore.EventBox
+		serviceHelper    *mrtool.ServiceHelper
+		statusFlow       mrenum.StatusFlow
 	}
 )
 
@@ -36,12 +36,12 @@ func NewProduct(
 ) *Product {
 	return &Product{
 		componentOrderer: componentOrderer,
-		storage: storage,
-		storageCategory: storageCategory,
+		storage:          storage,
+		storageCategory:  storageCategory,
 		storageTrademark: storageTrademark,
-		eventBox: eventBox,
-		serviceHelper: serviceHelper,
-		statusFlow: mrenum.ItemStatusFlow,
+		eventBox:         eventBox,
+		serviceHelper:    serviceHelper,
+		statusFlow:       mrenum.ItemStatusFlow,
 	}
 }
 
@@ -190,7 +190,7 @@ func (uc *Product) MoveAfterID(ctx context.Context, id mrtype.KeyInt32, afterID 
 	}
 
 	if err := uc.storage.LoadOne(ctx, &item); err != nil {
-		return  err
+		return err
 	}
 
 	if item.CategoryID < 1 {

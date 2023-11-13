@@ -18,16 +18,16 @@ import (
 )
 
 const (
-	productURL			 = "/v1/catalog/products"
-	productItemURL		 = "/v1/catalog/products/:id"
+	productURL             = "/v1/catalog/products"
+	productItemURL         = "/v1/catalog/products/:id"
 	productChangeStatusURL = "/v1/catalog/products/:id/status"
-	productMoveURL		 = "/v1/catalog/products/:id/move"
+	productMoveURL         = "/v1/catalog/products/:id/move"
 )
 
 type (
 	Product struct {
-		section mrcore.ClientSection
-		service usecase.ProductService
+		section    mrcore.ClientSection
+		service    usecase.ProductService
 		listSorter mrview.ListSorter
 	}
 )
@@ -38,14 +38,14 @@ func NewProduct(
 	listSorter mrview.ListSorter,
 ) *Product {
 	return &Product{
-		section: section,
-		service: service,
+		section:    section,
+		service:    service,
 		listSorter: listSorter,
 	}
 }
 
 func (ht *Product) AddHandlers(router mrcore.HttpRouter) {
-	moduleAccessFunc := func (next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
+	moduleAccessFunc := func(next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
 		return ht.section.MiddlewareWithPermission(global.PermissionCatalogProduct, next)
 	}
 
@@ -84,11 +84,11 @@ func (ht *Product) listParams(c mrcore.ClientData) entity.ProductParams {
 			CategoryID: view_shared.ParseFilterCategoryID(c, global.ParamNameFilterCategoryID),
 			Trademarks: view_shared.ParseFilterTrademarkList(c, global.ParamNameFilterCatalogTrademarks),
 			SearchText: view_shared.ParseFilterString(c, global.ParamNameFilterSearchText),
-			Price: view_shared.ParseFilterRangeInt64(c, global.ParamNameFilterPriceRange),
-			Statuses: view_shared.ParseFilterStatusList(c, global.ParamNameFilterStatuses),
+			Price:      view_shared.ParseFilterRangeInt64(c, global.ParamNameFilterPriceRange),
+			Statuses:   view_shared.ParseFilterStatusList(c, global.ParamNameFilterStatuses),
 		},
 		Sorter: view_shared.ParseListSorter(c, ht.listSorter),
-		Pager: view_shared.ParseListPager(c),
+		Pager:  view_shared.ParseListPager(c),
 	}
 }
 
@@ -113,11 +113,11 @@ func (ht *Product) Create() mrcore.HttpHandlerFunc {
 		}
 
 		item := entity.Product{
-			CategoryID: request.CategoryID,
+			CategoryID:  request.CategoryID,
 			TrademarkID: request.TrademarkID,
-			Article: request.Article,
-			Caption: request.Caption,
-			Price: request.Price,
+			Article:     request.Article,
+			Caption:     request.Caption,
+			Price:       request.Price,
 		}
 
 		if err := ht.service.Create(c.Context(), &item); err != nil {
@@ -146,13 +146,13 @@ func (ht *Product) Store() mrcore.HttpHandlerFunc {
 		}
 
 		item := entity.Product{
-			ID:		  ht.getItemID(c),
+			ID:          ht.getItemID(c),
 			TagVersion:  request.Version,
 			CategoryID:  request.CategoryID,
 			TrademarkID: request.TrademarkID,
-			Article:	 request.Article,
-			Caption:	 request.Caption,
-			Price:	   request.Price,
+			Article:     request.Article,
+			Caption:     request.Caption,
+			Price:       request.Price,
 		}
 
 		if err := ht.service.Store(c.Context(), &item); err != nil {
@@ -172,9 +172,9 @@ func (ht *Product) ChangeStatus() mrcore.HttpHandlerFunc {
 		}
 
 		item := entity.Product{
-			ID:		 ht.getItemID(c),
+			ID:         ht.getItemID(c),
 			TagVersion: request.Version,
-			Status:	 request.Status,
+			Status:     request.Status,
 		}
 
 		if err := ht.service.ChangeStatus(c.Context(), &item); err != nil {

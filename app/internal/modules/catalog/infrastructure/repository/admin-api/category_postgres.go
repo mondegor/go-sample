@@ -12,7 +12,7 @@ import (
 
 type (
 	Category struct {
-		client mrstorage.DBConn
+		client    mrstorage.DBConn
 		sqlSelect mrstorage.SqlBuilderSelect
 	}
 )
@@ -22,27 +22,27 @@ func NewCategory(
 	sqlSelect mrstorage.SqlBuilderSelect,
 ) *Category {
 	return &Category{
-		client: client,
+		client:    client,
 		sqlSelect: sqlSelect,
 	}
 }
 
 func (re *Category) NewFetchParams(params entity.CategoryParams) mrstorage.SqlSelectParams {
 	return mrstorage.SqlSelectParams{
-		Where: re.sqlSelect.Where(func (w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
+		Where: re.sqlSelect.Where(func(w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
 			return w.JoinAnd(
 				w.NotEqual("category_status", mrenum.ItemStatusRemoved),
 				w.FilterLike("UPPER(category_caption)", strings.ToUpper(params.Filter.SearchText)),
 				w.FilterAnyOf("category_status", params.Filter.Statuses),
 			)
 		}),
-		OrderBy: re.sqlSelect.OrderBy(func (s mrstorage.SqlBuilderOrderBy) mrstorage.SqlBuilderPartFunc {
+		OrderBy: re.sqlSelect.OrderBy(func(s mrstorage.SqlBuilderOrderBy) mrstorage.SqlBuilderPartFunc {
 			return s.Join(
 				s.Field(params.Sorter.FieldName, params.Sorter.Direction),
 				s.Field("category_id", mrenum.SortDirectionASC),
 			)
 		}),
-		Pager: re.sqlSelect.Pager(func (p mrstorage.SqlBuilderPager) mrstorage.SqlBuilderPartFunc {
+		Pager: re.sqlSelect.Pager(func(p mrstorage.SqlBuilderPager) mrstorage.SqlBuilderPartFunc {
 			return p.OffsetLimit(params.Pager.Index, params.Pager.Size)
 		}),
 	}
@@ -69,7 +69,7 @@ func (re *Category) Fetch(ctx context.Context, params mrstorage.SqlSelectParams)
 	cursor, err := re.client.Query(
 		ctx,
 		sql,
-		whereArgs...
+		whereArgs...,
 	)
 
 	if err != nil {

@@ -7,7 +7,7 @@ import (
 )
 
 func NewLogger(cfg *config.Config) (*mrcore.LoggerAdapter, error) {
-	logger, err := mrcore.NewLogger("[" + cfg.Log.Prefix + "] ", cfg.Log.Level)
+	logger, err := mrcore.NewLogger("["+cfg.Log.Prefix+"] ", cfg.Log.Level)
 
 	if err != nil {
 		return nil, err

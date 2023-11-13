@@ -12,7 +12,7 @@ import (
 
 type (
 	Trademark struct {
-		client mrstorage.DBConn
+		client    mrstorage.DBConn
 		sqlSelect mrstorage.SqlBuilderSelect
 	}
 )
@@ -22,27 +22,27 @@ func NewTrademark(
 	sqlSelect mrstorage.SqlBuilderSelect,
 ) *Trademark {
 	return &Trademark{
-		client: client,
+		client:    client,
 		sqlSelect: sqlSelect,
 	}
 }
 
 func (re *Trademark) NewFetchParams(params entity.TrademarkParams) mrstorage.SqlSelectParams {
 	return mrstorage.SqlSelectParams{
-		Where: re.sqlSelect.Where(func (w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
+		Where: re.sqlSelect.Where(func(w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
 			return w.JoinAnd(
 				w.NotEqual("trademark_status", mrenum.ItemStatusRemoved),
 				w.FilterLike("UPPER(trademark_caption)", strings.ToUpper(params.Filter.SearchText)),
 				w.FilterAnyOf("trademark_status", params.Filter.Statuses),
 			)
 		}),
-		OrderBy: re.sqlSelect.OrderBy(func (s mrstorage.SqlBuilderOrderBy) mrstorage.SqlBuilderPartFunc {
+		OrderBy: re.sqlSelect.OrderBy(func(s mrstorage.SqlBuilderOrderBy) mrstorage.SqlBuilderPartFunc {
 			return s.Join(
 				s.Field(params.Sorter.FieldName, params.Sorter.Direction),
 				s.Field("trademark_id", mrenum.SortDirectionASC),
 			)
 		}),
-		Pager: re.sqlSelect.Pager(func (p mrstorage.SqlBuilderPager) mrstorage.SqlBuilderPartFunc {
+		Pager: re.sqlSelect.Pager(func(p mrstorage.SqlBuilderPager) mrstorage.SqlBuilderPartFunc {
 			return p.OffsetLimit(params.Pager.Index, params.Pager.Size)
 		}),
 	}
@@ -68,7 +68,7 @@ func (re *Trademark) Fetch(ctx context.Context, params mrstorage.SqlSelectParams
 	cursor, err := re.client.Query(
 		ctx,
 		sql,
-		whereArgs...
+		whereArgs...,
 	)
 
 	if err != nil {

@@ -24,12 +24,12 @@ func NewHttpRouter(cfg *config.Config, logger mrcore.Logger) (mrcore.HttpRouter,
 	logger.Info("Create and init http router")
 
 	corsOptions := mrserver.CorsOptions{
-		AllowedOrigins: cfg.Cors.AllowedOrigins,
-		AllowedMethods: cfg.Cors.AllowedMethods,
-		AllowedHeaders: cfg.Cors.AllowedHeaders,
-		ExposedHeaders: cfg.Cors.ExposedHeaders,
+		AllowedOrigins:   cfg.Cors.AllowedOrigins,
+		AllowedMethods:   cfg.Cors.AllowedMethods,
+		AllowedHeaders:   cfg.Cors.AllowedHeaders,
+		ExposedHeaders:   cfg.Cors.ExposedHeaders,
 		AllowCredentials: cfg.Cors.AllowCredentials,
-		Debug: cfg.Debug,
+		Debug:            cfg.Debug,
 	}
 
 	router := mrserver.NewRouter(logger, mrserver.HandlerAdapter(requestValidator))
