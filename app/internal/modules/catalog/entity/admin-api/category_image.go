@@ -1,9 +1,9 @@
 package entity
 
 import (
-    "go-sample/internal/global"
+	"go-sample/internal/global"
 )
 
 const (
-    ModelNameCatalogCategoryImage = global.SectionAdminAPI + ".CatalogCategoryImage"
+	ModelNameCatalogCategoryImage = global.SectionAdminAPI + ".CatalogCategoryImage"
 )

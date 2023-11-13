@@ -1,5 +1,5 @@
 package entity_shared
 
 type (
-    Money int64
+	Money int64
 )

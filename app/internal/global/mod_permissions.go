@@ -1,9 +1,9 @@
 package global
 
 const (
-    PermissionCatalogCategory = "modCatalogCategory"
-    PermissionCatalogProduct = "modCatalogProduct"
-    PermissionCatalogTrademark = "modCatalogTrademark"
+	PermissionCatalogCategory = "modCatalogCategory"
+	PermissionCatalogProduct = "modCatalogProduct"
+	PermissionCatalogTrademark = "modCatalogTrademark"
 
-    PermissionFileStationImageProxy = "modFileStationImageProxy"
+	PermissionFileStationImageProxy = "modFileStationImageProxy"
 )

@@ -1,34 +1,34 @@
 package factory
 
 import (
-    "go-sample/config"
-    "strings"
+	"go-sample/config"
+	"strings"
 
-    "github.com/mondegor/go-webcore/mrcore"
-    "github.com/mondegor/go-webcore/mrperms"
+	"github.com/mondegor/go-webcore/mrcore"
+	"github.com/mondegor/go-webcore/mrperms"
 )
 
 func NewModulesAccess(cfg *config.Config, logger mrcore.Logger) (*mrperms.ModulesAccess, error) {
-    logger.Info("Create and init roles and permissions for modules access")
+	logger.Info("Create and init roles and permissions for modules access")
 
-    m, err := mrperms.NewModulesAccess(
-        mrperms.ModulesAccessOptions{
-            RolesDirPath: cfg.ModulesAccess.Roles.DirPath,
-            RolesFileType: cfg.ModulesAccess.Roles.FileType,
-            Roles: cfg.ModulesAccess.Roles.List,
-            Privileges: cfg.ModulesAccess.Privileges,
-            Permissions: cfg.ModulesAccess.Permissions,
-        },
-    )
+	m, err := mrperms.NewModulesAccess(
+		mrperms.ModulesAccessOptions{
+			RolesDirPath: cfg.ModulesAccess.Roles.DirPath,
+			RolesFileType: cfg.ModulesAccess.Roles.FileType,
+			Roles: cfg.ModulesAccess.Roles.List,
+			Privileges: cfg.ModulesAccess.Privileges,
+			Permissions: cfg.ModulesAccess.Permissions,
+		},
+	)
 
-    if err != nil {
-        return nil, err
-    }
+	if err != nil {
+		return nil, err
+	}
 
-    logger.Info("Registered roles: %s", strings.Join(m.RegisteredRoles(), ", "))
-    logger.Info("Default role: %s", m.DefaultRole())
-    logger.Info("Registered privileges: %s", strings.Join(m.RegisteredPrivileges(), ", "))
-    logger.Debug("Registered permissions:\n - %s", strings.Join(m.RegisteredPermissions(), ",\n - "))
+	logger.Info("Registered roles: %s", strings.Join(m.RegisteredRoles(), ", "))
+	logger.Info("Default role: %s", m.DefaultRole())
+	logger.Info("Registered privileges: %s", strings.Join(m.RegisteredPrivileges(), ", "))
+	logger.Debug("Registered permissions:\n - %s", strings.Join(m.RegisteredPermissions(), ",\n - "))
 
-    return m, nil
+	return m, nil
 }

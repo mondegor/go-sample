@@ -1,13 +1,13 @@
 package usecase
 
 import (
-    "context"
+	"context"
 
-    "github.com/mondegor/go-webcore/mrtype"
+	"github.com/mondegor/go-webcore/mrtype"
 )
 
 type (
-    FileProviderAdapterService interface {
-        Get(ctx context.Context, path string) (*mrtype.File, error)
-    }
+	FileProviderAdapterService interface {
+		Get(ctx context.Context, path string) (*mrtype.File, error)
+	}
 )

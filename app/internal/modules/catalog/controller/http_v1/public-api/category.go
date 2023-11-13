@@ -1,95 +1,95 @@
 package http_v1
 
 import (
-    "go-sample/internal/global"
-    "go-sample/internal/modules/catalog/controller/http_v1/public-api/view"
-    view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared/view"
-    "go-sample/internal/modules/catalog/entity/public-api"
-    usecase "go-sample/internal/modules/catalog/usecase/public-api"
-    "net/http"
+	"go-sample/internal/global"
+	"go-sample/internal/modules/catalog/controller/http_v1/public-api/view"
+	view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared/view"
+	"go-sample/internal/modules/catalog/entity/public-api"
+	usecase "go-sample/internal/modules/catalog/usecase/public-api"
+	"net/http"
 
-    "github.com/mondegor/go-webcore/mrcore"
-    "github.com/mondegor/go-webcore/mrtype"
+	"github.com/mondegor/go-webcore/mrcore"
+	"github.com/mondegor/go-webcore/mrtype"
 )
 
 const (
-    categoryURL = "/v1/catalog/categories"
-    categoryItemURL = "/v1/catalog/categories/:id"
+	categoryURL = "/v1/catalog/categories"
+	categoryItemURL = "/v1/catalog/categories/:id"
 )
 
 type (
-    Category struct {
-        section mrcore.ClientSection
-        service usecase.CategoryService
-        imagesURL mrcore.BuilderPath
-    }
+	Category struct {
+		section mrcore.ClientSection
+		service usecase.CategoryService
+		imagesURL mrcore.BuilderPath
+	}
 )
 
 func NewCategory(
-    section mrcore.ClientSection,
-    service usecase.CategoryService,
-    imagesURL mrcore.BuilderPath,
+	section mrcore.ClientSection,
+	service usecase.CategoryService,
+	imagesURL mrcore.BuilderPath,
 ) *Category {
-    return &Category{
-        section: section,
-        service: service,
-        imagesURL: imagesURL,
-    }
+	return &Category{
+		section: section,
+		service: service,
+		imagesURL: imagesURL,
+	}
 }
 
 func (ht *Category) AddHandlers(router mrcore.HttpRouter) {
-    moduleAccessFunc := func (next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
-        return ht.section.MiddlewareWithPermission(global.PermissionCatalogCategory, next)
-    }
+	moduleAccessFunc := func (next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
+		return ht.section.MiddlewareWithPermission(global.PermissionCatalogCategory, next)
+	}
 
-    router.HttpHandlerFunc(http.MethodGet, ht.section.Path(categoryURL), moduleAccessFunc(ht.GetList()))
-    router.HttpHandlerFunc(http.MethodGet, ht.section.Path(categoryItemURL), moduleAccessFunc(ht.Get()))
+	router.HttpHandlerFunc(http.MethodGet, ht.section.Path(categoryURL), moduleAccessFunc(ht.GetList()))
+	router.HttpHandlerFunc(http.MethodGet, ht.section.Path(categoryItemURL), moduleAccessFunc(ht.Get()))
 }
 
 func (ht *Category) GetList() mrcore.HttpHandlerFunc {
-    return func(c mrcore.ClientData) error {
-        items, totalItems, err := ht.service.GetList(c.Context(), ht.listParams(c))
+	return func(c mrcore.ClientData) error {
+		items, totalItems, err := ht.service.GetList(c.Context(), ht.listParams(c))
 
-        if err != nil {
-            return err
-        }
+		if err != nil {
+			return err
+		}
 
-        for i := range items {
-            items[i].ImagePath = ht.imagesURL.FullPath(items[i].ImagePath)
-        }
+		for i := range items {
+			items[i].ImagePath = ht.imagesURL.FullPath(items[i].ImagePath)
+		}
 
-        return c.SendResponse(
-            http.StatusOK,
-            view.CategoryListResponse{
-                Items: items,
-                Total: totalItems,
-            },
-        )
-    }
+		return c.SendResponse(
+			http.StatusOK,
+			view.CategoryListResponse{
+				Items: items,
+				Total: totalItems,
+			},
+		)
+	}
 }
 
 func (ht *Category) listParams(c mrcore.ClientData) entity.CategoryParams {
-    return entity.CategoryParams{
-        Filter: entity.CategoryListFilter{
-            SearchText: view_shared.ParseFilterString(c, global.ParamNameFilterSearchText),
-        },
-    }
+	return entity.CategoryParams{
+		Filter: entity.CategoryListFilter{
+			SearchText: view_shared.ParseFilterString(c, global.ParamNameFilterSearchText),
+		},
+	}
 }
 
 func (ht *Category) Get() mrcore.HttpHandlerFunc {
-    return func(c mrcore.ClientData) error {
-        item, err := ht.service.GetItem(c.Context(), ht.getItemID(c))
+	return func(c mrcore.ClientData) error {
+		item, err := ht.service.GetItem(c.Context(), ht.getItemID(c))
 
-        if err != nil {
-            return err
-        }
+		if err != nil {
+			return err
+		}
 
-        item.ImagePath = ht.imagesURL.FullPath(item.ImagePath)
+		item.ImagePath = ht.imagesURL.FullPath(item.ImagePath)
 
-        return c.SendResponse(http.StatusOK, item)
-    }
+		return c.SendResponse(http.StatusOK, item)
+	}
 }
 
 func (ht *Category) getItemID(c mrcore.ClientData) mrtype.KeyInt32 {
-    return mrtype.KeyInt32(c.RequestPath().GetInt64("id"))
+	return mrtype.KeyInt32(c.RequestPath().GetInt64("id"))
 }

@@ -1,21 +1,21 @@
 package global
 
 const (
-    ParamNameFilterSearchText = "query"
+	ParamNameFilterSearchText = "query"
 
-    ParamNameFilterCategoryID = "categoryId"
-    ParamNameFilterStatuses          = "statuses"
-    ParamNameFilterCatalogTrademarks = "trademarks"
+	ParamNameFilterCategoryID = "categoryId"
+	ParamNameFilterStatuses		  = "statuses"
+	ParamNameFilterCatalogTrademarks = "trademarks"
 
-    ParamNameFilterPriceRange = "price"
+	ParamNameFilterPriceRange = "price"
 
-    ParamNameSortField = "sortField"
-    ParamNameSortDirection = "sortDirection"
-    ParamNamePageIndex = "pageIndex"
-    ParamNamePageSize = "pageSize"
+	ParamNameSortField = "sortField"
+	ParamNameSortDirection = "sortDirection"
+	ParamNamePageIndex = "pageIndex"
+	ParamNamePageSize = "pageSize"
 
-    ParamNameFileCatalogCategoryImage = "categoryImage"
+	ParamNameFileCatalogCategoryImage = "categoryImage"
 
-    PageSizeMax = 1000
-    PageSizeDefault = 20
+	PageSizeMax = 1000
+	PageSizeDefault = 20
 )
