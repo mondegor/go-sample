@@ -1,0 +1,79 @@
+Catalog.Products.AdminAPI.Request.Model.CreateProduct:
+  description: DTO создания товара каталога
+  type: object
+  required:
+    - categoryId
+    - trademarkId
+    - article
+    - caption
+  properties:
+    categoryId:
+      $ref: "#/components/schemas/App.Field.IntegerID"
+    trademarkId:
+      $ref: "#/components/schemas/App.Field.IntegerID"
+    article:
+      $ref: "#/components/schemas/App.Field.Article"
+    caption:
+      $ref: "#/components/schemas/App.Field.Caption"
+    price:
+      $ref: "#/components/schemas/App.Field.Price"
+
+Catalog.Products.AdminAPI.Request.Model.StoreProduct:
+  description: DTO сохранения товара каталога
+  type: object
+  required:
+    - categoryId
+    - trademarkId
+    - article
+    - caption
+  properties:
+    version:
+      $ref: "#/components/schemas/App.Field.Version"
+    categoryId:
+      $ref: "#/components/schemas/App.Field.IntegerID"
+    trademarkId:
+      $ref: "#/components/schemas/App.Field.IntegerID"
+    article:
+      $ref: "#/components/schemas/App.Field.Article"
+    caption: # required,max=128
+      $ref: "#/components/schemas/App.Field.Caption"
+    price:
+      $ref: "#/components/schemas/App.Field.Price"
+
+Catalog.Products.AdminAPI.Response.Model.ProductList:
+  description: DTO - список товаров каталога
+  type: object
+  required:
+    - items
+    - total
+  properties:
+    items:
+      description: Список записей ограниченный фильтром и pageSize
+      type: array
+      items:
+        $ref: "#/components/schemas/Catalog.Products.AdminAPI.Response.Model.Product"
+    total:
+      $ref: "#/components/schemas/App.Field.ListPager.Total"
+
+Catalog.Products.AdminAPI.Response.Model.Product:
+  description: DTO - товар каталога
+  type: object
+  properties:
+    id: # productId
+      $ref: "#/components/schemas/App.Field.IntegerID"
+    version:
+      $ref: "#/components/schemas/App.Field.Version"
+    createdAt:
+      $ref: "#/components/schemas/App.Field.CreatedAt"
+    categoryId:
+      $ref: "#/components/schemas/App.Field.IntegerID"
+    trademarkId:
+      $ref: "#/components/schemas/App.Field.IntegerID"
+    article:
+      $ref: "#/components/schemas/App.Field.Article"
+    caption:
+      $ref: "#/components/schemas/App.Field.Caption"
+    price:
+      $ref: "#/components/schemas/App.Field.Price"
+    status:
+      $ref: "#/components/schemas/App.Field.Status"

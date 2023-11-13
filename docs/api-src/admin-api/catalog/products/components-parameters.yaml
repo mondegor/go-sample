@@ -1,0 +1,28 @@
+Catalog.Products.AdminAPI.Request.Path.ProductID:
+  description: Идентификатор товара
+  name: productId
+  in: path
+  required: true
+  schema:
+    type: integer
+    minimum: 1
+  example: 729114
+
+Catalog.Products.AdminAPI.Request.Query.Filter.CategoryID:
+  description: Идентификатор категории
+  name: categoryId
+  in: query
+  required: false
+  schema:
+    type: integer
+    minimum: 1
+  example: 21
+
+Catalog.Products.AdminAPI.Request.Query.Filter.TrademarkIDs:
+  description: Список идентификаторов торговых марок через ","
+  name: trademarks
+  in: query
+  required: false
+  schema:
+    type: string
+  example: "1736,1691"

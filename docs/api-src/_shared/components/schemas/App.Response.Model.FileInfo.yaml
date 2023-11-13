@@ -1,0 +1,21 @@
+App.Response.Model.FileInfo:
+  description: DTO - информация о файле
+  type: object
+  required:
+    - originalName
+    - size
+  properties:
+    contentType:
+      description: Тип файла
+      type: string
+      maxLength: 64
+      example: "image/png"
+    originalName:
+      description: Оригинальное название файла
+      type: string
+      maxLength: 128
+      example: "Название"
+    size:
+      description: Размер файла в байтах
+      type: number
+      example: 7

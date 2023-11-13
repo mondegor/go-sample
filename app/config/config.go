@@ -9,7 +9,7 @@ import (
 
 const (
     appName = "Go Sample"
-    appVersion = "v0.1.3"
+    appVersion = "v0.2.0"
 )
 
 type (
@@ -25,13 +25,14 @@ type (
         Log `yaml:"logger"`
         Storage `yaml:"storage"`
         Redis `yaml:"redis"`
-        FileStorage `yaml:"fs"`
+        DownloadImages `yaml:"download_images"`
+        FileStorage `yaml:"file_storage"`
         S3 `yaml:"s3"`
         // Sentry `yaml:"sentry"`
-        Cors `yaml:"cors"`
-        Translation `yaml:"translation"`
+        Cors           `yaml:"cors"`
+        Translation    `yaml:"translation"`
         ClientSections `yaml:"client_sections"`
-        ModulesAccess `yaml:"modules_access"`
+        ModulesAccess   `yaml:"modules_access"`
     }
 
     Server struct {
@@ -53,13 +54,13 @@ type (
     }
 
     Storage struct {
-        Host string `yaml:"host" env:"APPX_DB_HOST"`
-        Port string `yaml:"port" env:"APPX_DB_PORT"`
-        Username string `yaml:"username" env:"APPX_DB_USER"`
-        Password string `yaml:"password" env:"APPX_DB_PASSWORD"`
-        Database string `yaml:"database" env:"APPX_DB_NAME"`
-        MaxPoolSize int32 `yaml:"max_pool_size" env:"APPX_DB_MAX_POOL_SIZE"`
-        Timeout int32 `yaml:"timeout"` // in sec
+        Host        string `yaml:"host" env:"APPX_DB_HOST"`
+        Port        string `yaml:"port" env:"APPX_DB_PORT"`
+        Username    string `yaml:"username" env:"APPX_DB_USER"`
+        Password    string `yaml:"password" env:"APPX_DB_PASSWORD"`
+        Database    string `yaml:"database" env:"APPX_DB_NAME"`
+        MaxPoolSize int32  `yaml:"max_pool_size" env:"APPX_DB_MAX_POOL_SIZE"`
+        Timeout     int32  `yaml:"timeout"` // in sec
     }
 
     Redis struct {
@@ -67,6 +68,11 @@ type (
         Port string `yaml:"port" env:"APPX_REDIS_PORT"`
         Password string `yaml:"password" env:"APPX_REDIS_PASSWORD"`
         Timeout int `yaml:"timeout"` // in sec
+    }
+
+    DownloadImages struct {
+        Host string `yaml:"host" env:"APPX_IMAGE_HOST"`
+        BasePath string `yaml:"base_path"`
     }
 
     FileStorage struct {
@@ -80,7 +86,7 @@ type (
         UseSSL bool `yaml:"use_ssl" env:"APPX_S3_USESSL"`
         Username string `yaml:"username" env:"APPX_S3_USER"`
         Password string `yaml:"password" env:"APPX_S3_PASSWORD"`
-        BacketName string `yaml:"backet_name"`
+        BucketName string `yaml:"bucket_name"`
     }
 
     //Sentry struct {
@@ -103,15 +109,13 @@ type (
     }
 
     ClientSections struct {
-        Public ClientSection `yaml:"public"`
-        AdminPanel ClientSection `yaml:"admin_panel"`
-        ProviderAccount ClientSection `yaml:"provider_account"`
+        AdminAPI ClientSection `yaml:"admin_api"`
+        PublicAPI ClientSection `yaml:"public_api"`
     }
 
     ClientSection struct {
-        Name string
-        Caption string
-        Privilege string
+        Caption string `yaml:"caption"`
+        Privilege string `yaml:"privilege"`
     }
 
     ModulesAccess struct {

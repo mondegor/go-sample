@@ -1,0 +1,11 @@
+---
+openapi: 3.0.3
+info:
+  version: 0.0.1
+  title: Private API управления каталогом товаров
+  description: Private REST API проекта go-sample управления каталогом товаров
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  contact:
+    name: Andrey Nazarov

@@ -1,0 +1,56 @@
+Catalog.Trademarks.AdminAPI.Request.Model.CreateTrademark:
+  description: DTO создания торговой марки
+  type: object
+  required:
+    - caption
+  properties:
+    caption:
+      $ref: "#/components/schemas/App.Field.Caption"
+
+Catalog.Trademarks.AdminAPI.Request.Model.StoreTrademark:
+  description: DTO сохранения торговой марки
+  type: object
+  required:
+    - version
+    - caption
+  properties:
+    version:
+      $ref: "#/components/schemas/App.Field.Version"
+    caption:
+      $ref: "#/components/schemas/App.Field.Caption"
+
+Catalog.Trademarks.AdminAPI.Response.Model.TrademarkList:
+  description: DTO - список торговых марок
+  type: object
+  required:
+    - items
+    - total
+  properties:
+    items:
+      description: Список записей ограниченный фильтром и pageSize
+      type: array
+      items:
+        $ref: "#/components/schemas/Catalog.Trademarks.AdminAPI.Response.Model.Trademark"
+    total:
+      $ref: "#/components/schemas/App.Field.ListPager.Total"
+
+Catalog.Trademarks.AdminAPI.Response.Model.Trademark:
+  description: DTO - торговая марка
+  type: object
+  required:
+    - id
+    - version
+    - createdAt
+    - caption
+    - status
+  properties:
+    id: # trademarkId
+      $ref: "#/components/schemas/App.Field.IntegerID"
+    version:
+      $ref: "#/components/schemas/App.Field.Version"
+    createdAt:
+      $ref: "#/components/schemas/App.Field.CreatedAt"
+    caption:
+      $ref: "#/components/schemas/App.Field.Caption"
+    status:
+      $ref: "#/components/schemas/App.Field.Status"

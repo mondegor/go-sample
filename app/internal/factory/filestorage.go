@@ -10,7 +10,7 @@ import (
     "github.com/mondegor/go-webcore/mrcore"
 )
 
-func NewFileStorage(cfg *config.Config, logger mrcore.Logger) (mrstorage.FileProvider, error) {
+func NewFileStorage(cfg *config.Config, logger mrcore.Logger) (mrstorage.FileProviderAPI, error) {
     logger.Info("Init file storage")
 
     err := createBaseDir(cfg.FileStorage.DownloadDir, 0755)

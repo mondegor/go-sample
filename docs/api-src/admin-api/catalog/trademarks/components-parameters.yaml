@@ -1,0 +1,9 @@
+Catalog.Trademarks.AdminAPI.Request.Path.TrademarkID:
+  description: Идентификатор торговой марки
+  name: trademarkId
+  in: path
+  required: true
+  schema:
+    type: integer
+    minimum: 1
+  example: 1736

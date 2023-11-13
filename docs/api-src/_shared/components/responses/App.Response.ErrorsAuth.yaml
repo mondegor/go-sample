@@ -1,0 +1,13 @@
+App.Response.Error401:
+  description: Пользователь не был аутентифицирован
+  content:
+    application/problem+json:
+      schema:
+        $ref: "#/components/schemas/App.Response.Model.Error"
+
+App.Response.Error403:
+  description: Пользователю с текущими правами доступ отклонён
+  content:
+    application/problem+json:
+      schema:
+        $ref: "#/components/schemas/App.Response.Model.Error"

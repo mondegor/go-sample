@@ -1,0 +1,275 @@
+/v1/catalog/products:
+  get:
+    summary: Метод получения списка товаров категории
+    description: Метод предназначен для получения списка всех товаров указанной категории, сохранённых в БД
+    operationId: getProducts
+    tags:
+      - Catalog.Products
+
+    security:
+      - bearerAuth: []
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+      - $ref: "#/components/parameters/App.Request.Query.Filter.SearchText"
+      - $ref: "#/components/parameters/Catalog.Products.AdminAPI.Request.Query.Filter.CategoryID"
+      - $ref: "#/components/parameters/Catalog.Products.AdminAPI.Request.Query.Filter.TrademarkIDs"
+      - $ref: "#/components/parameters/App.Request.Query.Filter.Statuses"
+      - $ref: "#/components/parameters/App.Request.Query.ListSorter.SortField"
+      - $ref: "#/components/parameters/App.Request.Query.ListSorter.SortDirection"
+      - $ref: "#/components/parameters/App.Request.Query.ListPager.PageIndex"
+      - $ref: "#/components/parameters/App.Request.Query.ListPager.PageSize"
+
+    responses:
+      "200":
+        description: Получен список товаров
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: "#/components/schemas/Catalog.Products.AdminAPI.Response.Model.ProductList"
+      "401":
+        $ref: "#/components/responses/App.Response.Error401"
+      "403":
+        $ref: "#/components/responses/App.Response.Error403"
+      "500":
+        $ref: "#/components/responses/App.Response.Error5XX"
+
+  post:
+    summary: Метод добавления нового товара
+    description: |-
+      Метод предназначен для создания информации о новом товаре в БД
+
+      **Пользовательские ошибки валидации 400:**
+      - Артикул не может быть пустым;
+      - Артикул не может быть более N символов;
+      - Артикул должен соответствовать указанному шаблону;
+      - Указанный артикул уже существует;
+      - Заголовок записи не может быть пустым;
+      - Заголовок записи не может быть более N символов;
+      - Указанная категория не найдена;
+      - Указанная торговая марка не найдена;
+      - Указанная цена содержит недопустимое значение;
+    operationId: createProduct
+    tags:
+      - Catalog.Products
+
+    security:
+      - bearerAuth: []
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+
+    requestBody:
+      required: true
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: "#/components/schemas/Catalog.Products.AdminAPI.Request.Model.CreateProduct"
+
+    responses:
+      "201":
+        description: Информация о товаре успешно добавлена
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: "#/components/schemas/App.Response.Model.CreateItem"
+      "400":
+        $ref: "#/components/responses/App.Response.Error400"
+      "401":
+        $ref: "#/components/responses/App.Response.Error401"
+      "403":
+        $ref: "#/components/responses/App.Response.Error403"
+      "500":
+        $ref: "#/components/responses/App.Response.Error5XX"
+
+/v1/catalog/products/{productId}:
+  get:
+    summary: Метод получения товара
+    description: Метод предназначен для получения информации о товаре из БД
+    operationId: getProduct
+    tags:
+      - Catalog.Products
+
+    security:
+      - bearerAuth: []
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+      - $ref: "#/components/parameters/Catalog.Products.AdminAPI.Request.Path.ProductID"
+
+    responses:
+      "200":
+        description: Получена информация о товаре
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: "#/components/schemas/Catalog.Products.AdminAPI.Response.Model.Product"
+      "401":
+        $ref: "#/components/responses/App.Response.Error401"
+      "403":
+        $ref: "#/components/responses/App.Response.Error403"
+      "404":
+        $ref: "#/components/responses/App.Response.Error404"
+      "500":
+        $ref: "#/components/responses/App.Response.Error5XX"
+
+  put:
+    summary: Метод сохранения товара
+    description: |-
+      Метод предназначен для сохранения информации о товаре в БД
+
+      **Пользовательские ошибки валидации 400:**
+      - Артикул не может быть пустым;
+      - Артикул не может быть более N символов;
+      - Артикул должен соответствовать указанному шаблону;
+      - Указанный артикул уже существует;
+      - Заголовок записи не может быть пустым;
+      - Заголовок записи не может быть более N символов;
+      - Указанная категория не найдена;
+      - Указанная торговая марка не найдена;
+      - Указанная цена содержит недопустимое значение;
+    operationId: storeProduct
+    tags:
+      - Catalog.Products
+
+    security:
+      - bearerAuth: []
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+      - $ref: "#/components/parameters/Catalog.Products.AdminAPI.Request.Path.ProductID"
+
+    requestBody:
+      required: true
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: "#/components/schemas/Catalog.Products.AdminAPI.Request.Model.StoreProduct"
+
+    responses:
+      "204":
+        description: Информация о товаре успешно сохранена
+      "400":
+        $ref: "#/components/responses/App.Response.Error400"
+      "401":
+        $ref: "#/components/responses/App.Response.Error401"
+      "403":
+        $ref: "#/components/responses/App.Response.Error403"
+      "404":
+        $ref: "#/components/responses/App.Response.Error404"
+      "500":
+        $ref: "#/components/responses/App.Response.Error5XX"
+
+  delete:
+    summary: Метод удаления товара
+    description: Метод предназначен для удаления информации о товаре из БД
+    operationId: removeProduct
+    tags:
+      - Catalog.Products
+
+    security:
+      - bearerAuth: []
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+      - $ref: "#/components/parameters/Catalog.Products.AdminAPI.Request.Path.ProductID"
+
+    responses:
+      "204":
+        description: Информация о товаре успешно удалена
+      "401":
+        $ref: "#/components/responses/App.Response.Error401"
+      "403":
+        $ref: "#/components/responses/App.Response.Error403"
+      "404":
+        $ref: "#/components/responses/App.Response.Error404"
+      "500":
+        $ref: "#/components/responses/App.Response.Error5XX"
+
+/v1/catalog/products/{productId}/status:
+  put:
+    summary: Метод изменения статуса товара
+    description: |-
+      Метод предназначен для изменения статуса товара в БД
+
+      **Пользовательские ошибки валидации 400:**
+      - Указанный статус содержит недопустимое значение;
+      - В данный статус переключение невозможно;
+    operationId: changeProductStatus
+    tags:
+      - Catalog.Products
+
+    security:
+      - bearerAuth: []
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+      - $ref: "#/components/parameters/Catalog.Products.AdminAPI.Request.Path.ProductID"
+
+    requestBody:
+      required: true
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: "#/components/schemas/App.Request.Model.ChangeStatus"
+
+    responses:
+      "204":
+        description: Статус товара успешно изменён
+      "400":
+        $ref: "#/components/responses/App.Response.Error400"
+      "401":
+        $ref: "#/components/responses/App.Response.Error401"
+      "403":
+        $ref: "#/components/responses/App.Response.Error403"
+      "404":
+        $ref: "#/components/responses/App.Response.Error404"
+      "500":
+        $ref: "#/components/responses/App.Response.Error5XX"
+
+/v1/catalog/products/{productId}/move:
+  patch:
+    summary: Метод перемещения товара
+    description: |-
+      Метод предназначен для изменения позиции товара в рамках категории в БД
+
+      **Пользовательские ошибки валидации 400:**
+      - Не найдено поле, после которого необходимо вставить указанное поле;
+    operationId: moveProduct
+    tags:
+      - Catalog.Products
+
+    security:
+      - bearerAuth: []
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+      - $ref: "#/components/parameters/Catalog.Products.AdminAPI.Request.Path.ProductID"
+
+    requestBody:
+      required: true
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: "#/components/schemas/App.Request.Model.MoveItem"
+
+    responses:
+      "204":
+        description: Статус поля формы успешно изменён
+      "400":
+        $ref: "#/components/responses/App.Response.Error400"
+      "401":
+        $ref: "#/components/responses/App.Response.Error401"
+      "403":
+        $ref: "#/components/responses/App.Response.Error403"
+      "404":
+        $ref: "#/components/responses/App.Response.Error404"
+      "500":
+        $ref: "#/components/responses/App.Response.Error5XX"

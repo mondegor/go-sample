@@ -4,4 +4,4 @@ privileges:
 
 permissions:
   - modCatalogCategory
-  - modImageItem
+  - modFileStationImageProxy

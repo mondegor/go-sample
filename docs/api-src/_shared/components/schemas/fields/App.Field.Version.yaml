@@ -1,0 +1,5 @@
+App.Field.Version:
+  description: Текущая версия записи
+  type: number
+  minimum: 1
+  example: 7

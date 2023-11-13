@@ -1,0 +1,218 @@
+/v1/catalog/trademarks:
+  get:
+    summary: Метод получения списка торговых марок
+    description: Метод предназначен для получения списка всех торговых марок, сохраненных в БД
+    operationId: getTrademarks
+    tags:
+      - Catalog.Trademarks
+
+    security:
+      - bearerAuth: []
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+      - $ref: "#/components/parameters/App.Request.Query.Filter.SearchText"
+      - $ref: "#/components/parameters/App.Request.Query.Filter.Statuses"
+      - $ref: "#/components/parameters/App.Request.Query.ListSorter.SortField"
+      - $ref: "#/components/parameters/App.Request.Query.ListSorter.SortDirection"
+      - $ref: "#/components/parameters/App.Request.Query.ListPager.PageIndex"
+      - $ref: "#/components/parameters/App.Request.Query.ListPager.PageSize"
+
+    responses:
+      "200":
+        description: Получен список торговых марок
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: "#/components/schemas/Catalog.Trademarks.AdminAPI.Response.Model.TrademarkList"
+      "401":
+        $ref: "#/components/responses/App.Response.Error401"
+      "403":
+        $ref: "#/components/responses/App.Response.Error403"
+      "500":
+        $ref: "#/components/responses/App.Response.Error5XX"
+
+  post:
+    summary: Метод добавления новой торговой марки
+    description: |-
+      Метод предназначен для создания информации о новой торговой марки в БД
+
+      **Пользовательские ошибки валидации 400:**
+      - Заголовок записи не может быть пустым;
+      - Заголовок записи не может быть более N символов;
+    operationId: createTrademark
+    tags:
+      - Catalog.Trademarks
+
+    security:
+      - bearerAuth: []
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+
+    requestBody:
+      required: true
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: "#/components/schemas/Catalog.Trademarks.AdminAPI.Request.Model.CreateTrademark"
+
+    responses:
+      "201":
+        description: Информация о торговой марке успешно добавлена
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: "#/components/schemas/App.Response.Model.CreateItem"
+      "400":
+        $ref: "#/components/responses/App.Response.Error400"
+      "401":
+        $ref: "#/components/responses/App.Response.Error401"
+      "403":
+        $ref: "#/components/responses/App.Response.Error403"
+      "500":
+        $ref: "#/components/responses/App.Response.Error5XX"
+
+/v1/catalog/trademarks/{trademarkId}:
+  get:
+    summary: Метод получения торговой марки
+    description: Метод предназначен для получения информации о торговой марке из БД
+    operationId: getTrademark
+    tags:
+      - Catalog.Trademarks
+
+    security:
+      - bearerAuth: []
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+      - $ref: "#/components/parameters/Catalog.Trademarks.AdminAPI.Request.Path.TrademarkID"
+
+    responses:
+      "200":
+        description: Получена информация о торговой марке
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: "#/components/schemas/Catalog.Trademarks.AdminAPI.Response.Model.Trademark"
+      "401":
+        $ref: "#/components/responses/App.Response.Error401"
+      "403":
+        $ref: "#/components/responses/App.Response.Error403"
+      "404":
+        $ref: "#/components/responses/App.Response.Error404"
+      "500":
+        $ref: "#/components/responses/App.Response.Error5XX"
+
+  put:
+    summary: Метод сохранения торговой марки
+    description: |-
+      Метод предназначен для сохранения информации о торговой марке в БД
+
+      **Пользовательские ошибки валидации 400:**
+      - Заголовок записи не может быть пустым;
+      - Заголовок записи не может быть более N символов;
+    operationId: storeTrademark
+    tags:
+      - Catalog.Trademarks
+
+    security:
+      - bearerAuth: []
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+      - $ref: "#/components/parameters/Catalog.Trademarks.AdminAPI.Request.Path.TrademarkID"
+
+    requestBody:
+      required: true
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: "#/components/schemas/Catalog.Trademarks.AdminAPI.Request.Model.StoreTrademark"
+
+    responses:
+      "204":
+        description: Информация о торговой марке успешно сохранена
+      "400":
+        $ref: "#/components/responses/App.Response.Error400"
+      "401":
+        $ref: "#/components/responses/App.Response.Error401"
+      "403":
+        $ref: "#/components/responses/App.Response.Error403"
+      "404":
+        $ref: "#/components/responses/App.Response.Error404"
+      "500":
+        $ref: "#/components/responses/App.Response.Error5XX"
+
+  delete:
+    summary: Метод удаления торговой марки
+    description: Метод предназначен для удаления информации о торговой марке из БД
+    operationId: removeTrademark
+    tags:
+      - Catalog.Trademarks
+
+    security:
+      - bearerAuth: []
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+      - $ref: "#/components/parameters/Catalog.Trademarks.AdminAPI.Request.Path.TrademarkID"
+
+    responses:
+      "204":
+        description: Информация о торговой марке успешно удалена
+      "401":
+        $ref: "#/components/responses/App.Response.Error401"
+      "403":
+        $ref: "#/components/responses/App.Response.Error403"
+      "404":
+        $ref: "#/components/responses/App.Response.Error404"
+      "500":
+        $ref: "#/components/responses/App.Response.Error5XX"
+
+/v1/catalog/trademarks/{trademarkId}/status:
+  put:
+    summary: Метод изменения статуса торговой марки
+    description: |-
+      Метод предназначен для изменения статуса торговой марки в БД
+
+      **Пользовательские ошибки валидации 400:**
+      - Указанный статус содержит недопустимое значение;
+      - В данный статус переключение невозможно;
+    operationId: changeTrademarkStatus
+    tags:
+      - Catalog.Trademarks
+
+    security:
+      - bearerAuth: []
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+      - $ref: "#/components/parameters/Catalog.Trademarks.AdminAPI.Request.Path.TrademarkID"
+
+    requestBody:
+      required: true
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: "#/components/schemas/App.Request.Model.ChangeStatus"
+
+    responses:
+      "204":
+        description: Статус торговой марки успешно изменён
+      "400":
+        $ref: "#/components/responses/App.Response.Error400"
+      "401":
+        $ref: "#/components/responses/App.Response.Error401"
+      "403":
+        $ref: "#/components/responses/App.Response.Error403"
+      "404":
+        $ref: "#/components/responses/App.Response.Error404"
+      "500":
+        $ref: "#/components/responses/App.Response.Error5XX"

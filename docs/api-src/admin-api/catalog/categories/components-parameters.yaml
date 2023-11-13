@@ -1,0 +1,9 @@
+Catalog.Categories.AdminAPI.Request.Path.CategoryID:
+  description: Идентификатор категории
+  name: categoryId
+  in: path
+  required: true
+  schema:
+    type: integer
+    minimum: 1
+  example: 21

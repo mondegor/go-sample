@@ -2,7 +2,7 @@ package factory
 
 import (
     "go-sample/config"
-    view_shared "go-sample/internal/controller/http_v1/shared/view"
+    view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared/view"
 
     "github.com/mondegor/go-webcore/mrcore"
     "github.com/mondegor/go-webcore/mrview"

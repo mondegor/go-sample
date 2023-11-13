@@ -32,7 +32,11 @@ redis:
   port: 6379
   password: 123456
 
-fs:
+download_images:
+  host: http://127.0.0.1/
+  base_path: "images"
+
+file_storage:
   download_dir: "./downloads"
   catalog_category_image_dir: "catalog/categories"
 
@@ -42,7 +46,7 @@ s3:
   use_ssl: false
   username: admin # d4jrL7eXyKg7ZNdYdl2p
   password: 12345678 # qZkNDK1Hewb4GVEvzvZGRCVb5uU4ZCX9bKztlhvR
-  backet_name: go-sample-data
+  bucket_name: go-sample-data
 
 #sentry:
 #  use: false
@@ -63,34 +67,32 @@ cors:
   allow_credentials: true
 
 translation:
-  dir_path: ./translate
+  dir_path: "./translate"
   file_type: yaml
-  lang_codes: # the first language is used as fallback
+  lang_codes: # the first language is default
     - en
     - ru
 
 client_sections:
-  public:
-    name: public
+  admin_api:
+    caption: Admin API
+    privilege: apiAdm
+  public_api:
     caption: Public API
     privilege: apiPublic
-  admin_panel:
-    name: adm
-    caption: Admin Panel API
-    privilege: apiAdm
 
 modules_access:
   roles:
     dir_path: "./roles"
     file_type: yaml
-    list: # the first role use as default
+    list: # the first role is default
       - guests
       - administrators
   privileges:
-    - apiPublic
     - apiAdm
+    - apiPublic
   permissions:
     - modCatalogCategory
     - modCatalogProduct
     - modCatalogTrademark
-    - modImageItem
+    - modFileStationImageProxy
