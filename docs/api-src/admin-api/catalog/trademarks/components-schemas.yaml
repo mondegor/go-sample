@@ -15,7 +15,7 @@ Catalog.Trademarks.AdminAPI.Request.Model.StoreTrademark:
     - caption
   properties:
     version:
-      $ref: "#/components/schemas/App.Field.Version"
+      $ref: "#/components/schemas/App.Field.TagVersion"
     caption:
       $ref: "#/components/schemas/App.Field.Caption"
 
@@ -47,10 +47,10 @@ Catalog.Trademarks.AdminAPI.Response.Model.Trademark:
     id: # trademarkId
       $ref: "#/components/schemas/App.Field.IntegerID"
     version:
-      $ref: "#/components/schemas/App.Field.Version"
+      $ref: "#/components/schemas/App.Field.TagVersion"
     createdAt:
       $ref: "#/components/schemas/App.Field.CreatedAt"
     caption:
       $ref: "#/components/schemas/App.Field.Caption"
     status:
-      $ref: "#/components/schemas/App.Field.Status"
+      $ref: "#/components/schemas/App.Enum.Status"

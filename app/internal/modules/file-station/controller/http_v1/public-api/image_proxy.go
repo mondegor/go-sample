@@ -2,7 +2,7 @@ package http_v1
 
 import (
 	"fmt"
-	"go-sample/internal/global"
+	module "go-sample/internal/modules/file-station"
 	usecase "go-sample/internal/modules/file-station/usecase/public-api"
 	"net/http"
 	"strings"
@@ -32,15 +32,15 @@ func NewImageProxy(
 
 func (ht *ImageProxy) AddHandlers(router mrcore.HttpRouter) {
 	moduleAccessFunc := func(next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
-		return ht.section.MiddlewareWithPermission(global.PermissionFileStationImageProxy, next)
+		return ht.section.MiddlewareWithPermission(module.PermissionFileStationImageProxy, next)
 	}
 
 	router.HttpHandlerFunc(http.MethodGet, ht.section.Path(ht.imagesURL), moduleAccessFunc(ht.Get()))
 }
 
 func (ht *ImageProxy) Get() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientData) error {
-		item, err := ht.service.Get(c.Context(), c.RequestPath().Get("path"))
+	return func(c mrcore.ClientContext) error {
+		item, err := ht.service.Get(c.Context(), c.ParamFromPath("path"))
 
 		if err != nil {
 			return err

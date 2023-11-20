@@ -6,6 +6,4 @@ App.Request.Header.CorrelationID:
   schema:
     type: string
     format: uuid
-    minLength: 36
-    maxLength: 36
   example: "f7479171-83d2-4f64-84ac-892f8c0aaf48"

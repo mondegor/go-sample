@@ -32,13 +32,8 @@ redis:
   port: 6379
   password: 123456
 
-download_images:
-  host: http://127.0.0.1/
-  base_path: "images"
-
 file_storage:
   download_dir: "./downloads"
-  catalog_category_image_dir: "catalog/categories"
 
 s3:
   host: 127.0.0.1
@@ -46,7 +41,6 @@ s3:
   use_ssl: false
   username: admin # d4jrL7eXyKg7ZNdYdl2p
   password: 12345678 # qZkNDK1Hewb4GVEvzvZGRCVb5uU4ZCX9bKztlhvR
-  bucket_name: go-sample-data
 
 #sentry:
 #  use: false
@@ -85,7 +79,7 @@ modules_access:
   roles:
     dir_path: "./roles"
     file_type: yaml
-    list: # the first role is default
+    list: # the first role is the guest role
       - guests
       - administrators
   privileges:
@@ -96,3 +90,15 @@ modules_access:
     - modCatalogProduct
     - modCatalogTrademark
     - modFileStationImageProxy
+
+modules_settings:
+  catalog_category:
+    image:
+      base_dir: "catalog/categories"
+      bucket_name: bucket1 # from file_station.image_proxy.bucket_name
+  file_station:
+    image_proxy:
+      host: http://127.0.0.1/
+      url_path_root: "images"
+      bucket_name: bucket1
+      init_bucket: true

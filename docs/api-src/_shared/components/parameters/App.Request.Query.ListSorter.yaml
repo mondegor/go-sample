@@ -1,5 +1,5 @@
 App.Request.Query.ListSorter.SortField:
-  description: Название поля, по которому происходит сортировка
+  description: Название колонки, по которой происходит сортировка
   name: sortField
   in: query
   required: false

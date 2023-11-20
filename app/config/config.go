@@ -9,30 +9,30 @@ import (
 
 const (
 	appName    = "Go Sample"
-	appVersion = "v0.2.1"
+	appVersion = "v0.3.0"
 )
 
 type (
 	Config struct {
-		AppName        string
-		AppVersion     string
-		AppInfo        string
-		AppPath        string `yaml:"app_path"`
-		ConfigPath     string
-		Debug          bool `yaml:"debug" env:"APPX_DEBUG"`
-		Server         `yaml:"server"`
-		Listen         `yaml:"listen"`
-		Log            `yaml:"logger"`
-		Storage        `yaml:"storage"`
-		Redis          `yaml:"redis"`
-		DownloadImages `yaml:"download_images"`
-		FileStorage    `yaml:"file_storage"`
-		S3             `yaml:"s3"`
+		AppName     string
+		AppVersion  string
+		AppInfo     string
+		AppPath     string `yaml:"app_path"`
+		ConfigPath  string
+		Debug       bool `yaml:"debug" env:"APPX_DEBUG"`
+		Server      `yaml:"server"`
+		Listen      `yaml:"listen"`
+		Log         `yaml:"logger"`
+		Storage     `yaml:"storage"`
+		Redis       `yaml:"redis"`
+		FileStorage `yaml:"file_storage"`
+		S3          `yaml:"s3"`
 		// Sentry `yaml:"sentry"`
-		Cors           `yaml:"cors"`
-		Translation    `yaml:"translation"`
-		ClientSections `yaml:"client_sections"`
-		ModulesAccess  `yaml:"modules_access"`
+		Cors            `yaml:"cors"`
+		Translation     `yaml:"translation"`
+		ClientSections  `yaml:"client_sections"`
+		ModulesAccess   `yaml:"modules_access"`
+		ModulesSettings `yaml:"modules_settings"`
 	}
 
 	Server struct {
@@ -70,23 +70,16 @@ type (
 		Timeout  int    `yaml:"timeout"` // in sec
 	}
 
-	DownloadImages struct {
-		Host     string `yaml:"host" env:"APPX_IMAGE_HOST"`
-		BasePath string `yaml:"base_path"`
-	}
-
 	FileStorage struct {
-		DownloadDir             string `yaml:"download_dir" env:"APPX_FS_DOWNLOAD_DIR"`
-		CatalogCategoryImageDir string `yaml:"catalog_category_image_dir"`
+		DownloadDir string `yaml:"download_dir" env:"APPX_FS_DOWNLOAD_DIR"`
 	}
 
 	S3 struct {
-		Host       string `yaml:"host" env:"APPX_S3_HOST"`
-		Port       string `yaml:"port" env:"APPX_S3_PORT"`
-		UseSSL     bool   `yaml:"use_ssl" env:"APPX_S3_USESSL"`
-		Username   string `yaml:"username" env:"APPX_S3_USER"`
-		Password   string `yaml:"password" env:"APPX_S3_PASSWORD"`
-		BucketName string `yaml:"bucket_name"`
+		Host     string `yaml:"host" env:"APPX_S3_HOST"`
+		Port     string `yaml:"port" env:"APPX_S3_PORT"`
+		UseSSL   bool   `yaml:"use_ssl" env:"APPX_S3_USESSL"`
+		Username string `yaml:"username" env:"APPX_S3_USER"`
+		Password string `yaml:"password" env:"APPX_S3_PASSWORD"`
 	}
 
 	//Sentry struct {
@@ -128,6 +121,23 @@ type (
 		DirPath  string   `yaml:"dir_path"`
 		FileType string   `yaml:"file_type"`
 		List     []string `yaml:"list"`
+	}
+
+	ModulesSettings struct {
+		CatalogCategory struct {
+			Image struct {
+				BaseDir    string `yaml:"base_dir"`
+				BucketName string `yaml:"bucket_name"`
+			} `yaml:"image"`
+		} `yaml:"catalog_category"`
+		FileStation struct {
+			ImageProxy struct {
+				Host        string `yaml:"host" env:"APPX_IMAGE_HOST"`
+				URLPathRoot string `yaml:"url_path_root"`
+				BucketName  string `yaml:"bucket_name"`
+				InitBucket  bool   `yaml:"init_bucket"` // check and create if not exists
+			} `yaml:"image_proxy"`
+		} `yaml:"file_station"`
 	}
 )
 

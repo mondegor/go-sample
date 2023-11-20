@@ -1,4 +1,4 @@
-package global
+package module
 
 const (
 	ParamNameFilterSearchText = "query"

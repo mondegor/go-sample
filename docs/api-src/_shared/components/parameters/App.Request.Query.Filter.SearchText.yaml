@@ -5,4 +5,5 @@ App.Request.Query.Filter.SearchText:
   required: false
   schema:
     type: string
+    maxLength: 128
   example: "перфокарта"

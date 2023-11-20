@@ -2,7 +2,7 @@ package http_v1
 
 import (
 	"fmt"
-	"go-sample/internal/global"
+	module "go-sample/internal/modules/catalog"
 	"go-sample/internal/modules/catalog/controller/http_v1/admin-api/view"
 	view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared/view"
 	entity "go-sample/internal/modules/catalog/entity/admin-api"
@@ -43,7 +43,7 @@ func NewTrademark(
 
 func (ht *Trademark) AddHandlers(router mrcore.HttpRouter) {
 	moduleAccessFunc := func(next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
-		return ht.section.MiddlewareWithPermission(global.PermissionCatalogTrademark, next)
+		return ht.section.MiddlewareWithPermission(module.PermissionCatalogTrademark, next)
 	}
 
 	router.HttpHandlerFunc(http.MethodGet, ht.section.Path(trademarkURL), moduleAccessFunc(ht.GetList()))
@@ -57,7 +57,7 @@ func (ht *Trademark) AddHandlers(router mrcore.HttpRouter) {
 }
 
 func (ht *Trademark) GetList() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientData) error {
+	return func(c mrcore.ClientContext) error {
 		items, totalItems, err := ht.service.GetList(c.Context(), ht.listParams(c))
 
 		if err != nil {
@@ -74,19 +74,19 @@ func (ht *Trademark) GetList() mrcore.HttpHandlerFunc {
 	}
 }
 
-func (ht *Trademark) listParams(c mrcore.ClientData) entity.TrademarkParams {
+func (ht *Trademark) listParams(c mrcore.ClientContext) entity.TrademarkParams {
 	return entity.TrademarkParams{
 		Filter: entity.TrademarkListFilter{
-			SearchText: view_shared.ParseFilterString(c, global.ParamNameFilterSearchText),
-			Statuses:   view_shared.ParseFilterStatusList(c, global.ParamNameFilterStatuses),
+			SearchText: view_shared.ParseFilterString(c, module.ParamNameFilterSearchText),
+			Statuses:   view_shared.ParseFilterStatusList(c, module.ParamNameFilterStatuses),
 		},
-		Sorter: view_shared.ParseListSorter(c, ht.listSorter),
-		Pager:  view_shared.ParseListPager(c),
+		Sorter: view_shared.ParseSortParams(c, ht.listSorter),
+		Pager:  view_shared.ParsePageParams(c),
 	}
 }
 
 func (ht *Trademark) Get() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientData) error {
+	return func(c mrcore.ClientContext) error {
 		item, err := ht.service.GetItem(c.Context(), ht.getItemID(c))
 
 		if err != nil {
@@ -98,10 +98,10 @@ func (ht *Trademark) Get() mrcore.HttpHandlerFunc {
 }
 
 func (ht *Trademark) Create() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientData) error {
+	return func(c mrcore.ClientContext) error {
 		request := view.CreateTrademarkRequest{}
 
-		if err := c.ParseAndValidate(&request); err != nil {
+		if err := c.Validate(&request); err != nil {
 			return err
 		}
 
@@ -115,7 +115,7 @@ func (ht *Trademark) Create() mrcore.HttpHandlerFunc {
 
 		return c.SendResponse(
 			http.StatusCreated,
-			view.CreateItemResponse{
+			view.SuccessCreatedItemResponse{
 				ItemID: fmt.Sprintf("%d", item.ID),
 				Message: mrctx.Locale(c.Context()).TranslateMessage(
 					"msgTrademarkSuccessCreated",
@@ -127,10 +127,10 @@ func (ht *Trademark) Create() mrcore.HttpHandlerFunc {
 }
 
 func (ht *Trademark) Store() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientData) error {
+	return func(c mrcore.ClientContext) error {
 		request := view.StoreTrademarkRequest{}
 
-		if err := c.ParseAndValidate(&request); err != nil {
+		if err := c.Validate(&request); err != nil {
 			return err
 		}
 
@@ -149,16 +149,16 @@ func (ht *Trademark) Store() mrcore.HttpHandlerFunc {
 }
 
 func (ht *Trademark) ChangeStatus() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientData) error {
+	return func(c mrcore.ClientContext) error {
 		request := view.ChangeItemStatusRequest{}
 
-		if err := c.ParseAndValidate(&request); err != nil {
+		if err := c.Validate(&request); err != nil {
 			return err
 		}
 
 		item := entity.Trademark{
 			ID:         ht.getItemID(c),
-			TagVersion: request.Version,
+			TagVersion: request.TagVersion,
 			Status:     request.Status,
 		}
 
@@ -171,7 +171,7 @@ func (ht *Trademark) ChangeStatus() mrcore.HttpHandlerFunc {
 }
 
 func (ht *Trademark) Remove() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientData) error {
+	return func(c mrcore.ClientContext) error {
 		if err := ht.service.Remove(c.Context(), ht.getItemID(c)); err != nil {
 			return err
 		}
@@ -180,6 +180,6 @@ func (ht *Trademark) Remove() mrcore.HttpHandlerFunc {
 	}
 }
 
-func (ht *Trademark) getItemID(c mrcore.ClientData) mrtype.KeyInt32 {
-	return mrtype.KeyInt32(c.RequestPath().GetInt64("id"))
+func (ht *Trademark) getItemID(c mrcore.ClientContext) mrtype.KeyInt32 {
+	return view_shared.ParseIDFromPath(c, "id")
 }

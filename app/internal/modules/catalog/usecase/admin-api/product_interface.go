@@ -29,9 +29,10 @@ type (
 		LoadOne(ctx context.Context, row *entity.Product) error
 		FetchIdByArticle(ctx context.Context, article string) (mrtype.KeyInt32, error)
 		FetchStatus(ctx context.Context, row *entity.Product) (mrenum.ItemStatus, error)
+		IsExists(ctx context.Context, id mrtype.KeyInt32) error
 		Insert(ctx context.Context, row *entity.Product) error
-		Update(ctx context.Context, row *entity.Product) error
-		UpdateStatus(ctx context.Context, row *entity.Product) error
+		Update(ctx context.Context, row *entity.Product) (int32, error)
+		UpdateStatus(ctx context.Context, row *entity.Product) (int32, error)
 		Delete(ctx context.Context, id mrtype.KeyInt32) error
 	}
 )

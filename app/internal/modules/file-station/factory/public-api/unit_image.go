@@ -18,14 +18,19 @@ func newUnitImageProxy(
 	opts *modules.Options,
 	section mrcore.ClientSection,
 ) error {
-	fileAPI, err := factory.NewS3MinioFileProvider(opts.MinioAdapter, opts.Cfg.BucketName, opts.Logger)
+	fileAPI, err := factory.NewS3MinioFileProvider(
+		opts.MinioAdapter,
+		opts.Cfg.ModulesSettings.FileStation.ImageProxy.BucketName,
+		opts.Cfg.ModulesSettings.FileStation.ImageProxy.InitBucket,
+		opts.Logger,
+	)
 
 	if err != nil {
 		return err
 	}
 
 	service := usecase.NewFileProviderAdapter(fileAPI)
-	*c = append(*c, http_v1.NewImageProxy(section, service, opts.Cfg.DownloadImages.BasePath))
+	*c = append(*c, http_v1.NewImageProxy(section, service, opts.Cfg.ModulesSettings.FileStation.ImageProxy.URLPathRoot))
 
 	return nil
 }

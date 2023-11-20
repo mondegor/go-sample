@@ -2,7 +2,7 @@ package http_v1
 
 import (
 	"fmt"
-	"go-sample/internal/global"
+	module "go-sample/internal/modules/catalog"
 	"go-sample/internal/modules/catalog/controller/http_v1/admin-api/view"
 	view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared/view"
 	entity "go-sample/internal/modules/catalog/entity/admin-api"
@@ -46,7 +46,7 @@ func NewProduct(
 
 func (ht *Product) AddHandlers(router mrcore.HttpRouter) {
 	moduleAccessFunc := func(next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
-		return ht.section.MiddlewareWithPermission(global.PermissionCatalogProduct, next)
+		return ht.section.MiddlewareWithPermission(module.PermissionCatalogProduct, next)
 	}
 
 	router.HttpHandlerFunc(http.MethodGet, ht.section.Path(productURL), moduleAccessFunc(ht.GetList()))
@@ -61,7 +61,7 @@ func (ht *Product) AddHandlers(router mrcore.HttpRouter) {
 }
 
 func (ht *Product) GetList() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientData) error {
+	return func(c mrcore.ClientContext) error {
 		items, totalItems, err := ht.service.GetList(c.Context(), ht.listParams(c))
 
 		if err != nil {
@@ -78,22 +78,22 @@ func (ht *Product) GetList() mrcore.HttpHandlerFunc {
 	}
 }
 
-func (ht *Product) listParams(c mrcore.ClientData) entity.ProductParams {
+func (ht *Product) listParams(c mrcore.ClientContext) entity.ProductParams {
 	return entity.ProductParams{
 		Filter: entity.ProductListFilter{
-			CategoryID: view_shared.ParseFilterCategoryID(c, global.ParamNameFilterCategoryID),
-			Trademarks: view_shared.ParseFilterTrademarkList(c, global.ParamNameFilterCatalogTrademarks),
-			SearchText: view_shared.ParseFilterString(c, global.ParamNameFilterSearchText),
-			Price:      view_shared.ParseFilterRangeInt64(c, global.ParamNameFilterPriceRange),
-			Statuses:   view_shared.ParseFilterStatusList(c, global.ParamNameFilterStatuses),
+			CategoryID: view_shared.ParseFilterCategoryID(c, module.ParamNameFilterCategoryID),
+			Trademarks: view_shared.ParseFilterTrademarkList(c, module.ParamNameFilterCatalogTrademarks),
+			SearchText: view_shared.ParseFilterString(c, module.ParamNameFilterSearchText),
+			Price:      view_shared.ParseFilterRangeInt64(c, module.ParamNameFilterPriceRange),
+			Statuses:   view_shared.ParseFilterStatusList(c, module.ParamNameFilterStatuses),
 		},
-		Sorter: view_shared.ParseListSorter(c, ht.listSorter),
-		Pager:  view_shared.ParseListPager(c),
+		Sorter: view_shared.ParseSortParams(c, ht.listSorter),
+		Pager:  view_shared.ParsePageParams(c),
 	}
 }
 
 func (ht *Product) Get() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientData) error {
+	return func(c mrcore.ClientContext) error {
 		item, err := ht.service.GetItem(c.Context(), ht.getItemID(c))
 
 		if err != nil {
@@ -105,10 +105,10 @@ func (ht *Product) Get() mrcore.HttpHandlerFunc {
 }
 
 func (ht *Product) Create() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientData) error {
+	return func(c mrcore.ClientContext) error {
 		request := view.CreateProductRequest{}
 
-		if err := c.ParseAndValidate(&request); err != nil {
+		if err := c.Validate(&request); err != nil {
 			return err
 		}
 
@@ -126,7 +126,7 @@ func (ht *Product) Create() mrcore.HttpHandlerFunc {
 
 		return c.SendResponse(
 			http.StatusCreated,
-			view.CreateItemResponse{
+			view.SuccessCreatedItemResponse{
 				ItemID: fmt.Sprintf("%d", item.ID),
 				Message: mrctx.Locale(c.Context()).TranslateMessage(
 					"msgProductSuccessCreated",
@@ -138,10 +138,10 @@ func (ht *Product) Create() mrcore.HttpHandlerFunc {
 }
 
 func (ht *Product) Store() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientData) error {
+	return func(c mrcore.ClientContext) error {
 		request := view.StoreProductRequest{}
 
-		if err := c.ParseAndValidate(&request); err != nil {
+		if err := c.Validate(&request); err != nil {
 			return err
 		}
 
@@ -164,16 +164,16 @@ func (ht *Product) Store() mrcore.HttpHandlerFunc {
 }
 
 func (ht *Product) ChangeStatus() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientData) error {
+	return func(c mrcore.ClientContext) error {
 		request := view.ChangeItemStatusRequest{}
 
-		if err := c.ParseAndValidate(&request); err != nil {
+		if err := c.Validate(&request); err != nil {
 			return err
 		}
 
 		item := entity.Product{
 			ID:         ht.getItemID(c),
-			TagVersion: request.Version,
+			TagVersion: request.TagVersion,
 			Status:     request.Status,
 		}
 
@@ -186,7 +186,7 @@ func (ht *Product) ChangeStatus() mrcore.HttpHandlerFunc {
 }
 
 func (ht *Product) Remove() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientData) error {
+	return func(c mrcore.ClientContext) error {
 		if err := ht.service.Remove(c.Context(), ht.getItemID(c)); err != nil {
 			return err
 		}
@@ -196,10 +196,10 @@ func (ht *Product) Remove() mrcore.HttpHandlerFunc {
 }
 
 func (ht *Product) Move() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientData) error {
+	return func(c mrcore.ClientContext) error {
 		request := view.MoveItemRequest{}
 
-		if err := c.ParseAndValidate(&request); err != nil {
+		if err := c.Validate(&request); err != nil {
 			return err
 		}
 
@@ -217,21 +217,21 @@ func (ht *Product) Move() mrcore.HttpHandlerFunc {
 	}
 }
 
-func (ht *Product) getItemID(c mrcore.ClientData) mrtype.KeyInt32 {
-	return mrtype.KeyInt32(c.RequestPath().GetInt64("id"))
+func (ht *Product) getItemID(c mrcore.ClientContext) mrtype.KeyInt32 {
+	return view_shared.ParseIDFromPath(c, "id")
 }
 
 func (ht *Product) getWrapError(err error) error {
 	if usecase_shared.FactoryErrProductArticleAlreadyExists.Is(err) {
-		return mrerr.NewListWith("article", err)
+		return mrerr.NewFieldError("article", err)
 	}
 
 	if usecase_shared.FactoryErrCategoryNotFound.Is(err) {
-		return mrerr.NewListWith("categoryId", err)
+		return mrerr.NewFieldError("categoryId", err)
 	}
 
 	if usecase_shared.FactoryErrTrademarkNotFound.Is(err) {
-		return mrerr.NewListWith("trademarkId", err)
+		return mrerr.NewFieldError("trademarkId", err)
 	}
 
 	return err

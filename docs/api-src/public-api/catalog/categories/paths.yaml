@@ -23,7 +23,7 @@
             schema:
               $ref: "#/components/schemas/Catalog.Categories.PublicAPI.Response.Model.CategoryList"
       "500":
-        $ref: "#/components/responses/App.Response.Error5XX"
+        $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
 /v1/catalog/categories/{categoryId}:
   get:
@@ -46,6 +46,6 @@
             schema:
               $ref: "#/components/schemas/Catalog.Categories.PublicAPI.Response.Model.Category"
       "404":
-        $ref: "#/components/responses/App.Response.Error404"
+        $ref: "#/components/responses/App.ResponseJson.Error404"
       "500":
-        $ref: "#/components/responses/App.Response.Error5XX"
+        $ref: "#/components/responses/App.ResponseJson.Error5XX"

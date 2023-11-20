@@ -68,7 +68,7 @@ func (uc *Product) GetList(ctx context.Context, params entity.ProductParams) ([]
 
 func (uc *Product) GetItem(ctx context.Context, id mrtype.KeyInt32) (*entity.Product, error) {
 	if id < 1 {
-		return nil, mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"id": id})
+		return nil, mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogProduct)
 	}
 
 	item := &entity.Product{ID: id}
@@ -110,30 +110,45 @@ func (uc *Product) Create(ctx context.Context, item *entity.Product) error {
 }
 
 func (uc *Product) Store(ctx context.Context, item *entity.Product) error {
-	if item.ID < 1 || item.TagVersion < 1 {
-		return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"item.id": item.ID, "version": item.TagVersion})
+	if item.ID < 1 {
+		return mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogProduct)
+	}
+
+	if item.TagVersion < 1 {
+		return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"tagVersion": item.TagVersion})
+	}
+
+	if err := uc.storage.IsExists(ctx, item.ID); err != nil {
+		return uc.serviceHelper.WrapErrorForSelect(err, entity.ModelNameCatalogProduct)
 	}
 
 	if err := uc.checkProduct(ctx, item); err != nil {
 		return err
 	}
 
-	if err := uc.storage.Update(ctx, item); err != nil {
-		return uc.serviceHelper.WrapErrorForUpdate(err, entity.ModelNameCatalogProduct)
+	version, err := uc.storage.Update(ctx, item)
+
+	if err != nil {
+		return uc.serviceHelper.WrapErrorForUpdateWithVersion(err, entity.ModelNameCatalogProduct)
 	}
 
 	uc.eventBox.Emit(
-		"%s::Store: id=%d",
+		"%s::Store: id=%d, ver=%d",
 		entity.ModelNameCatalogProduct,
 		item.ID,
+		version,
 	)
 
 	return nil
 }
 
 func (uc *Product) ChangeStatus(ctx context.Context, item *entity.Product) error {
-	if item.ID < 1 || item.TagVersion < 1 {
-		return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"item.id": item.ID, "version": item.TagVersion})
+	if item.ID < 1 {
+		return mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogProduct)
+	}
+
+	if item.TagVersion < 1 {
+		return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"tagVersion": item.TagVersion})
 	}
 
 	currentStatus, err := uc.storage.FetchStatus(ctx, item)
@@ -150,16 +165,17 @@ func (uc *Product) ChangeStatus(ctx context.Context, item *entity.Product) error
 		return mrcore.FactoryErrServiceIncorrectSwitchStatus.New(currentStatus, item.Status, entity.ModelNameCatalogProduct, item.ID)
 	}
 
-	err = uc.storage.UpdateStatus(ctx, item)
+	version, err := uc.storage.UpdateStatus(ctx, item)
 
 	if err != nil {
-		return uc.serviceHelper.WrapErrorForUpdate(err, entity.ModelNameCatalogProduct)
+		return uc.serviceHelper.WrapErrorForUpdateWithVersion(err, entity.ModelNameCatalogProduct)
 	}
 
 	uc.eventBox.Emit(
-		"%s::ChangeStatus: id=%d, status=%s",
+		"%s::ChangeStatus: id=%d, ver=%d, status=%s",
 		entity.ModelNameCatalogProduct,
 		item.ID,
+		version,
 		item.Status,
 	)
 
@@ -168,7 +184,7 @@ func (uc *Product) ChangeStatus(ctx context.Context, item *entity.Product) error
 
 func (uc *Product) Remove(ctx context.Context, id mrtype.KeyInt32) error {
 	if id < 1 {
-		return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"id": id})
+		return mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogProduct)
 	}
 
 	if err := uc.storage.Delete(ctx, id); err != nil {

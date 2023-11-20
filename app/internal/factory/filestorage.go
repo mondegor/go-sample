@@ -4,6 +4,7 @@ import (
 	"errors"
 	"go-sample/config"
 	"os"
+	"strings"
 
 	"github.com/mondegor/go-storage/mrfilestorage"
 	"github.com/mondegor/go-storage/mrstorage"
@@ -19,7 +20,7 @@ func NewFileStorage(cfg *config.Config, logger mrcore.Logger) (mrstorage.FilePro
 		return nil, err
 	}
 
-	err = os.MkdirAll(cfg.FileStorage.DownloadDir+"/"+cfg.FileStorage.CatalogCategoryImageDir, 0755)
+	err = os.MkdirAll(cfg.FileStorage.DownloadDir+"/"+strings.Trim(cfg.ModulesSettings.CatalogCategory.Image.BaseDir, "/"), 0755)
 
 	if err != nil {
 		return nil, err

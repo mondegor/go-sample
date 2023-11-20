@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.3
 info:
-  version: 0.0.1
+  version: 0.3.0
   title: Private API управления торговыми марками товаров
   description: Private REST API проекта go-sample управления торговыми марками товаров
   license:

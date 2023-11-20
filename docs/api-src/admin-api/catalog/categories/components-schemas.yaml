@@ -14,7 +14,7 @@ Catalog.Categories.AdminAPI.Request.Model.StoreCategory:
     - caption
   properties:
     version:
-      $ref: "#/components/schemas/App.Field.Version"
+      $ref: "#/components/schemas/App.Field.TagVersion"
     caption:
       $ref: "#/components/schemas/App.Field.Caption"
 
@@ -46,7 +46,7 @@ Catalog.Categories.AdminAPI.Response.Model.Category:
     id: # categoryId
       $ref: "#/components/schemas/App.Field.IntegerID"
     version:
-      $ref: "#/components/schemas/App.Field.Version"
+      $ref: "#/components/schemas/App.Field.TagVersion"
     createdAt:
       $ref: "#/components/schemas/App.Field.CreatedAt"
     caption:
@@ -54,4 +54,4 @@ Catalog.Categories.AdminAPI.Response.Model.Category:
     imageInfo:
       $ref: "#/components/schemas/App.Response.Model.FileInfo"
     status:
-      $ref: "#/components/schemas/App.Field.Status"
+      $ref: "#/components/schemas/App.Enum.Status"

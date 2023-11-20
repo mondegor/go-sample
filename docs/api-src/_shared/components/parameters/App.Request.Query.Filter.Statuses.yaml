@@ -1,5 +1,5 @@
 App.Request.Query.Filter.Statuses:
-  description: Список статусов через "," (см. App.Field.Status)
+  description: Список статусов через "," (см. App.Enum.Status)
   name: statuses
   in: query
   required: false

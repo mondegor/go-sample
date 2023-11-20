@@ -27,8 +27,8 @@ type (
 		FetchStatus(ctx context.Context, row *entity.Trademark) (mrenum.ItemStatus, error)
 		IsExists(ctx context.Context, id mrtype.KeyInt32) error
 		Insert(ctx context.Context, row *entity.Trademark) error
-		Update(ctx context.Context, row *entity.Trademark) error
-		UpdateStatus(ctx context.Context, row *entity.Trademark) error
+		Update(ctx context.Context, row *entity.Trademark) (int32, error)
+		UpdateStatus(ctx context.Context, row *entity.Trademark) (int32, error)
 		Delete(ctx context.Context, id mrtype.KeyInt32) error
 	}
 )

@@ -25,7 +25,12 @@ func newUnitCategory(
 	storage *repository.Category,
 	listSorter mrview.ListSorter,
 ) error {
-	fileAPI, err := factory.NewS3MinioFileProvider(opts.MinioAdapter, opts.Cfg.BucketName, opts.Logger)
+	fileAPI, err := factory.NewS3MinioFileProvider(
+		opts.MinioAdapter,
+		opts.Cfg.ModulesSettings.CatalogCategory.Image.BucketName,
+		false,
+		opts.Logger,
+	)
 
 	if err != nil {
 		return err
@@ -33,7 +38,7 @@ func newUnitCategory(
 
 	imageStorage := repository.NewCategoryImage(opts.PostgresAdapter)
 	imageService := usecase.NewCategoryImage(
-		opts.Cfg.FileStorage.CatalogCategoryImageDir,
+		opts.Cfg.ModulesSettings.CatalogCategory.Image.BaseDir,
 		imageStorage,
 		fileAPI,
 		opts.Locker,

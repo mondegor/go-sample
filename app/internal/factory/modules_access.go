@@ -26,7 +26,7 @@ func NewModulesAccess(cfg *config.Config, logger mrcore.Logger) (*mrperms.Module
 	}
 
 	logger.Info("Registered roles: %s", strings.Join(m.RegisteredRoles(), ", "))
-	logger.Info("Default role: %s", m.DefaultRole())
+	logger.Info("Guest role: %s", m.GuestRole())
 	logger.Info("Registered privileges: %s", strings.Join(m.RegisteredPrivileges(), ", "))
 	logger.Debug("Registered permissions:\n - %s", strings.Join(m.RegisteredPermissions(), ",\n - "))
 

@@ -33,19 +33,21 @@ func NewS3Minio(cfg *config.Config, logger mrcore.Logger) (*mrminio.ConnAdapter,
 	return conn, nil
 }
 
-func NewS3MinioFileProvider(conn *mrminio.ConnAdapter, bucketName string, logger mrcore.Logger) (mrstorage.FileProviderAPI, error) {
-	logger.Info("Init S3 minio bucket '%s' and create if not exists", bucketName)
+func NewS3MinioFileProvider(conn *mrminio.ConnAdapter, bucketName string, initBucket bool, logger mrcore.Logger) (mrstorage.FileProviderAPI, error) {
+	logger.Info("Init S3 minio bucket '%s'", bucketName)
 
-	created, err := conn.InitBucket(context.Background(), bucketName, true)
+	if initBucket {
+		created, err := conn.InitBucket(context.Background(), bucketName, true)
 
-	if err != nil {
-		return nil, err
-	}
+		if err != nil {
+			return nil, err
+		}
 
-	if created {
-		mrcore.LogInfo("Bucket '%s' created", bucketName)
-	} else {
-		mrcore.LogInfo("Bucket '%s' exists, OK", bucketName)
+		if created {
+			mrcore.LogInfo("Bucket '%s' created", bucketName)
+		} else {
+			mrcore.LogInfo("Bucket '%s' exists, OK", bucketName)
+		}
 	}
 
 	return mrminio.NewFileProvider(conn, bucketName), nil

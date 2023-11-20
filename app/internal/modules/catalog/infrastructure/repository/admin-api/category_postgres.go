@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	module "go-sample/internal/modules/catalog"
 	"go-sample/internal/modules/catalog/entity/admin-api"
 	"strings"
 
@@ -60,7 +61,7 @@ func (re *Category) Fetch(ctx context.Context, params mrstorage.SqlSelectParams)
 			image_path,
 			category_status
 		FROM
-			public.catalog_categories
+			` + module.DBSchema + `.catalog_categories
 		WHERE
 			` + whereStr + `
 		ORDER BY
@@ -109,7 +110,7 @@ func (re *Category) FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPa
 		SELECT
 			COUNT(*)
 		FROM
-			public.catalog_categories
+			` + module.DBSchema + `.catalog_categories
 		WHERE
 			` + whereStr + `;`
 
@@ -135,7 +136,7 @@ func (re *Category) LoadOne(ctx context.Context, row *entity.Category) error {
 			image_path,
 			category_status
 		FROM
-			public.catalog_categories
+			` + module.DBSchema + `.catalog_categories
 		WHERE
 			category_id = $1 AND category_status <> $2
 		LIMIT 1;`
@@ -159,9 +160,9 @@ func (re *Category) FetchStatus(ctx context.Context, row *entity.Category) (mren
 		SELECT
 			category_status
 		FROM
-			public.catalog_categories
+			` + module.DBSchema + `.catalog_categories
 		WHERE
-			category_id = $1 AND tag_version = $2 AND category_status <> $3
+			category_id = $1 AND category_status <> $2
 		LIMIT 1;`
 
 	var status mrenum.ItemStatus
@@ -170,7 +171,6 @@ func (re *Category) FetchStatus(ctx context.Context, row *entity.Category) (mren
 		ctx,
 		sql,
 		row.ID,
-		row.TagVersion,
 		mrenum.ItemStatusRemoved,
 	).Scan(
 		&status,
@@ -186,7 +186,7 @@ func (re *Category) IsExists(ctx context.Context, id mrtype.KeyInt32) error {
 		SELECT
 			1
 		FROM
-			public.catalog_categories
+			` + module.DBSchema + `.catalog_categories
 		WHERE
 			category_id = $1 AND category_status <> $2
 		LIMIT 1;`
@@ -203,7 +203,7 @@ func (re *Category) IsExists(ctx context.Context, id mrtype.KeyInt32) error {
 
 func (re *Category) Insert(ctx context.Context, row *entity.Category) error {
 	sql := `
-		INSERT INTO public.catalog_categories
+		INSERT INTO ` + module.DBSchema + `.catalog_categories
 			(
 				category_caption,
 				category_status
@@ -213,7 +213,7 @@ func (re *Category) Insert(ctx context.Context, row *entity.Category) error {
 		RETURNING
 			category_id;`
 
-	err := re.client.QueryRow(
+	return re.client.QueryRow(
 		ctx,
 		sql,
 		row.Caption,
@@ -221,56 +221,70 @@ func (re *Category) Insert(ctx context.Context, row *entity.Category) error {
 	).Scan(
 		&row.ID,
 	)
-
-	return err
 }
 
-func (re *Category) Update(ctx context.Context, row *entity.Category) error {
+func (re *Category) Update(ctx context.Context, row *entity.Category) (int32, error) {
 	sql := `
 		UPDATE
-			public.catalog_categories
+			` + module.DBSchema + `.catalog_categories
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),
 			category_caption = $4
 		WHERE
-			category_id = $1 AND tag_version = $2 AND category_status <> $3;`
+			category_id = $1 AND tag_version = $2 AND category_status <> $3
+		RETURNING
+			tag_version;`
 
-	return re.client.Exec(
+	var tagVersion int32
+
+	err := re.client.QueryRow(
 		ctx,
 		sql,
 		row.ID,
 		row.TagVersion,
 		mrenum.ItemStatusRemoved,
 		row.Caption,
+	).Scan(
+		&tagVersion,
 	)
+
+	return tagVersion, err
 }
 
-func (re *Category) UpdateStatus(ctx context.Context, row *entity.Category) error {
+func (re *Category) UpdateStatus(ctx context.Context, row *entity.Category) (int32, error) {
 	sql := `
 		UPDATE
-			public.catalog_categories
+			` + module.DBSchema + `.catalog_categories
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),
 			category_status = $4
 		WHERE
-			category_id = $1 AND tag_version = $2 AND category_status <> $3;`
+			category_id = $1 AND tag_version = $2 AND category_status <> $3
+		RETURNING
+			tag_version;`
 
-	return re.client.Exec(
+	var tagVersion int32
+
+	err := re.client.QueryRow(
 		ctx,
 		sql,
 		row.ID,
 		row.TagVersion,
 		mrenum.ItemStatusRemoved,
 		row.Status,
+	).Scan(
+		&tagVersion,
 	)
+
+	return tagVersion, err
 }
 
 func (re *Category) Delete(ctx context.Context, id mrtype.KeyInt32) error {
 	sql := `
 		UPDATE
-			public.catalog_categories
+			` + module.DBSchema + `.catalog_categories
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),

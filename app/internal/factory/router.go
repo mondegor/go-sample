@@ -32,11 +32,10 @@ func NewHttpRouter(cfg *config.Config, logger mrcore.Logger) (mrcore.HttpRouter,
 		Debug:            cfg.Debug,
 	}
 
-	router := mrserver.NewRouter(logger, mrserver.HandlerAdapter(requestValidator))
+	router := mrserver.NewRouter(logger, mrserver.HandlerAdapter(nil))
 	router.RegisterMiddleware(
 		mrserver.NewCors(corsOptions),
-		mrserver.MiddlewareFirst(logger),
-		mrserver.MiddlewareAcceptLanguage(responseTranslator),
+		mrserver.MiddlewareFirst(logger, responseTranslator, requestValidator),
 	)
 
 	router.HandlerFunc(http.MethodGet, "/", mrserver.MainPage)

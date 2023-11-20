@@ -27,11 +27,11 @@
             schema:
               $ref: "#/components/schemas/Catalog.Trademarks.AdminAPI.Response.Model.TrademarkList"
       "401":
-        $ref: "#/components/responses/App.Response.Error401"
+        $ref: "#/components/responses/App.ResponseJson.Error401"
       "403":
-        $ref: "#/components/responses/App.Response.Error403"
+        $ref: "#/components/responses/App.ResponseJson.Error403"
       "500":
-        $ref: "#/components/responses/App.Response.Error5XX"
+        $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
   post:
     summary: Метод добавления новой торговой марки
@@ -65,15 +65,15 @@
         content:
           application/json;charset=UTF-8:
             schema:
-              $ref: "#/components/schemas/App.Response.Model.CreateItem"
+              $ref: "#/components/schemas/App.Response.Model.SuccessCreatedItem"
       "400":
-        $ref: "#/components/responses/App.Response.Error400"
+        $ref: "#/components/responses/App.ResponseJson.Error400"
       "401":
-        $ref: "#/components/responses/App.Response.Error401"
+        $ref: "#/components/responses/App.ResponseJson.Error401"
       "403":
-        $ref: "#/components/responses/App.Response.Error403"
+        $ref: "#/components/responses/App.ResponseJson.Error403"
       "500":
-        $ref: "#/components/responses/App.Response.Error5XX"
+        $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
 /v1/catalog/trademarks/{trademarkId}:
   get:
@@ -99,13 +99,13 @@
             schema:
               $ref: "#/components/schemas/Catalog.Trademarks.AdminAPI.Response.Model.Trademark"
       "401":
-        $ref: "#/components/responses/App.Response.Error401"
+        $ref: "#/components/responses/App.ResponseJson.Error401"
       "403":
-        $ref: "#/components/responses/App.Response.Error403"
+        $ref: "#/components/responses/App.ResponseJson.Error403"
       "404":
-        $ref: "#/components/responses/App.Response.Error404"
+        $ref: "#/components/responses/App.ResponseJson.Error404"
       "500":
-        $ref: "#/components/responses/App.Response.Error5XX"
+        $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
   put:
     summary: Метод сохранения торговой марки
@@ -138,15 +138,15 @@
       "204":
         description: Информация о торговой марке успешно сохранена
       "400":
-        $ref: "#/components/responses/App.Response.Error400"
+        $ref: "#/components/responses/App.ResponseJson.Error400"
       "401":
-        $ref: "#/components/responses/App.Response.Error401"
+        $ref: "#/components/responses/App.ResponseJson.Error401"
       "403":
-        $ref: "#/components/responses/App.Response.Error403"
+        $ref: "#/components/responses/App.ResponseJson.Error403"
       "404":
-        $ref: "#/components/responses/App.Response.Error404"
+        $ref: "#/components/responses/App.ResponseJson.Error404"
       "500":
-        $ref: "#/components/responses/App.Response.Error5XX"
+        $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
   delete:
     summary: Метод удаления торговой марки
@@ -167,13 +167,13 @@
       "204":
         description: Информация о торговой марке успешно удалена
       "401":
-        $ref: "#/components/responses/App.Response.Error401"
+        $ref: "#/components/responses/App.ResponseJson.Error401"
       "403":
-        $ref: "#/components/responses/App.Response.Error403"
+        $ref: "#/components/responses/App.ResponseJson.Error403"
       "404":
-        $ref: "#/components/responses/App.Response.Error404"
+        $ref: "#/components/responses/App.ResponseJson.Error404"
       "500":
-        $ref: "#/components/responses/App.Response.Error5XX"
+        $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
 /v1/catalog/trademarks/{trademarkId}/status:
   put:
@@ -207,12 +207,12 @@
       "204":
         description: Статус торговой марки успешно изменён
       "400":
-        $ref: "#/components/responses/App.Response.Error400"
+        $ref: "#/components/responses/App.ResponseJson.Error400"
       "401":
-        $ref: "#/components/responses/App.Response.Error401"
+        $ref: "#/components/responses/App.ResponseJson.Error401"
       "403":
-        $ref: "#/components/responses/App.Response.Error403"
+        $ref: "#/components/responses/App.ResponseJson.Error403"
       "404":
-        $ref: "#/components/responses/App.Response.Error404"
+        $ref: "#/components/responses/App.ResponseJson.Error404"
       "500":
-        $ref: "#/components/responses/App.Response.Error5XX"
+        $ref: "#/components/responses/App.ResponseJson.Error5XX"

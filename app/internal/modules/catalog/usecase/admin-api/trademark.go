@@ -56,7 +56,7 @@ func (uc *Trademark) GetList(ctx context.Context, params entity.TrademarkParams)
 
 func (uc *Trademark) GetItem(ctx context.Context, id mrtype.KeyInt32) (*entity.Trademark, error) {
 	if id < 1 {
-		return nil, mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"id": id})
+		return nil, mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogTrademark)
 	}
 
 	item := &entity.Trademark{ID: id}
@@ -87,26 +87,41 @@ func (uc *Trademark) Create(ctx context.Context, item *entity.Trademark) error {
 }
 
 func (uc *Trademark) Store(ctx context.Context, item *entity.Trademark) error {
-	if item.ID < 1 || item.TagVersion < 1 {
-		return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"item.id": item.ID, "version": item.TagVersion})
+	if item.ID < 1 {
+		return mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogTrademark)
 	}
 
-	if err := uc.storage.Update(ctx, item); err != nil {
-		return uc.serviceHelper.WrapErrorForUpdate(err, entity.ModelNameCatalogTrademark)
+	if item.TagVersion < 1 {
+		return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"tagVersion": item.TagVersion})
+	}
+
+	if err := uc.storage.IsExists(ctx, item.ID); err != nil {
+		return uc.serviceHelper.WrapErrorForSelect(err, entity.ModelNameCatalogTrademark)
+	}
+
+	version, err := uc.storage.Update(ctx, item)
+
+	if err != nil {
+		return uc.serviceHelper.WrapErrorForUpdateWithVersion(err, entity.ModelNameCatalogTrademark)
 	}
 
 	uc.eventBox.Emit(
-		"%s::Store: id=%d",
+		"%s::Store: id=%d, ver=%d",
 		entity.ModelNameCatalogTrademark,
 		item.ID,
+		version,
 	)
 
 	return nil
 }
 
 func (uc *Trademark) ChangeStatus(ctx context.Context, item *entity.Trademark) error {
-	if item.ID < 1 || item.TagVersion < 1 {
-		return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"item.id": item.ID, "version": item.TagVersion})
+	if item.ID < 1 {
+		return mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogTrademark)
+	}
+
+	if item.TagVersion < 1 {
+		return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"tagVersion": item.TagVersion})
 	}
 
 	currentStatus, err := uc.storage.FetchStatus(ctx, item)
@@ -123,16 +138,17 @@ func (uc *Trademark) ChangeStatus(ctx context.Context, item *entity.Trademark) e
 		return mrcore.FactoryErrServiceIncorrectSwitchStatus.New(currentStatus, item.Status, entity.ModelNameCatalogTrademark, item.ID)
 	}
 
-	err = uc.storage.UpdateStatus(ctx, item)
+	version, err := uc.storage.UpdateStatus(ctx, item)
 
 	if err != nil {
-		return uc.serviceHelper.WrapErrorForUpdate(err, entity.ModelNameCatalogTrademark)
+		return uc.serviceHelper.WrapErrorForUpdateWithVersion(err, entity.ModelNameCatalogTrademark)
 	}
 
 	uc.eventBox.Emit(
-		"%s::ChangeStatus: id=%d, status=%s",
+		"%s::ChangeStatus: id=%d, ver=%d, status=%s",
 		entity.ModelNameCatalogTrademark,
 		item.ID,
+		version,
 		item.Status,
 	)
 
@@ -141,7 +157,7 @@ func (uc *Trademark) ChangeStatus(ctx context.Context, item *entity.Trademark) e
 
 func (uc *Trademark) Remove(ctx context.Context, id mrtype.KeyInt32) error {
 	if id < 1 {
-		return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"id": id})
+		return mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogTrademark)
 	}
 
 	if err := uc.storage.Delete(ctx, id); err != nil {

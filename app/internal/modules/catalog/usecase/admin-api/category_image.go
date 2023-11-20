@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/mondegor/go-storage/mrstorage"
-	"github.com/mondegor/go-sysmess/mrerr"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrctx"
 	"github.com/mondegor/go-webcore/mrtool"
@@ -47,7 +46,7 @@ func NewCategoryImage(
 // Get - WARNING you don't forget to call item.File.Body.Close()
 func (uc *CategoryImage) Get(ctx context.Context, categoryID mrtype.KeyInt32) (*mrtype.File, error) {
 	if categoryID < 1 {
-		return nil, mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"categoryId": categoryID})
+		return nil, mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogCategoryImage)
 	}
 
 	imagePath, err := uc.storage.FetchPath(ctx, categoryID)
@@ -71,7 +70,7 @@ func (uc *CategoryImage) Get(ctx context.Context, categoryID mrtype.KeyInt32) (*
 
 func (uc *CategoryImage) GetInfoByPath(ctx context.Context, imagePath string) (*mrtype.FileInfo, error) {
 	if imagePath == "" {
-		return nil, mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"imagePath": "EMPTY"})
+		return nil, mrcore.FactoryErrServiceEmptyInputData.New("imagePath")
 	}
 
 	info, err := uc.fileAPI.Info(ctx, imagePath)
@@ -85,7 +84,7 @@ func (uc *CategoryImage) GetInfoByPath(ctx context.Context, imagePath string) (*
 
 func (uc *CategoryImage) Store(ctx context.Context, categoryID mrtype.KeyInt32, file *mrtype.File) error {
 	if categoryID < 1 {
-		return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"categoryId": categoryID})
+		return mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogCategoryImage)
 	}
 
 	newImagePath, err := uc.getImagePath(categoryID, file.OriginalName)
@@ -134,7 +133,7 @@ func (uc *CategoryImage) Store(ctx context.Context, categoryID mrtype.KeyInt32, 
 
 func (uc *CategoryImage) Remove(ctx context.Context, categoryID mrtype.KeyInt32) error {
 	if categoryID < 1 {
-		return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"categoryId": categoryID})
+		return mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogCategoryImage)
 	}
 
 	unlock, err := uc.locker.Lock(ctx, uc.getLockKey(categoryID))
@@ -192,9 +191,7 @@ func (uc *CategoryImage) removeImageFile(ctx context.Context, filePath string) {
 		return
 	}
 
-	err := uc.fileAPI.Remove(ctx, filePath)
-
-	if err != nil {
+	if err := uc.fileAPI.Remove(ctx, filePath); err != nil {
 		mrctx.Logger(ctx).Err(err)
 	}
 }

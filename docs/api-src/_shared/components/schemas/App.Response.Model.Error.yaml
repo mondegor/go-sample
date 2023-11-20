@@ -20,7 +20,7 @@ App.Response.Model.Error: # RFC 7807 (Problem Details for HTTP APIs)
       type: string
       example: "PUT /users/123456"
     time:
-      description: Время возникновения ошибки с точностью до миллисекунд
+      description: Время возникновения ошибки с точностью до миллисекунд (UTC)
       type: string
       format: date-time
       example: "2023-01-01T12:00:00.000+02:00"

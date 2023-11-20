@@ -1,6 +1,5 @@
 App.Field.UUID:
   description: Идентификатор записи
+  type: string
   format: uuid
-  minLength: 36
-  maxLength: 36
-  example: "9171f7471f77-d283-f644-4a8c-c0aa892f8f48"
+  example: "0f6eee34-1644-4367-8087-3930e47231eb"

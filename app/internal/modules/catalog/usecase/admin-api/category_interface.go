@@ -28,8 +28,8 @@ type (
 		FetchStatus(ctx context.Context, row *entity.Category) (mrenum.ItemStatus, error)
 		IsExists(ctx context.Context, id mrtype.KeyInt32) error
 		Insert(ctx context.Context, row *entity.Category) error
-		Update(ctx context.Context, row *entity.Category) error
-		UpdateStatus(ctx context.Context, row *entity.Category) error
+		Update(ctx context.Context, row *entity.Category) (int32, error)
+		UpdateStatus(ctx context.Context, row *entity.Category) (int32, error)
 		Delete(ctx context.Context, id mrtype.KeyInt32) error
 	}
 )

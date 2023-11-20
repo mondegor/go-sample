@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.3
 info:
-  version: 0.0.1
+  version: 0.3.0
   title: Private API управления каталогом товаров
   description: Private REST API проекта go-sample управления каталогом товаров
   license:
@@ -52,11 +52,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/Catalog.Categories.AdminAPI.Response.Model.CategoryList"
         "401":
-          $ref: "#/components/responses/App.Response.Error401"
+          $ref: "#/components/responses/App.ResponseJson.Error401"
         "403":
-          $ref: "#/components/responses/App.Response.Error403"
+          $ref: "#/components/responses/App.ResponseJson.Error403"
         "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
     post:
       summary: Метод добавления новой категории
@@ -90,15 +90,15 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/App.Response.Model.CreateItem"
+                $ref: "#/components/schemas/App.Response.Model.SuccessCreatedItem"
         "400":
-          $ref: "#/components/responses/App.Response.Error400"
+          $ref: "#/components/responses/App.ResponseJson.Error400"
         "401":
-          $ref: "#/components/responses/App.Response.Error401"
+          $ref: "#/components/responses/App.ResponseJson.Error401"
         "403":
-          $ref: "#/components/responses/App.Response.Error403"
+          $ref: "#/components/responses/App.ResponseJson.Error403"
         "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
   /v1/catalog/categories/{categoryId}:
     get:
@@ -124,13 +124,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/Catalog.Categories.AdminAPI.Response.Model.Category"
         "401":
-          $ref: "#/components/responses/App.Response.Error401"
+          $ref: "#/components/responses/App.ResponseJson.Error401"
         "403":
-          $ref: "#/components/responses/App.Response.Error403"
+          $ref: "#/components/responses/App.ResponseJson.Error403"
         "404":
-          $ref: "#/components/responses/App.Response.Error404"
+          $ref: "#/components/responses/App.ResponseJson.Error404"
         "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
     put:
       summary: Метод сохранения категории
@@ -163,15 +163,15 @@ paths:
         "204":
           description: Информация о категории успешно сохранена
         "400":
-          $ref: "#/components/responses/App.Response.Error400"
+          $ref: "#/components/responses/App.ResponseJson.Error400"
         "401":
-          $ref: "#/components/responses/App.Response.Error401"
+          $ref: "#/components/responses/App.ResponseJson.Error401"
         "403":
-          $ref: "#/components/responses/App.Response.Error403"
+          $ref: "#/components/responses/App.ResponseJson.Error403"
         "404":
-          $ref: "#/components/responses/App.Response.Error404"
+          $ref: "#/components/responses/App.ResponseJson.Error404"
         "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
     delete:
       summary: Метод удаления категории
@@ -192,13 +192,13 @@ paths:
         "204":
           description: Информация о категории успешно удалена
         "401":
-          $ref: "#/components/responses/App.Response.Error401"
+          $ref: "#/components/responses/App.ResponseJson.Error401"
         "403":
-          $ref: "#/components/responses/App.Response.Error403"
+          $ref: "#/components/responses/App.ResponseJson.Error403"
         "404":
-          $ref: "#/components/responses/App.Response.Error404"
+          $ref: "#/components/responses/App.ResponseJson.Error404"
         "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
   /v1/catalog/categories/{categoryId}/status:
     put:
@@ -232,15 +232,15 @@ paths:
         "204":
           description: Статус категории успешно изменён
         "400":
-          $ref: "#/components/responses/App.Response.Error400"
+          $ref: "#/components/responses/App.ResponseJson.Error400"
         "401":
-          $ref: "#/components/responses/App.Response.Error401"
+          $ref: "#/components/responses/App.ResponseJson.Error401"
         "403":
-          $ref: "#/components/responses/App.Response.Error403"
+          $ref: "#/components/responses/App.ResponseJson.Error403"
         "404":
-          $ref: "#/components/responses/App.Response.Error404"
+          $ref: "#/components/responses/App.ResponseJson.Error404"
         "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
   /v1/catalog/categories/{categoryId}/image:
     get:
@@ -266,9 +266,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/App.Response.Model.BinaryFile"
         "404":
-          $ref: "#/components/responses/App.Response.Error404"
+          $ref: "#/components/responses/App.ResponseJson.Error404"
         "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
     put:
       summary: Метод загруки/обновления изображения для категории
@@ -306,11 +306,11 @@ paths:
         "204":
           description: Изображение категории было сохранено
         "400":
-          $ref: "#/components/responses/App.Response.Error400"
+          $ref: "#/components/responses/App.ResponseJson.Error400"
         "401":
-          $ref: "#/components/responses/App.Response.Error401"
+          $ref: "#/components/responses/App.ResponseJson.Error401"
         "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
     delete:
       summary: Метод удаления изображения для категории
@@ -331,11 +331,11 @@ paths:
         "204":
           description: Изображение категории успешно удалено
         "401":
-          $ref: "#/components/responses/App.Response.Error401"
+          $ref: "#/components/responses/App.ResponseJson.Error401"
         "404":
-          $ref: "#/components/responses/App.Response.Error404"
+          $ref: "#/components/responses/App.ResponseJson.Error404"
         "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
   /v1/catalog/products:
     get:
@@ -368,11 +368,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/Catalog.Products.AdminAPI.Response.Model.ProductList"
         "401":
-          $ref: "#/components/responses/App.Response.Error401"
+          $ref: "#/components/responses/App.ResponseJson.Error401"
         "403":
-          $ref: "#/components/responses/App.Response.Error403"
+          $ref: "#/components/responses/App.ResponseJson.Error403"
         "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
     post:
       summary: Метод добавления нового товара
@@ -413,15 +413,15 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/App.Response.Model.CreateItem"
+                $ref: "#/components/schemas/App.Response.Model.SuccessCreatedItem"
         "400":
-          $ref: "#/components/responses/App.Response.Error400"
+          $ref: "#/components/responses/App.ResponseJson.Error400"
         "401":
-          $ref: "#/components/responses/App.Response.Error401"
+          $ref: "#/components/responses/App.ResponseJson.Error401"
         "403":
-          $ref: "#/components/responses/App.Response.Error403"
+          $ref: "#/components/responses/App.ResponseJson.Error403"
         "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
   /v1/catalog/products/{productId}:
     get:
@@ -447,13 +447,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/Catalog.Products.AdminAPI.Response.Model.Product"
         "401":
-          $ref: "#/components/responses/App.Response.Error401"
+          $ref: "#/components/responses/App.ResponseJson.Error401"
         "403":
-          $ref: "#/components/responses/App.Response.Error403"
+          $ref: "#/components/responses/App.ResponseJson.Error403"
         "404":
-          $ref: "#/components/responses/App.Response.Error404"
+          $ref: "#/components/responses/App.ResponseJson.Error404"
         "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
     put:
       summary: Метод сохранения товара
@@ -493,15 +493,15 @@ paths:
         "204":
           description: Информация о товаре успешно сохранена
         "400":
-          $ref: "#/components/responses/App.Response.Error400"
+          $ref: "#/components/responses/App.ResponseJson.Error400"
         "401":
-          $ref: "#/components/responses/App.Response.Error401"
+          $ref: "#/components/responses/App.ResponseJson.Error401"
         "403":
-          $ref: "#/components/responses/App.Response.Error403"
+          $ref: "#/components/responses/App.ResponseJson.Error403"
         "404":
-          $ref: "#/components/responses/App.Response.Error404"
+          $ref: "#/components/responses/App.ResponseJson.Error404"
         "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
     delete:
       summary: Метод удаления товара
@@ -522,13 +522,13 @@ paths:
         "204":
           description: Информация о товаре успешно удалена
         "401":
-          $ref: "#/components/responses/App.Response.Error401"
+          $ref: "#/components/responses/App.ResponseJson.Error401"
         "403":
-          $ref: "#/components/responses/App.Response.Error403"
+          $ref: "#/components/responses/App.ResponseJson.Error403"
         "404":
-          $ref: "#/components/responses/App.Response.Error404"
+          $ref: "#/components/responses/App.ResponseJson.Error404"
         "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
   /v1/catalog/products/{productId}/status:
     put:
@@ -562,15 +562,15 @@ paths:
         "204":
           description: Статус товара успешно изменён
         "400":
-          $ref: "#/components/responses/App.Response.Error400"
+          $ref: "#/components/responses/App.ResponseJson.Error400"
         "401":
-          $ref: "#/components/responses/App.Response.Error401"
+          $ref: "#/components/responses/App.ResponseJson.Error401"
         "403":
-          $ref: "#/components/responses/App.Response.Error403"
+          $ref: "#/components/responses/App.ResponseJson.Error403"
         "404":
-          $ref: "#/components/responses/App.Response.Error404"
+          $ref: "#/components/responses/App.ResponseJson.Error404"
         "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
   /v1/catalog/products/{productId}/move:
     patch:
@@ -603,15 +603,15 @@ paths:
         "204":
           description: Статус поля формы успешно изменён
         "400":
-          $ref: "#/components/responses/App.Response.Error400"
+          $ref: "#/components/responses/App.ResponseJson.Error400"
         "401":
-          $ref: "#/components/responses/App.Response.Error401"
+          $ref: "#/components/responses/App.ResponseJson.Error401"
         "403":
-          $ref: "#/components/responses/App.Response.Error403"
+          $ref: "#/components/responses/App.ResponseJson.Error403"
         "404":
-          $ref: "#/components/responses/App.Response.Error404"
+          $ref: "#/components/responses/App.ResponseJson.Error404"
         "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
   /v1/catalog/trademarks:
     get:
@@ -642,11 +642,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/Catalog.Trademarks.AdminAPI.Response.Model.TrademarkList"
         "401":
-          $ref: "#/components/responses/App.Response.Error401"
+          $ref: "#/components/responses/App.ResponseJson.Error401"
         "403":
-          $ref: "#/components/responses/App.Response.Error403"
+          $ref: "#/components/responses/App.ResponseJson.Error403"
         "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
     post:
       summary: Метод добавления новой торговой марки
@@ -680,15 +680,15 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/App.Response.Model.CreateItem"
+                $ref: "#/components/schemas/App.Response.Model.SuccessCreatedItem"
         "400":
-          $ref: "#/components/responses/App.Response.Error400"
+          $ref: "#/components/responses/App.ResponseJson.Error400"
         "401":
-          $ref: "#/components/responses/App.Response.Error401"
+          $ref: "#/components/responses/App.ResponseJson.Error401"
         "403":
-          $ref: "#/components/responses/App.Response.Error403"
+          $ref: "#/components/responses/App.ResponseJson.Error403"
         "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
   /v1/catalog/trademarks/{trademarkId}:
     get:
@@ -714,13 +714,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/Catalog.Trademarks.AdminAPI.Response.Model.Trademark"
         "401":
-          $ref: "#/components/responses/App.Response.Error401"
+          $ref: "#/components/responses/App.ResponseJson.Error401"
         "403":
-          $ref: "#/components/responses/App.Response.Error403"
+          $ref: "#/components/responses/App.ResponseJson.Error403"
         "404":
-          $ref: "#/components/responses/App.Response.Error404"
+          $ref: "#/components/responses/App.ResponseJson.Error404"
         "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
     put:
       summary: Метод сохранения торговой марки
@@ -753,15 +753,15 @@ paths:
         "204":
           description: Информация о торговой марке успешно сохранена
         "400":
-          $ref: "#/components/responses/App.Response.Error400"
+          $ref: "#/components/responses/App.ResponseJson.Error400"
         "401":
-          $ref: "#/components/responses/App.Response.Error401"
+          $ref: "#/components/responses/App.ResponseJson.Error401"
         "403":
-          $ref: "#/components/responses/App.Response.Error403"
+          $ref: "#/components/responses/App.ResponseJson.Error403"
         "404":
-          $ref: "#/components/responses/App.Response.Error404"
+          $ref: "#/components/responses/App.ResponseJson.Error404"
         "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
     delete:
       summary: Метод удаления торговой марки
@@ -782,13 +782,13 @@ paths:
         "204":
           description: Информация о торговой марке успешно удалена
         "401":
-          $ref: "#/components/responses/App.Response.Error401"
+          $ref: "#/components/responses/App.ResponseJson.Error401"
         "403":
-          $ref: "#/components/responses/App.Response.Error403"
+          $ref: "#/components/responses/App.ResponseJson.Error403"
         "404":
-          $ref: "#/components/responses/App.Response.Error404"
+          $ref: "#/components/responses/App.ResponseJson.Error404"
         "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
   /v1/catalog/trademarks/{trademarkId}/status:
     put:
@@ -822,15 +822,15 @@ paths:
         "204":
           description: Статус торговой марки успешно изменён
         "400":
-          $ref: "#/components/responses/App.Response.Error400"
+          $ref: "#/components/responses/App.ResponseJson.Error400"
         "401":
-          $ref: "#/components/responses/App.Response.Error401"
+          $ref: "#/components/responses/App.ResponseJson.Error401"
         "403":
-          $ref: "#/components/responses/App.Response.Error403"
+          $ref: "#/components/responses/App.ResponseJson.Error403"
         "404":
-          $ref: "#/components/responses/App.Response.Error404"
+          $ref: "#/components/responses/App.ResponseJson.Error404"
         "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
 components:
 
@@ -842,7 +842,7 @@ components:
       required: false
       schema:
         type: string
-        default: "en"
+        default: "ru"
       example: "ru;q=0.9, fr-CH, fr;q=0.8, en;q=0.7, *;q=0.5"
 
     App.Request.Header.CorrelationID:
@@ -853,19 +853,7 @@ components:
       schema:
         type: string
         format: uuid
-        minLength: 36
-        maxLength: 36
       example: "f7479171-83d2-4f64-84ac-892f8c0aaf48"
-
-    App.Request.Query.Filter.Statuses:
-      description: Список статусов через "," (см. App.Field.Status)
-      name: statuses
-      in: query
-      required: false
-      schema:
-        type: string
-        default: "ENABLED"
-      example: "DRAFT,ENABLED"
 
     App.Request.Query.Filter.SearchText:
       description: Поисковая строка
@@ -874,34 +862,45 @@ components:
       required: false
       schema:
         type: string
+        maxLength: 128
       example: "перфокарта"
 
+    App.Request.Query.Filter.Statuses:
+      description: Список статусов через "," (см. App.Enum.Status)
+      name: statuses
+      in: query
+      required: false
+      schema:
+        type: string
+        default: "ENABLED"
+      example: "DRAFT,ENABLED"
+
     App.Request.Query.ListPager.PageIndex:
-      description: Индекс страницы с записями
+      description: Индекс страницы списка с записями
       name: pageIndex
       in: query
       required: false
       schema:
         type: integer
         minimum: 0
-        maximum: 1000
+        maximum: 1024
         default: 0
       example: 2
 
     App.Request.Query.ListPager.PageSize:
-      description: Количество записей на страницу
+      description: Количество записей на страницу списка
       name: pageSize
       in: query
       required: false
       schema:
         type: integer
         minimum: 1
-        maximum: 1000
-        default: 20
-      example: 50
+        maximum: 1024
+        default: 50
+      example: 70
 
     App.Request.Query.ListSorter.SortField:
-      description: Название поля, по которому происходит сортировка
+      description: Название колонки, по которой происходит сортировка
       name: sortField
       in: query
       required: false
@@ -976,6 +975,19 @@ components:
       example: 1736
 
   schemas:
+    App.Enum.Status:
+      description: |-
+        Текущий статус записи:
+        - DRAFT - черновик;
+        - ENABLED - используется;
+        - DISABLED - отключена;
+      type: string
+      enum:
+        - DRAFT
+        - ENABLED
+        - DISABLED
+      example: "ENABLED"
+
     App.Field.Article:
       description: Уникальный артикул записи
       type: string
@@ -1014,20 +1026,7 @@ components:
       minimum: 0
       example: 8234500 # 82345 coins
 
-    App.Field.Status:
-      description: |-
-        Текущий статус записи:
-        - DRAFT - черновик;
-        - ENABLED - используется;
-        - DISABLED - отключена;
-      type: string
-      enum:
-        - DRAFT
-        - ENABLED
-        - DISABLED
-      example: "ENABLED"
-
-    App.Field.Version:
+    App.Field.TagVersion:
       description: Текущая версия записи
       type: number
       minimum: 1
@@ -1042,11 +1041,13 @@ components:
         - ENABLED -> DISABLED;
         - DISABLED -> ENABLED;
       type: object
+      required:
+        - status
       properties:
         version:
-          $ref: "#/components/schemas/App.Field.Version"
+          $ref: "#/components/schemas/App.Field.TagVersion"
         status:
-          $ref: "#/components/schemas/App.Field.Status"
+          $ref: "#/components/schemas/App.Enum.Status"
 
     App.Request.Model.MoveItem:
       description: DTO перемещения записи в рамках списка
@@ -1065,21 +1066,7 @@ components:
       description: DTO - бинарный файл
       type: string
       format: binary
-
-    App.Response.Model.CreateItem:
-      description: DTO результата создания записи
-      type: object
-      required:
-        - id
-      properties:
-        id:
-          description: Идентификатор созданной записи
-          type: integer
-          minimum: 1
-          example: 1000
-        message:
-          type: string
-          example: "Запись была успешно создана"
+      maxLength: 16777216
 
     App.Response.Model.Error: # RFC 7807 (Problem Details for HTTP APIs)
       description: DTO следующих ошибок - 401, 403, 404, 5XX
@@ -1103,7 +1090,7 @@ components:
           type: string
           example: "PUT /users/123456"
         time:
-          description: Время возникновения ошибки с точностью до миллисекунд
+          description: Время возникновения ошибки с точностью до миллисекунд (UTC)
           type: string
           format: date-time
           example: "2023-01-01T12:00:00.000+02:00"
@@ -1150,6 +1137,21 @@ components:
           type: number
           example: 7
 
+    App.Response.Model.SuccessCreatedItem:
+      description: DTO результата создания записи
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          description: Идентификатор созданной записи
+          type: integer
+          minimum: 1
+          example: 1000
+        message:
+          type: string
+          example: "Запись была успешно создана"
+
     Catalog.Categories.AdminAPI.Request.Model.CreateCategory:
       description: DTO создания категории каталога
       type: object
@@ -1166,7 +1168,7 @@ components:
         - caption
       properties:
         version:
-          $ref: "#/components/schemas/App.Field.Version"
+          $ref: "#/components/schemas/App.Field.TagVersion"
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
 
@@ -1198,7 +1200,7 @@ components:
         id: # categoryId
           $ref: "#/components/schemas/App.Field.IntegerID"
         version:
-          $ref: "#/components/schemas/App.Field.Version"
+          $ref: "#/components/schemas/App.Field.TagVersion"
         createdAt:
           $ref: "#/components/schemas/App.Field.CreatedAt"
         caption:
@@ -1206,7 +1208,7 @@ components:
         imageInfo:
           $ref: "#/components/schemas/App.Response.Model.FileInfo"
         status:
-          $ref: "#/components/schemas/App.Field.Status"
+          $ref: "#/components/schemas/App.Enum.Status"
 
     Catalog.Products.AdminAPI.Request.Model.CreateProduct:
       description: DTO создания товара каталога
@@ -1238,7 +1240,7 @@ components:
         - caption
       properties:
         version:
-          $ref: "#/components/schemas/App.Field.Version"
+          $ref: "#/components/schemas/App.Field.TagVersion"
         categoryId:
           $ref: "#/components/schemas/App.Field.IntegerID"
         trademarkId:
@@ -1272,7 +1274,7 @@ components:
         id: # productId
           $ref: "#/components/schemas/App.Field.IntegerID"
         version:
-          $ref: "#/components/schemas/App.Field.Version"
+          $ref: "#/components/schemas/App.Field.TagVersion"
         createdAt:
           $ref: "#/components/schemas/App.Field.CreatedAt"
         categoryId:
@@ -1286,7 +1288,7 @@ components:
         price:
           $ref: "#/components/schemas/App.Field.Price"
         status:
-          $ref: "#/components/schemas/App.Field.Status"
+          $ref: "#/components/schemas/App.Enum.Status"
 
     Catalog.Trademarks.AdminAPI.Request.Model.CreateTrademark:
       description: DTO создания торговой марки
@@ -1305,7 +1307,7 @@ components:
         - caption
       properties:
         version:
-          $ref: "#/components/schemas/App.Field.Version"
+          $ref: "#/components/schemas/App.Field.TagVersion"
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
 
@@ -1337,16 +1339,16 @@ components:
         id: # trademarkId
           $ref: "#/components/schemas/App.Field.IntegerID"
         version:
-          $ref: "#/components/schemas/App.Field.Version"
+          $ref: "#/components/schemas/App.Field.TagVersion"
         createdAt:
           $ref: "#/components/schemas/App.Field.CreatedAt"
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
         status:
-          $ref: "#/components/schemas/App.Field.Status"
+          $ref: "#/components/schemas/App.Enum.Status"
 
   responses:
-    App.Response.Error400:
+    App.ResponseJson.Error400:
       description: Некорректные входные данные. Возвращается список атрибутов с ошибками
       content:
         application/json;charset=UTF-8:
@@ -1355,28 +1357,28 @@ components:
             items:
               $ref: "#/components/schemas/App.Response.Model.ErrorAttribute"
 
-    App.Response.Error404:
+    App.ResponseJson.Error404:
       description: Запрашиваемый ресурс не был найден
       content:
         application/problem+json:
           schema:
             $ref: "#/components/schemas/App.Response.Model.Error"
 
-    App.Response.Error5XX:
+    App.ResponseJson.Error5XX:
       description: Внутренняя ошибка сервера
       content:
         application/problem+json:
           schema:
             $ref: "#/components/schemas/App.Response.Model.Error"
 
-    App.Response.Error401:
+    App.ResponseJson.Error401:
       description: Пользователь не был аутентифицирован
       content:
         application/problem+json:
           schema:
             $ref: "#/components/schemas/App.Response.Model.Error"
 
-    App.Response.Error403:
+    App.ResponseJson.Error403:
       description: Пользователю с текущими правами доступ отклонён
       content:
         application/problem+json:

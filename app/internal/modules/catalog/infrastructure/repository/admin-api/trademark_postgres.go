@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	module "go-sample/internal/modules/catalog"
 	"go-sample/internal/modules/catalog/entity/admin-api"
 	"strings"
 
@@ -59,7 +60,7 @@ func (re *Trademark) Fetch(ctx context.Context, params mrstorage.SqlSelectParams
 			trademark_caption,
 			trademark_status
 		FROM
-			public.catalog_trademarks
+			` + module.DBSchema + `.catalog_trademarks
 		WHERE
 			` + whereStr + `
 		ORDER BY
@@ -107,7 +108,7 @@ func (re *Trademark) FetchTotal(ctx context.Context, where mrstorage.SqlBuilderP
 		SELECT
 			COUNT(*)
 		FROM
-			public.catalog_trademarks
+			` + module.DBSchema + `.catalog_trademarks
 		WHERE
 			` + whereStr + `;`
 
@@ -132,7 +133,7 @@ func (re *Trademark) LoadOne(ctx context.Context, row *entity.Trademark) error {
 			trademark_caption,
 			trademark_status
 		FROM
-			public.catalog_trademarks
+			` + module.DBSchema + `.catalog_trademarks
 		WHERE
 			trademark_id = $1 AND trademark_status <> $2
 		LIMIT 1;`
@@ -155,9 +156,9 @@ func (re *Trademark) FetchStatus(ctx context.Context, row *entity.Trademark) (mr
 		SELECT
 			trademark_status
 		FROM
-			public.catalog_trademarks
+			` + module.DBSchema + `.catalog_trademarks
 		WHERE
-			trademark_id = $1 AND tag_version = $2 AND trademark_status <> $3
+			trademark_id = $1 AND trademark_status <> $2
 		LIMIT 1;`
 
 	var status mrenum.ItemStatus
@@ -166,7 +167,6 @@ func (re *Trademark) FetchStatus(ctx context.Context, row *entity.Trademark) (mr
 		ctx,
 		sql,
 		row.ID,
-		row.TagVersion,
 		mrenum.ItemStatusRemoved,
 	).Scan(
 		&status,
@@ -182,7 +182,7 @@ func (re *Trademark) IsExists(ctx context.Context, id mrtype.KeyInt32) error {
 		SELECT
 			1
 		FROM
-			public.catalog_trademarks
+			` + module.DBSchema + `.catalog_trademarks
 		WHERE
 			trademark_id = $1 AND trademark_status <> $2
 		LIMIT 1;`
@@ -199,7 +199,7 @@ func (re *Trademark) IsExists(ctx context.Context, id mrtype.KeyInt32) error {
 
 func (re *Trademark) Insert(ctx context.Context, row *entity.Trademark) error {
 	sql := `
-		INSERT INTO public.catalog_trademarks
+		INSERT INTO ` + module.DBSchema + `.catalog_trademarks
 			(
 				trademark_caption,
 				trademark_status
@@ -209,7 +209,7 @@ func (re *Trademark) Insert(ctx context.Context, row *entity.Trademark) error {
 		RETURNING
 			trademark_id;`
 
-	err := re.client.QueryRow(
+	return re.client.QueryRow(
 		ctx,
 		sql,
 		row.Caption,
@@ -217,56 +217,70 @@ func (re *Trademark) Insert(ctx context.Context, row *entity.Trademark) error {
 	).Scan(
 		&row.ID,
 	)
-
-	return err
 }
 
-func (re *Trademark) Update(ctx context.Context, row *entity.Trademark) error {
+func (re *Trademark) Update(ctx context.Context, row *entity.Trademark) (int32, error) {
 	sql := `
 		UPDATE
-			public.catalog_trademarks
+			` + module.DBSchema + `.catalog_trademarks
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),
 			trademark_caption = $4
 		WHERE
-			trademark_id = $1 AND tag_version = $2 AND trademark_status <> $3;`
+			trademark_id = $1 AND tag_version = $2 AND trademark_status <> $3
+		RETURNING
+			tag_version;`
 
-	return re.client.Exec(
+	var tagVersion int32
+
+	err := re.client.QueryRow(
 		ctx,
 		sql,
 		row.ID,
 		row.TagVersion,
 		mrenum.ItemStatusRemoved,
 		row.Caption,
+	).Scan(
+		&tagVersion,
 	)
+
+	return tagVersion, err
 }
 
-func (re *Trademark) UpdateStatus(ctx context.Context, row *entity.Trademark) error {
+func (re *Trademark) UpdateStatus(ctx context.Context, row *entity.Trademark) (int32, error) {
 	sql := `
 		UPDATE
-			public.catalog_trademarks
+			` + module.DBSchema + `.catalog_trademarks
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),
 			trademark_status = $4
 		WHERE
-			trademark_id = $1 AND tag_version = $2 AND trademark_status <> $3;`
+			trademark_id = $1 AND tag_version = $2 AND trademark_status <> $3
+		RETURNING
+			tag_version;`
 
-	return re.client.Exec(
+	var tagVersion int32
+
+	err := re.client.QueryRow(
 		ctx,
 		sql,
 		row.ID,
 		row.TagVersion,
 		mrenum.ItemStatusRemoved,
 		row.Status,
+	).Scan(
+		&tagVersion,
 	)
+
+	return tagVersion, err
 }
 
 func (re *Trademark) Delete(ctx context.Context, id mrtype.KeyInt32) error {
 	sql := `
 		UPDATE
-			public.catalog_trademarks
+			` + module.DBSchema + `.catalog_trademarks
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),

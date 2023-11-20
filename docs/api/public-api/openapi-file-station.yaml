@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.3
 info:
-  version: 0.0.1
+  version: 0.3.0
   title: Public API получения файлов по URL
   description: Public REST API проекта go-sample получения файлов по URL
   license:
@@ -41,9 +41,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/App.Response.Model.BinaryFile"
         "404":
-          $ref: "#/components/responses/App.Response.Error404"
+          $ref: "#/components/responses/App.ResponseJson.Error404"
         "500":
-          $ref: "#/components/responses/App.Response.Error5XX"
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
 components:
 
@@ -55,7 +55,7 @@ components:
       required: false
       schema:
         type: string
-        default: "en"
+        default: "ru"
       example: "ru;q=0.9, fr-CH, fr;q=0.8, en;q=0.7, *;q=0.5"
 
     App.Request.Header.CorrelationID:
@@ -66,8 +66,6 @@ components:
       schema:
         type: string
         format: uuid
-        minLength: 36
-        maxLength: 36
       example: "f7479171-83d2-4f64-84ac-892f8c0aaf48"
 
     FileStation.PublicAPI.Request.Path.FilePath:
@@ -86,6 +84,7 @@ components:
       description: DTO - бинарный файл
       type: string
       format: binary
+      maxLength: 16777216
 
     App.Response.Model.Error: # RFC 7807 (Problem Details for HTTP APIs)
       description: DTO следующих ошибок - 401, 403, 404, 5XX
@@ -109,7 +108,7 @@ components:
           type: string
           example: "PUT /users/123456"
         time:
-          description: Время возникновения ошибки с точностью до миллисекунд
+          description: Время возникновения ошибки с точностью до миллисекунд (UTC)
           type: string
           format: date-time
           example: "2023-01-01T12:00:00.000+02:00"
@@ -135,7 +134,7 @@ components:
           example: "Атрибут не может быть пустым. Указано недопустимое значение атрибута"
 
   responses:
-    App.Response.Error400:
+    App.ResponseJson.Error400:
       description: Некорректные входные данные. Возвращается список атрибутов с ошибками
       content:
         application/json;charset=UTF-8:
@@ -144,14 +143,14 @@ components:
             items:
               $ref: "#/components/schemas/App.Response.Model.ErrorAttribute"
 
-    App.Response.Error404:
+    App.ResponseJson.Error404:
       description: Запрашиваемый ресурс не был найден
       content:
         application/problem+json:
           schema:
             $ref: "#/components/schemas/App.Response.Model.Error"
 
-    App.Response.Error5XX:
+    App.ResponseJson.Error5XX:
       description: Внутренняя ошибка сервера
       content:
         application/problem+json:

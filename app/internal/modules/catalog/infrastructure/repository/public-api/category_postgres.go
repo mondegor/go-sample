@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	module "go-sample/internal/modules/catalog"
 	"go-sample/internal/modules/catalog/entity/public-api"
 	"strings"
 
@@ -46,7 +47,7 @@ func (re *Category) Fetch(ctx context.Context, params mrstorage.SqlSelectParams)
 			category_caption,
 			image_path
 		FROM
-			public.catalog_categories
+			` + module.DBSchema + `.catalog_categories
 		WHERE
 			` + whereStr + `
 		ORDER BY
@@ -92,7 +93,7 @@ func (re *Category) FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPa
 		SELECT
 			COUNT(*)
 		FROM
-			public.catalog_categories
+			` + module.DBSchema + `.catalog_categories
 		WHERE
 			` + whereStr + `;`
 
@@ -115,7 +116,7 @@ func (re *Category) LoadOne(ctx context.Context, row *entity.Category) error {
 			category_caption,
 			image_path
 		FROM
-			public.catalog_categories
+			` + module.DBSchema + `.catalog_categories
 		WHERE
 			category_id = $1 AND category_status = $2
 		LIMIT 1;`

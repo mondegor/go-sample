@@ -1,4 +1,4 @@
-App.Field.Status:
+App.Enum.Status:
   description: |-
     Текущий статус записи:
     - DRAFT - черновик;

@@ -3,7 +3,7 @@ package http_v1
 import (
 	"context"
 	"fmt"
-	"go-sample/internal/global"
+	module "go-sample/internal/modules/catalog"
 	"go-sample/internal/modules/catalog/controller/http_v1/admin-api/view"
 	view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared/view"
 	"go-sample/internal/modules/catalog/entity/admin-api"
@@ -48,7 +48,7 @@ func NewCategory(
 
 func (ht *Category) AddHandlers(router mrcore.HttpRouter) {
 	moduleAccessFunc := func(next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
-		return ht.section.MiddlewareWithPermission(global.PermissionCatalogCategory, next)
+		return ht.section.MiddlewareWithPermission(module.PermissionCatalogCategory, next)
 	}
 
 	router.HttpHandlerFunc(http.MethodGet, ht.section.Path(categoryURL), moduleAccessFunc(ht.GetList()))
@@ -66,7 +66,7 @@ func (ht *Category) AddHandlers(router mrcore.HttpRouter) {
 }
 
 func (ht *Category) GetList() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientData) error {
+	return func(c mrcore.ClientContext) error {
 		items, totalItems, err := ht.service.GetList(c.Context(), ht.listParams(c))
 
 		if err != nil {
@@ -87,19 +87,19 @@ func (ht *Category) GetList() mrcore.HttpHandlerFunc {
 	}
 }
 
-func (ht *Category) listParams(c mrcore.ClientData) entity.CategoryParams {
+func (ht *Category) listParams(c mrcore.ClientContext) entity.CategoryParams {
 	return entity.CategoryParams{
 		Filter: entity.CategoryListFilter{
-			SearchText: view_shared.ParseFilterString(c, global.ParamNameFilterSearchText),
-			Statuses:   view_shared.ParseFilterStatusList(c, global.ParamNameFilterStatuses),
+			SearchText: view_shared.ParseFilterString(c, module.ParamNameFilterSearchText),
+			Statuses:   view_shared.ParseFilterStatusList(c, module.ParamNameFilterStatuses),
 		},
-		Sorter: view_shared.ParseListSorter(c, ht.listSorter),
-		Pager:  view_shared.ParseListPager(c),
+		Sorter: view_shared.ParseSortParams(c, ht.listSorter),
+		Pager:  view_shared.ParsePageParams(c),
 	}
 }
 
 func (ht *Category) Get() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientData) error {
+	return func(c mrcore.ClientContext) error {
 		item, err := ht.service.GetItem(c.Context(), ht.getItemID(c))
 
 		if err != nil {
@@ -113,10 +113,10 @@ func (ht *Category) Get() mrcore.HttpHandlerFunc {
 }
 
 func (ht *Category) Create() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientData) error {
+	return func(c mrcore.ClientContext) error {
 		request := view.CreateCategoryRequest{}
 
-		if err := c.ParseAndValidate(&request); err != nil {
+		if err := c.Validate(&request); err != nil {
 			return err
 		}
 
@@ -130,7 +130,7 @@ func (ht *Category) Create() mrcore.HttpHandlerFunc {
 
 		return c.SendResponse(
 			http.StatusCreated,
-			view.CreateItemResponse{
+			view.SuccessCreatedItemResponse{
 				ItemID: fmt.Sprintf("%d", item.ID),
 				Message: mrctx.Locale(c.Context()).TranslateMessage(
 					"msgCategorySuccessCreated",
@@ -142,10 +142,10 @@ func (ht *Category) Create() mrcore.HttpHandlerFunc {
 }
 
 func (ht *Category) Store() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientData) error {
+	return func(c mrcore.ClientContext) error {
 		request := view.StoreCategoryRequest{}
 
-		if err := c.ParseAndValidate(&request); err != nil {
+		if err := c.Validate(&request); err != nil {
 			return err
 		}
 
@@ -164,16 +164,16 @@ func (ht *Category) Store() mrcore.HttpHandlerFunc {
 }
 
 func (ht *Category) ChangeStatus() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientData) error {
+	return func(c mrcore.ClientContext) error {
 		request := view.ChangeItemStatusRequest{}
 
-		if err := c.ParseAndValidate(&request); err != nil {
+		if err := c.Validate(&request); err != nil {
 			return err
 		}
 
 		item := entity.Category{
 			ID:         ht.getItemID(c),
-			TagVersion: request.Version,
+			TagVersion: request.TagVersion,
 			Status:     request.Status,
 		}
 
@@ -186,7 +186,7 @@ func (ht *Category) ChangeStatus() mrcore.HttpHandlerFunc {
 }
 
 func (ht *Category) Remove() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientData) error {
+	return func(c mrcore.ClientContext) error {
 		if err := ht.service.Remove(c.Context(), ht.getItemID(c)); err != nil {
 			return err
 		}
@@ -196,7 +196,7 @@ func (ht *Category) Remove() mrcore.HttpHandlerFunc {
 }
 
 func (ht *Category) GetImage() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientData) error {
+	return func(c mrcore.ClientContext) error {
 		item, err := ht.serviceImage.Get(c.Context(), ht.getItemID(c))
 
 		if err != nil {
@@ -210,8 +210,8 @@ func (ht *Category) GetImage() mrcore.HttpHandlerFunc {
 }
 
 func (ht *Category) UploadImage() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientData) error {
-		file, hdr, err := c.Request().FormFile(global.ParamNameFileCatalogCategoryImage)
+	return func(c mrcore.ClientContext) error {
+		file, hdr, err := c.Request().FormFile(module.ParamNameFileCatalogCategoryImage)
 
 		if err != nil {
 			return mrcore.FactoryErrInternal.Caller(-1).Wrap(err)
@@ -242,7 +242,7 @@ func (ht *Category) UploadImage() mrcore.HttpHandlerFunc {
 }
 
 func (ht *Category) RemoveImage() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientData) error {
+	return func(c mrcore.ClientContext) error {
 		if err := ht.serviceImage.Remove(c.Context(), ht.getItemID(c)); err != nil {
 			return err
 		}
@@ -251,8 +251,8 @@ func (ht *Category) RemoveImage() mrcore.HttpHandlerFunc {
 	}
 }
 
-func (ht *Category) getItemID(c mrcore.ClientData) mrtype.KeyInt32 {
-	return mrtype.KeyInt32(c.RequestPath().GetInt64("id"))
+func (ht *Category) getItemID(c mrcore.ClientContext) mrtype.KeyInt32 {
+	return view_shared.ParseIDFromPath(c, "id")
 }
 
 func (ht *Category) getImageInfo(ctx context.Context, imagePath string) *mrtype.FileInfo {

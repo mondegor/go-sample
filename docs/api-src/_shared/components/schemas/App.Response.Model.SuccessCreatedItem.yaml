@@ -1,4 +1,4 @@
-App.Response.Model.CreateItem:
+App.Response.Model.SuccessCreatedItem:
   description: DTO результата создания записи
   type: object
   required:

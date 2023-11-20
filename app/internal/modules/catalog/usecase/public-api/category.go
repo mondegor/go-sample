@@ -4,7 +4,6 @@ import (
 	"context"
 	"go-sample/internal/modules/catalog/entity/public-api"
 
-	"github.com/mondegor/go-sysmess/mrerr"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrtool"
 	"github.com/mondegor/go-webcore/mrtype"
@@ -50,7 +49,7 @@ func (uc *Category) GetList(ctx context.Context, params entity.CategoryParams) (
 
 func (uc *Category) GetItem(ctx context.Context, id mrtype.KeyInt32) (*entity.Category, error) {
 	if id < 1 {
-		return nil, mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"id": id})
+		return nil, mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogCategory)
 	}
 
 	item := &entity.Category{ID: id}

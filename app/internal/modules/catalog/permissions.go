@@ -1,9 +1,7 @@
-package global
+package module
 
 const (
 	PermissionCatalogCategory  = "modCatalogCategory"
 	PermissionCatalogProduct   = "modCatalogProduct"
 	PermissionCatalogTrademark = "modCatalogTrademark"
-
-	PermissionFileStationImageProxy = "modFileStationImageProxy"
 )

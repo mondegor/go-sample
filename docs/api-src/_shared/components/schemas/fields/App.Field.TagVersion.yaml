@@ -1,4 +1,4 @@
-App.Field.Version:
+App.Field.TagVersion:
   description: Текущая версия записи
   type: number
   minimum: 1

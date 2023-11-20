@@ -28,7 +28,7 @@ Catalog.Products.AdminAPI.Request.Model.StoreProduct:
     - caption
   properties:
     version:
-      $ref: "#/components/schemas/App.Field.Version"
+      $ref: "#/components/schemas/App.Field.TagVersion"
     categoryId:
       $ref: "#/components/schemas/App.Field.IntegerID"
     trademarkId:
@@ -62,7 +62,7 @@ Catalog.Products.AdminAPI.Response.Model.Product:
     id: # productId
       $ref: "#/components/schemas/App.Field.IntegerID"
     version:
-      $ref: "#/components/schemas/App.Field.Version"
+      $ref: "#/components/schemas/App.Field.TagVersion"
     createdAt:
       $ref: "#/components/schemas/App.Field.CreatedAt"
     categoryId:
@@ -76,4 +76,4 @@ Catalog.Products.AdminAPI.Response.Model.Product:
     price:
       $ref: "#/components/schemas/App.Field.Price"
     status:
-      $ref: "#/components/schemas/App.Field.Status"
+      $ref: "#/components/schemas/App.Enum.Status"

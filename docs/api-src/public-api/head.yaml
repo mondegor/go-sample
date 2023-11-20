@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.3
 info:
-  version: v0.2.1
+  version: 0.3.0
   title: Public API go-sample
   description: Public REST API проекта go-sample
   license:

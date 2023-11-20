@@ -4,10 +4,10 @@ go 1.20
 
 require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
-	github.com/mondegor/go-components v0.3.1
-	github.com/mondegor/go-storage v0.6.1
-	github.com/mondegor/go-sysmess v0.3.7
-	github.com/mondegor/go-webcore v0.7.1
+	github.com/mondegor/go-components v0.3.2
+	github.com/mondegor/go-storage v0.6.2
+	github.com/mondegor/go-sysmess v0.4.0
+	github.com/mondegor/go-webcore v0.8.0
 )
 
 require (
@@ -28,7 +28,7 @@ require (
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/julienschmidt/httprouter v1.3.0 // indirect
-	github.com/klauspost/compress v1.17.2 // indirect
+	github.com/klauspost/compress v1.17.3 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.6 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/lib/pq v1.10.9 // indirect

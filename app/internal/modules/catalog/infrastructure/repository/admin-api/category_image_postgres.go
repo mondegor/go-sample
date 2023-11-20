@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	module "go-sample/internal/modules/catalog"
 
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-webcore/mrenum"
@@ -27,7 +28,7 @@ func (re *CategoryImage) FetchPath(ctx context.Context, categoryID mrtype.KeyInt
 		SELECT
 			image_path
 		FROM
-			public.catalog_categories
+			` + module.DBSchema + `.catalog_categories
 		WHERE
 			category_id = $1 AND category_status <> $2
 		LIMIT 1;`
@@ -49,7 +50,7 @@ func (re *CategoryImage) FetchPath(ctx context.Context, categoryID mrtype.KeyInt
 func (re *CategoryImage) Update(ctx context.Context, categoryID mrtype.KeyInt32, imagePath string) error {
 	sql := `
 		UPDATE
-			public.catalog_categories
+			` + module.DBSchema + `.catalog_categories
 		SET
 			datetime_updated = NOW(),
 			image_path = $3
