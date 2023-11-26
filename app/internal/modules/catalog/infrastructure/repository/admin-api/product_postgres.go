@@ -35,7 +35,7 @@ func NewProduct(
 
 func (re *Product) GetMetaData(categoryID mrtype.KeyInt32) mrorderer.EntityMeta {
 	return mrorderer.NewEntityMeta(
-		"` + module.DBSchema + `.catalog_products",
+		module.DBSchema + ".catalog_products",
 		"product_id",
 		re.sqlSelect.Where(func(w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
 			return w.JoinAnd(
@@ -127,7 +127,7 @@ func (re *Product) Fetch(ctx context.Context, params mrstorage.SqlSelectParams) 
 		rows = append(rows, row)
 	}
 
-	return rows, nil
+	return rows, cursor.Err()
 }
 
 func (re *Product) FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPart) (int64, error) {

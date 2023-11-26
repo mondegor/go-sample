@@ -12,6 +12,7 @@ import (
 
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrctx"
+	"github.com/mondegor/go-webcore/mrdebug"
 	"github.com/mondegor/go-webcore/mrtype"
 	"github.com/mondegor/go-webcore/mrview"
 )
@@ -211,18 +212,18 @@ func (ht *Category) GetImage() mrcore.HttpHandlerFunc {
 
 func (ht *Category) UploadImage() mrcore.HttpHandlerFunc {
 	return func(c mrcore.ClientContext) error {
+		logger := mrctx.Logger(c.Context())
+
 		file, hdr, err := c.Request().FormFile(module.ParamNameFileCatalogCategoryImage)
 
 		if err != nil {
-			return mrcore.FactoryErrInternal.Caller(-1).Wrap(err)
+			mrdebug.MultipartForm(logger, c.Request().MultipartForm)
+			return mrcore.FactoryErrHttpMultipartFormFile.Caller(-1).Wrap(err, module.ParamNameFileCatalogCategoryImage)
 		}
 
 		defer file.Close()
 
-		mrctx.Logger(c.Context()).Debug(
-			"uploaded file: name=%s, size=%d, header=%#v",
-			hdr.Filename, hdr.Size, hdr.Header,
-		)
+		mrdebug.MultipartFileHeader(logger, hdr)
 
 		item := mrtype.File{
 			FileInfo: mrtype.FileInfo{

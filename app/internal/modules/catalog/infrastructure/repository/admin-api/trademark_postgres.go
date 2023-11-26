@@ -98,7 +98,7 @@ func (re *Trademark) Fetch(ctx context.Context, params mrstorage.SqlSelectParams
 		rows = append(rows, row)
 	}
 
-	return rows, nil
+	return rows, cursor.Err()
 }
 
 func (re *Trademark) FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPart) (int64, error) {
