@@ -10,6 +10,7 @@ import (
 	usecase_shared "go-sample/internal/modules/catalog/usecase/shared"
 	"net/http"
 
+	"github.com/mondegor/go-components/mrorderer"
 	"github.com/mondegor/go-sysmess/mrerr"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrctx"
@@ -97,7 +98,7 @@ func (ht *Product) Get() mrcore.HttpHandlerFunc {
 		item, err := ht.service.GetItem(c.Context(), ht.getItemID(c))
 
 		if err != nil {
-			return err
+			return ht.wrapError(err, ht.getRawItemID(c))
 		}
 
 		return c.SendResponse(http.StatusOK, item)
@@ -121,7 +122,7 @@ func (ht *Product) Create() mrcore.HttpHandlerFunc {
 		}
 
 		if err := ht.service.Create(c.Context(), &item); err != nil {
-			return ht.getWrapError(err)
+			return ht.wrapError(err, ht.getRawItemID(c))
 		}
 
 		return c.SendResponse(
@@ -148,7 +149,6 @@ func (ht *Product) Store() mrcore.HttpHandlerFunc {
 		item := entity.Product{
 			ID:          ht.getItemID(c),
 			TagVersion:  request.Version,
-			CategoryID:  request.CategoryID,
 			TrademarkID: request.TrademarkID,
 			Article:     request.Article,
 			Caption:     request.Caption,
@@ -156,7 +156,7 @@ func (ht *Product) Store() mrcore.HttpHandlerFunc {
 		}
 
 		if err := ht.service.Store(c.Context(), &item); err != nil {
-			return ht.getWrapError(err)
+			return ht.wrapError(err, ht.getRawItemID(c))
 		}
 
 		return c.SendResponseNoContent()
@@ -178,7 +178,7 @@ func (ht *Product) ChangeStatus() mrcore.HttpHandlerFunc {
 		}
 
 		if err := ht.service.ChangeStatus(c.Context(), &item); err != nil {
-			return err
+			return ht.wrapError(err, ht.getRawItemID(c))
 		}
 
 		return c.SendResponseNoContent()
@@ -188,7 +188,7 @@ func (ht *Product) ChangeStatus() mrcore.HttpHandlerFunc {
 func (ht *Product) Remove() mrcore.HttpHandlerFunc {
 	return func(c mrcore.ClientContext) error {
 		if err := ht.service.Remove(c.Context(), ht.getItemID(c)); err != nil {
-			return err
+			return ht.wrapError(err, ht.getRawItemID(c))
 		}
 
 		return c.SendResponseNoContent()
@@ -210,7 +210,7 @@ func (ht *Product) Move() mrcore.HttpHandlerFunc {
 		)
 
 		if err != nil {
-			return err
+			return ht.wrapErrorNode(err, ht.getRawItemID(c))
 		}
 
 		return c.SendResponseNoContent()
@@ -221,7 +221,23 @@ func (ht *Product) getItemID(c mrcore.ClientContext) mrtype.KeyInt32 {
 	return view_shared.ParseIDFromPath(c, "id")
 }
 
-func (ht *Product) getWrapError(err error) error {
+func (ht *Product) getRawItemID(c mrcore.ClientContext) string {
+	return c.ParamFromPath("id")
+}
+
+func (ht *Product) wrapError(err error, rawItemID string) error {
+	if mrcore.FactoryErrServiceEntityNotFound.Is(err) {
+		return usecase_shared.FactoryErrProductNotFound.Wrap(err, rawItemID)
+	}
+
+	if mrcore.FactoryErrServiceEntityVersionInvalid.Is(err) {
+		return mrerr.NewFieldError("version", err)
+	}
+
+	if mrcore.FactoryErrServiceSwitchStatusRejected.Is(err) {
+		return mrerr.NewFieldError("status", err)
+	}
+
 	if usecase_shared.FactoryErrProductArticleAlreadyExists.Is(err) {
 		return mrerr.NewFieldError("article", err)
 	}
@@ -232,6 +248,18 @@ func (ht *Product) getWrapError(err error) error {
 
 	if usecase_shared.FactoryErrTrademarkNotFound.Is(err) {
 		return mrerr.NewFieldError("trademarkId", err)
+	}
+
+	return err
+}
+
+func (ht *Product) wrapErrorNode(err error, rawItemID string) error {
+	if mrcore.FactoryErrServiceEntityNotFound.Is(err) {
+		return usecase_shared.FactoryErrProductNotFound.Wrap(err, rawItemID)
+	}
+
+	if mrorderer.FactoryErrAfterNodeNotFound.Is(err) {
+		return mrerr.NewFieldError("afterNodeId", err)
 	}
 
 	return err

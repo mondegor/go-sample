@@ -60,7 +60,7 @@ func (re *Trademark) Fetch(ctx context.Context, params mrstorage.SqlSelectParams
 			trademark_caption,
 			trademark_status
 		FROM
-			` + module.DBSchema + `.catalog_trademarks
+			` + module.DBSchemaTrademark + `.catalog_trademarks
 		WHERE
 			` + whereStr + `
 		ORDER BY
@@ -108,7 +108,7 @@ func (re *Trademark) FetchTotal(ctx context.Context, where mrstorage.SqlBuilderP
 		SELECT
 			COUNT(*)
 		FROM
-			` + module.DBSchema + `.catalog_trademarks
+			` + module.DBSchemaTrademark + `.catalog_trademarks
 		WHERE
 			` + whereStr + `;`
 
@@ -133,7 +133,7 @@ func (re *Trademark) LoadOne(ctx context.Context, row *entity.Trademark) error {
 			trademark_caption,
 			trademark_status
 		FROM
-			` + module.DBSchema + `.catalog_trademarks
+			` + module.DBSchemaTrademark + `.catalog_trademarks
 		WHERE
 			trademark_id = $1 AND trademark_status <> $2
 		LIMIT 1;`
@@ -156,7 +156,7 @@ func (re *Trademark) FetchStatus(ctx context.Context, row *entity.Trademark) (mr
 		SELECT
 			trademark_status
 		FROM
-			` + module.DBSchema + `.catalog_trademarks
+			` + module.DBSchemaTrademark + `.catalog_trademarks
 		WHERE
 			trademark_id = $1 AND trademark_status <> $2
 		LIMIT 1;`
@@ -182,7 +182,7 @@ func (re *Trademark) IsExists(ctx context.Context, id mrtype.KeyInt32) error {
 		SELECT
 			1
 		FROM
-			` + module.DBSchema + `.catalog_trademarks
+			` + module.DBSchemaTrademark + `.catalog_trademarks
 		WHERE
 			trademark_id = $1 AND trademark_status <> $2
 		LIMIT 1;`
@@ -199,7 +199,7 @@ func (re *Trademark) IsExists(ctx context.Context, id mrtype.KeyInt32) error {
 
 func (re *Trademark) Insert(ctx context.Context, row *entity.Trademark) error {
 	sql := `
-		INSERT INTO ` + module.DBSchema + `.catalog_trademarks
+		INSERT INTO ` + module.DBSchemaTrademark + `.catalog_trademarks
 			(
 				trademark_caption,
 				trademark_status
@@ -222,7 +222,7 @@ func (re *Trademark) Insert(ctx context.Context, row *entity.Trademark) error {
 func (re *Trademark) Update(ctx context.Context, row *entity.Trademark) (int32, error) {
 	sql := `
 		UPDATE
-			` + module.DBSchema + `.catalog_trademarks
+			` + module.DBSchemaTrademark + `.catalog_trademarks
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),
@@ -251,7 +251,7 @@ func (re *Trademark) Update(ctx context.Context, row *entity.Trademark) (int32, 
 func (re *Trademark) UpdateStatus(ctx context.Context, row *entity.Trademark) (int32, error) {
 	sql := `
 		UPDATE
-			` + module.DBSchema + `.catalog_trademarks
+			` + module.DBSchemaTrademark + `.catalog_trademarks
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),
@@ -280,7 +280,7 @@ func (re *Trademark) UpdateStatus(ctx context.Context, row *entity.Trademark) (i
 func (re *Trademark) Delete(ctx context.Context, id mrtype.KeyInt32) error {
 	sql := `
 		UPDATE
-			` + module.DBSchema + `.catalog_trademarks
+			` + module.DBSchemaTrademark + `.catalog_trademarks
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),

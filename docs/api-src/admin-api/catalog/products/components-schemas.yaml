@@ -22,20 +22,15 @@ Catalog.Products.AdminAPI.Request.Model.StoreProduct:
   description: DTO сохранения товара каталога
   type: object
   required:
-    - categoryId
-    - trademarkId
-    - article
     - caption
   properties:
     version:
       $ref: "#/components/schemas/App.Field.TagVersion"
-    categoryId:
-      $ref: "#/components/schemas/App.Field.IntegerID"
     trademarkId:
       $ref: "#/components/schemas/App.Field.IntegerID"
     article:
       $ref: "#/components/schemas/App.Field.Article"
-    caption: # required,max=128
+    caption:
       $ref: "#/components/schemas/App.Field.Caption"
     price:
       $ref: "#/components/schemas/App.Field.Price"

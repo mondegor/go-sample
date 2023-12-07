@@ -1,7 +1,6 @@
 package factory
 
 import (
-	"go-sample/internal/factory"
 	"go-sample/internal/modules"
 	http_v1 "go-sample/internal/modules/file-station/controller/http_v1/public-api"
 	usecase "go-sample/internal/modules/file-station/usecase/public-api"
@@ -18,19 +17,14 @@ func newUnitImageProxy(
 	opts *modules.Options,
 	section mrcore.ClientSection,
 ) error {
-	fileAPI, err := factory.NewS3MinioFileProvider(
-		opts.MinioAdapter,
-		opts.Cfg.ModulesSettings.FileStation.ImageProxy.BucketName,
-		opts.Cfg.ModulesSettings.FileStation.ImageProxy.InitBucket,
-		opts.Logger,
-	)
+	fileAPI, err := opts.S3Pool.Provider(opts.Cfg.ModulesSettings.FileStation.ImageProxy.FileProvider)
 
 	if err != nil {
 		return err
 	}
 
-	service := usecase.NewFileProviderAdapter(fileAPI)
-	*c = append(*c, http_v1.NewImageProxy(section, service, opts.Cfg.ModulesSettings.FileStation.ImageProxy.URLPathRoot))
+	service := usecase.NewFileProviderAdapter(fileAPI, opts.ServiceHelper)
+	*c = append(*c, http_v1.NewImageProxy(section, service, opts.Cfg.ModulesSettings.FileStation.ImageProxy.BaseURL))
 
 	return nil
 }

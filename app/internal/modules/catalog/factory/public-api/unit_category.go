@@ -3,6 +3,7 @@ package factory
 import (
 	"go-sample/internal/factory"
 	"go-sample/internal/modules"
+	module "go-sample/internal/modules/catalog"
 	http_v1 "go-sample/internal/modules/catalog/controller/http_v1/public-api"
 	repository "go-sample/internal/modules/catalog/infrastructure/repository/public-api"
 	usecase "go-sample/internal/modules/catalog/usecase/public-api"
@@ -26,7 +27,7 @@ func newUnitCategory(
 		mrsql.NewBuilderSelect(
 			mrpostgres.NewSqlBuilderWhere(),
 			nil,
-			mrpostgres.NewSqlBuilderPager(1000),
+			mrpostgres.NewSqlBuilderPager(module.PageSizeMax),
 		),
 	)
 	imagesURL := factory.NewBuilderImagesURL(opts.Cfg)

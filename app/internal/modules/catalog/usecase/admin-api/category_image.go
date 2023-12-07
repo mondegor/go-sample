@@ -46,23 +46,23 @@ func NewCategoryImage(
 // Get - WARNING you don't forget to call item.File.Body.Close()
 func (uc *CategoryImage) Get(ctx context.Context, categoryID mrtype.KeyInt32) (*mrtype.File, error) {
 	if categoryID < 1 {
-		return nil, mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogCategoryImage)
+		return nil, mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
 	imagePath, err := uc.storage.FetchPath(ctx, categoryID)
 
 	if err != nil {
-		return nil, uc.serviceHelper.WrapErrorForSelect(err, entity.ModelNameCatalogCategoryImage)
+		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogCategoryImage, categoryID)
 	}
 
 	if imagePath == "" {
-		return nil, mrcore.FactoryErrServiceEntityNotFound.New(categoryID)
+		return nil, mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
 	file, err := uc.fileAPI.Download(ctx, imagePath)
 
 	if err != nil {
-		return nil, mrcore.FactoryErrServiceTemporarilyUnavailable.Wrap(err, "FileProviderAPI")
+		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, "FileProviderAPI", imagePath)
 	}
 
 	return file, nil
@@ -70,13 +70,13 @@ func (uc *CategoryImage) Get(ctx context.Context, categoryID mrtype.KeyInt32) (*
 
 func (uc *CategoryImage) GetInfoByPath(ctx context.Context, imagePath string) (*mrtype.FileInfo, error) {
 	if imagePath == "" {
-		return nil, mrcore.FactoryErrServiceEmptyInputData.New("imagePath")
+		return nil, mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
 	info, err := uc.fileAPI.Info(ctx, imagePath)
 
 	if err != nil {
-		return nil, mrcore.FactoryErrServiceTemporarilyUnavailable.Wrap(err, "FileProviderAPI")
+		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, "FileProviderAPI", imagePath)
 	}
 
 	return &info, nil
@@ -84,7 +84,7 @@ func (uc *CategoryImage) GetInfoByPath(ctx context.Context, imagePath string) (*
 
 func (uc *CategoryImage) Store(ctx context.Context, categoryID mrtype.KeyInt32, file *mrtype.File) error {
 	if categoryID < 1 {
-		return mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogCategoryImage)
+		return mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
 	newImagePath, err := uc.getImagePath(categoryID, file.OriginalName)
@@ -96,7 +96,7 @@ func (uc *CategoryImage) Store(ctx context.Context, categoryID mrtype.KeyInt32, 
 	unlock, err := uc.locker.Lock(ctx, uc.getLockKey(categoryID))
 
 	if err != nil {
-		return mrcore.FactoryErrServiceTemporarilyUnavailable.Wrap(err, entity.ModelNameCatalogCategoryImage)
+		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCatalogCategoryImage)
 	}
 
 	defer unlock()
@@ -104,18 +104,18 @@ func (uc *CategoryImage) Store(ctx context.Context, categoryID mrtype.KeyInt32, 
 	oldImagePath, err := uc.storage.FetchPath(ctx, categoryID)
 
 	if err != nil {
-		return uc.serviceHelper.WrapErrorForSelect(err, entity.ModelNameCatalogCategoryImage)
+		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogCategoryImage, categoryID)
 	}
 
 	file.Path = newImagePath
 
 	if err = uc.fileAPI.Upload(ctx, file); err != nil {
-		return mrcore.FactoryErrServiceTemporarilyUnavailable.Wrap(err, "FileProviderAPI")
+		return uc.serviceHelper.WrapErrorEntityFailed(err, "FileProviderAPI", file.Path)
 	}
 
 	if err = uc.storage.Update(ctx, categoryID, newImagePath); err != nil {
 		uc.removeImageFile(ctx, newImagePath)
-		return uc.serviceHelper.WrapErrorForUpdate(err, entity.ModelNameCatalogCategoryImage)
+		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogCategoryImage, categoryID)
 	}
 
 	uc.eventBox.Emit(
@@ -133,13 +133,13 @@ func (uc *CategoryImage) Store(ctx context.Context, categoryID mrtype.KeyInt32, 
 
 func (uc *CategoryImage) Remove(ctx context.Context, categoryID mrtype.KeyInt32) error {
 	if categoryID < 1 {
-		return mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogCategoryImage)
+		return mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
 	unlock, err := uc.locker.Lock(ctx, uc.getLockKey(categoryID))
 
 	if err != nil {
-		return mrcore.FactoryErrServiceTemporarilyUnavailable.Wrap(err, entity.ModelNameCatalogCategoryImage)
+		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCatalogCategoryImage)
 	}
 
 	defer unlock()
@@ -147,11 +147,11 @@ func (uc *CategoryImage) Remove(ctx context.Context, categoryID mrtype.KeyInt32)
 	imagePath, err := uc.storage.FetchPath(ctx, categoryID)
 
 	if err != nil {
-		return uc.serviceHelper.WrapErrorForSelect(err, entity.ModelNameCatalogCategoryImage)
+		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogCategoryImage, categoryID)
 	}
 
 	if err = uc.storage.Delete(ctx, categoryID); err != nil {
-		return uc.serviceHelper.WrapErrorForRemove(err, entity.ModelNameCatalogCategoryImage)
+		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogCategoryImage, categoryID)
 	}
 
 	uc.eventBox.Emit(

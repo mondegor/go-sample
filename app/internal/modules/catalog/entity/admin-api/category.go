@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"go-sample/internal/global"
 	"time"
 
 	"github.com/mondegor/go-webcore/mrenum"
@@ -9,7 +8,7 @@ import (
 )
 
 const (
-	ModelNameCatalogCategory = global.SectionAdminAPI + ".CatalogCategory"
+	ModelNameCatalogCategory = "admin-api.CatalogCategory"
 )
 
 type (

@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"go-sample/internal/global"
 	entity_shared "go-sample/internal/modules/catalog/entity/shared"
 	"time"
 
@@ -10,7 +9,7 @@ import (
 )
 
 const (
-	ModelNameCatalogProduct = global.SectionAdminAPI + ".CatalogProduct"
+	ModelNameCatalogProduct = "admin-api.CatalogProduct"
 )
 
 type (

@@ -3,20 +3,18 @@ App.ResponseJson.Error400:
   content:
     application/json;charset=UTF-8:
       schema:
-        type: array
-        items:
-          $ref: "#/components/schemas/App.Response.Model.ErrorAttribute"
+        $ref: "#/components/schemas/App.Response.Model.ErrorList"
 
 App.ResponseJson.Error404:
   description: Запрашиваемый ресурс не был найден
   content:
-    application/problem+json:
+    application/problem+json;charset=UTF-8:
       schema:
-        $ref: "#/components/schemas/App.Response.Model.Error"
+        $ref: "#/components/schemas/App.Response.Model.ErrorDetails"
 
 App.ResponseJson.Error5XX:
   description: Внутренняя ошибка сервера
   content:
-    application/problem+json:
+    application/problem+json;charset=UTF-8:
       schema:
-        $ref: "#/components/schemas/App.Response.Model.Error"
+        $ref: "#/components/schemas/App.Response.Model.ErrorDetails"

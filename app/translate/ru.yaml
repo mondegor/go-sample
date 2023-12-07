@@ -2,31 +2,49 @@
 messages:
 
 errors:
-  errSystem:
-    reason: System server error (ru)
-    details:
-      - Contact support in telegram (ru)
+  # Ошибки создаваемые AppErrorFactory
 
   errInternal:
-    reason: Internal server error (ru)
-    details:
-      - Contact support in telegram (ru)
+    reason: "Внутренняя ошибка сервера"
+
+  errSystem:
+    reason: "Системная ошибка сервера"
+
+  errHttpClientUnauthorized: # 401
+    reason: "Требуется авторизация пользователя"
+
+  errHttpAccessForbidden: # 403
+    reason: "Доступ к ресурсу отклонён"
+
+  errHttpResourceNotFound: # 404
+    reason: "Запрашиваемый ресурс не был найден"
 
   errHttpRequestParseData:
-    reason: Request body is not valid (ru)
-    details:
-      - Check fields REST API endpoint (ru)
-      - Check fields REST API endpoint1 (ru)
+    reason: "Тело запроса невалидное (проверьте: параметры запроса, правильность формата json и соответствующих ему типов)"
 
   errServiceTemporarilyUnavailable:
-    reason: Ресурс сервиса временно не доступен
-    details: [ detail1, detail2 ]
+    reason: "Система временно не может обработать ваш запрос. Пожалуйста, повторите запрос позже"
 
-  errHttpResourceNotFound:
-    reason: That resource is not found (ru)
+  # Ошибки генерируемые валидатором.
+  # ID формируется из "validator_err" и имени валидатора, которое указано
+  # в `` поля структуры (например: min, max, required).
+  # Можно использовать следующие переменные:
+  #   {{ .name }} - название поля, где произошла ошибка;
+  #   {{ .type }} - тип поля (например: int32);
+  #   {{ .value }} - текущее значение поля;
+  #   {{ .param }} - параметр валидатора (например: max=16 -> param=16);
 
-  errValidationMax:
-    reason: Значение поля не может быть более 32 символов
+  validator_err_required:
+    reason: "Поле обязательно для заполнения"
 
-  errCatalogProductArticleAlreadyExists:
-    reason: Product article '{{ .name }}' already exist
+  validator_err_min:
+    reason: "Значение поля должно быть не менее {{ .param }} символов (текущее значение: {{ .value }})"
+
+  validator_err_max:
+    reason: "Значение поля должно быть не более {{ .param }} символов (текущее значение: {{ .value }})"
+
+  validator_err_gte:
+    reason: "Значение поля должно быть больше или равно {{ .param }} (текущее значение: {{ .value }})"
+
+  validator_err_lte:
+    reason: "Значение поля должно быть меньше или равно {{ .param }} (текущее значение: {{ .value }})"

@@ -1,13 +1,11 @@
 package entity
 
 import (
-	"go-sample/internal/global"
-
 	"github.com/mondegor/go-webcore/mrtype"
 )
 
 const (
-	ModelNameCatalogCategory = global.SectionPublicAPI + ".CatalogCategory"
+	ModelNameCatalogCategory = "public-api.CatalogCategory"
 )
 
 type (

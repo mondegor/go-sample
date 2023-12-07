@@ -235,12 +235,34 @@ components:
       format: binary
       maxLength: 16777216
 
-    App.Response.Model.Error: # RFC 7807 (Problem Details for HTTP APIs)
+    App.Response.Model.ErrorList:
+      description: DTO списка пользовательских ошибок 400
+      type: array
+      items:
+        $ref: "#/components/schemas/App.Response.Model.ErrorAttribute"
+
+    App.Response.Model.ErrorAttribute:
+      description: DTO пользовательской ошибки 400
+      type: object
+      required:
+        - id
+        - value
+      properties:
+        id:
+          description: Название атрибута, где произошла ошибка
+          type: string
+          example: "attributeName"
+        value:
+          description: Описание ошибки
+          type: string
+          example: "Атрибут не может быть пустым | Указано недопустимое значение атрибута"
+
+    App.Response.Model.ErrorDetails: # RFC 7807 (Problem Details for HTTP APIs)
       description: DTO следующих ошибок - 401, 403, 404, 5XX
       type: object
       required:
         - title
-        - detail
+        - details
         - request
         - time
       properties:
@@ -248,7 +270,7 @@ components:
           description: Краткое описание проблемы, понятное человеку
           type: string
           example: "Resource not found"
-        detail:
+        details:
           description: Описание конкретно возникшей ошибки, понятное человеку
           type: string
           example: "Resource [User] with id = [123456] not found. You MUST use PUT to add a resource instead of GET"
@@ -265,22 +287,6 @@ components:
           description: Идентификатор конкретного возникновения ошибки
           type: string
           example: "5add1be1-90ab5d42-02fa8b1f-672503f2"
-
-    App.Response.Model.ErrorAttribute:
-      description: DTO элемента ошибки 400
-      type: object
-      required:
-        - id
-        - value
-      properties:
-        id:
-          description: Название атрибута, где произошла ошибка
-          type: string
-          example: "attributeName"
-        value:
-          description: Описание ошибки
-          type: string
-          example: "Атрибут не может быть пустым. Указано недопустимое значение атрибута"
 
     Catalog.Categories.PublicAPI.Response.Model.CategoryList:
       description: public DTO список торговых марок
@@ -318,21 +324,19 @@ components:
       content:
         application/json;charset=UTF-8:
           schema:
-            type: array
-            items:
-              $ref: "#/components/schemas/App.Response.Model.ErrorAttribute"
+            $ref: "#/components/schemas/App.Response.Model.ErrorList"
 
     App.ResponseJson.Error404:
       description: Запрашиваемый ресурс не был найден
       content:
-        application/problem+json:
+        application/problem+json;charset=UTF-8:
           schema:
-            $ref: "#/components/schemas/App.Response.Model.Error"
+            $ref: "#/components/schemas/App.Response.Model.ErrorDetails"
 
     App.ResponseJson.Error5XX:
       description: Внутренняя ошибка сервера
       content:
-        application/problem+json:
+        application/problem+json;charset=UTF-8:
           schema:
-            $ref: "#/components/schemas/App.Response.Model.Error"
+            $ref: "#/components/schemas/App.Response.Model.ErrorDetails"
 

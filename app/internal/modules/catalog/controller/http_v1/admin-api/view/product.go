@@ -13,16 +13,15 @@ type (
 		TrademarkID mrtype.KeyInt32     `json:"trademarkId" validate:"required,gte=1"`
 		Article     string              `json:"article" validate:"required,min=4,max=32,article"`
 		Caption     string              `json:"caption" validate:"required,max=128"`
-		Price       entity_shared.Money `json:"price" validate:"gte=0,lte=100000000001"`
+		Price       entity_shared.Money `json:"price" validate:"gte=0"`
 	}
 
 	StoreProductRequest struct {
 		Version     int32               `json:"version" validate:"required,gte=1"`
-		CategoryID  mrtype.KeyInt32     `json:"categoryId" validate:"required,gte=1"`
-		TrademarkID mrtype.KeyInt32     `json:"trademarkId" validate:"required,gte=1"`
-		Article     string              `json:"article" validate:"required,min=4,max=32,article"`
+		TrademarkID mrtype.KeyInt32     `json:"trademarkId" validate:"omitempty,gte=1"`
+		Article     string              `json:"article" validate:"omitempty,min=4,max=32,article"`
 		Caption     string              `json:"caption" validate:"required,max=128"`
-		Price       entity_shared.Money `json:"price" validate:"gte=0,lte=100000000001"`
+		Price       entity_shared.Money `json:"price" validate:"omitempty,gte=0"`
 	}
 
 	ProductListResponse struct {

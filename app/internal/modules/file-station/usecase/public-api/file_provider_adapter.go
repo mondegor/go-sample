@@ -6,20 +6,24 @@ import (
 
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-webcore/mrcore"
+	"github.com/mondegor/go-webcore/mrtool"
 	"github.com/mondegor/go-webcore/mrtype"
 )
 
 type (
 	FileProviderAdapter struct {
-		fileAPI mrstorage.FileProviderAPI
+		fileAPI       mrstorage.FileProviderAPI
+		serviceHelper *mrtool.ServiceHelper
 	}
 )
 
 func NewFileProviderAdapter(
 	fileAPI mrstorage.FileProviderAPI,
+	serviceHelper *mrtool.ServiceHelper,
 ) *FileProviderAdapter {
 	return &FileProviderAdapter{
-		fileAPI: fileAPI,
+		fileAPI:       fileAPI,
+		serviceHelper: serviceHelper,
 	}
 }
 
@@ -28,13 +32,13 @@ func (uc *FileProviderAdapter) Get(ctx context.Context, path string) (*mrtype.Fi
 	path = strings.TrimLeft(path, "/")
 
 	if path == "" {
-		return nil, mrcore.FactoryErrServiceEmptyInputData.New("path")
+		return nil, mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
 	file, err := uc.fileAPI.Download(ctx, path)
 
 	if err != nil {
-		return nil, mrcore.FactoryErrServiceTemporarilyUnavailable.Wrap(err, "FileProviderAPI")
+		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, "FileProviderAPI", path)
 	}
 
 	return file, nil

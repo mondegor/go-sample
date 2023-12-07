@@ -4,9 +4,9 @@ import (
 	"go-sample/config"
 
 	"github.com/mondegor/go-components/mrorderer"
-	"github.com/mondegor/go-storage/mrminio"
 	"github.com/mondegor/go-storage/mrpostgres"
 	"github.com/mondegor/go-storage/mrredis"
+	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrtool"
 )
@@ -18,7 +18,7 @@ type Options struct {
 	ServiceHelper    *mrtool.ServiceHelper
 	PostgresAdapter  *mrpostgres.ConnAdapter
 	RedisAdapter     *mrredis.ConnAdapter
-	MinioAdapter     *mrminio.ConnAdapter
+	S3Pool           *mrstorage.FileProviderPool
 	Locker           mrcore.Locker
 	OrdererComponent mrorderer.Component
 }

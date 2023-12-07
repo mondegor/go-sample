@@ -61,7 +61,7 @@ func (re *Category) Fetch(ctx context.Context, params mrstorage.SqlSelectParams)
 			image_path,
 			category_status
 		FROM
-			` + module.DBSchema + `.catalog_categories
+			` + module.DBSchemaCategory + `.catalog_categories
 		WHERE
 			` + whereStr + `
 		ORDER BY
@@ -110,7 +110,7 @@ func (re *Category) FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPa
 		SELECT
 			COUNT(*)
 		FROM
-			` + module.DBSchema + `.catalog_categories
+			` + module.DBSchemaCategory + `.catalog_categories
 		WHERE
 			` + whereStr + `;`
 
@@ -136,7 +136,7 @@ func (re *Category) LoadOne(ctx context.Context, row *entity.Category) error {
 			image_path,
 			category_status
 		FROM
-			` + module.DBSchema + `.catalog_categories
+			` + module.DBSchemaCategory + `.catalog_categories
 		WHERE
 			category_id = $1 AND category_status <> $2
 		LIMIT 1;`
@@ -160,7 +160,7 @@ func (re *Category) FetchStatus(ctx context.Context, row *entity.Category) (mren
 		SELECT
 			category_status
 		FROM
-			` + module.DBSchema + `.catalog_categories
+			` + module.DBSchemaCategory + `.catalog_categories
 		WHERE
 			category_id = $1 AND category_status <> $2
 		LIMIT 1;`
@@ -186,7 +186,7 @@ func (re *Category) IsExists(ctx context.Context, id mrtype.KeyInt32) error {
 		SELECT
 			1
 		FROM
-			` + module.DBSchema + `.catalog_categories
+			` + module.DBSchemaCategory + `.catalog_categories
 		WHERE
 			category_id = $1 AND category_status <> $2
 		LIMIT 1;`
@@ -203,7 +203,7 @@ func (re *Category) IsExists(ctx context.Context, id mrtype.KeyInt32) error {
 
 func (re *Category) Insert(ctx context.Context, row *entity.Category) error {
 	sql := `
-		INSERT INTO ` + module.DBSchema + `.catalog_categories
+		INSERT INTO ` + module.DBSchemaCategory + `.catalog_categories
 			(
 				category_caption,
 				category_status
@@ -226,7 +226,7 @@ func (re *Category) Insert(ctx context.Context, row *entity.Category) error {
 func (re *Category) Update(ctx context.Context, row *entity.Category) (int32, error) {
 	sql := `
 		UPDATE
-			` + module.DBSchema + `.catalog_categories
+			` + module.DBSchemaCategory + `.catalog_categories
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),
@@ -255,7 +255,7 @@ func (re *Category) Update(ctx context.Context, row *entity.Category) (int32, er
 func (re *Category) UpdateStatus(ctx context.Context, row *entity.Category) (int32, error) {
 	sql := `
 		UPDATE
-			` + module.DBSchema + `.catalog_categories
+			` + module.DBSchemaCategory + `.catalog_categories
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),
@@ -284,7 +284,7 @@ func (re *Category) UpdateStatus(ctx context.Context, row *entity.Category) (int
 func (re *Category) Delete(ctx context.Context, id mrtype.KeyInt32) error {
 	sql := `
 		UPDATE
-			` + module.DBSchema + `.catalog_categories
+			` + module.DBSchemaCategory + `.catalog_categories
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),

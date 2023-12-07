@@ -31,7 +31,7 @@ func (uc *Category) GetList(ctx context.Context, params entity.CategoryParams) (
 	total, err := uc.storage.FetchTotal(ctx, fetchParams.Where)
 
 	if err != nil {
-		return nil, 0, mrcore.FactoryErrServiceTemporarilyUnavailable.Wrap(err, entity.ModelNameCatalogCategory)
+		return nil, 0, uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCatalogCategory)
 	}
 
 	if total < 1 {
@@ -41,7 +41,7 @@ func (uc *Category) GetList(ctx context.Context, params entity.CategoryParams) (
 	items, err := uc.storage.Fetch(ctx, fetchParams)
 
 	if err != nil {
-		return nil, 0, mrcore.FactoryErrServiceTemporarilyUnavailable.Wrap(err, entity.ModelNameCatalogCategory)
+		return nil, 0, uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCatalogCategory)
 	}
 
 	return items, total, nil
@@ -49,13 +49,13 @@ func (uc *Category) GetList(ctx context.Context, params entity.CategoryParams) (
 
 func (uc *Category) GetItem(ctx context.Context, id mrtype.KeyInt32) (*entity.Category, error) {
 	if id < 1 {
-		return nil, mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogCategory)
+		return nil, mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
 	item := &entity.Category{ID: id}
 
 	if err := uc.storage.LoadOne(ctx, item); err != nil {
-		return nil, uc.serviceHelper.WrapErrorForSelect(err, entity.ModelNameCatalogCategory)
+		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogCategory, id)
 	}
 
 	return item, nil

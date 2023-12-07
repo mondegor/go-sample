@@ -18,8 +18,8 @@ type (
 	Product struct {
 		componentOrderer mrorderer.Component
 		storage          ProductStorage
-		storageCategory  CategoryStorage
-		storageTrademark TrademarkStorage
+		categoryAPI      usecase_shared.CategoryServiceAPI
+		trademarkAPI     usecase_shared.TrademarkServiceAPI
 		eventBox         mrcore.EventBox
 		serviceHelper    *mrtool.ServiceHelper
 		statusFlow       mrenum.StatusFlow
@@ -29,16 +29,16 @@ type (
 func NewProduct(
 	componentOrderer mrorderer.Component,
 	storage ProductStorage,
-	storageCategory CategoryStorage,
-	storageTrademark TrademarkStorage,
+	categoryAPI usecase_shared.CategoryServiceAPI,
+	trademarkAPI usecase_shared.TrademarkServiceAPI,
 	eventBox mrcore.EventBox,
 	serviceHelper *mrtool.ServiceHelper,
 ) *Product {
 	return &Product{
 		componentOrderer: componentOrderer,
 		storage:          storage,
-		storageCategory:  storageCategory,
-		storageTrademark: storageTrademark,
+		categoryAPI:      categoryAPI,
+		trademarkAPI:     trademarkAPI,
 		eventBox:         eventBox,
 		serviceHelper:    serviceHelper,
 		statusFlow:       mrenum.ItemStatusFlow,
@@ -50,7 +50,7 @@ func (uc *Product) GetList(ctx context.Context, params entity.ProductParams) ([]
 	total, err := uc.storage.FetchTotal(ctx, fetchParams.Where)
 
 	if err != nil {
-		return nil, 0, mrcore.FactoryErrServiceTemporarilyUnavailable.Wrap(err, entity.ModelNameCatalogProduct)
+		return nil, 0, uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCatalogProduct)
 	}
 
 	if total < 1 {
@@ -60,7 +60,7 @@ func (uc *Product) GetList(ctx context.Context, params entity.ProductParams) ([]
 	items, err := uc.storage.Fetch(ctx, fetchParams)
 
 	if err != nil {
-		return nil, 0, mrcore.FactoryErrServiceTemporarilyUnavailable.Wrap(err, entity.ModelNameCatalogProduct)
+		return nil, 0, uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCatalogProduct)
 	}
 
 	return items, total, nil
@@ -68,13 +68,13 @@ func (uc *Product) GetList(ctx context.Context, params entity.ProductParams) ([]
 
 func (uc *Product) GetItem(ctx context.Context, id mrtype.KeyInt32) (*entity.Product, error) {
 	if id < 1 {
-		return nil, mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogProduct)
+		return nil, mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
 	item := &entity.Product{ID: id}
 
 	if err := uc.storage.LoadOne(ctx, item); err != nil {
-		return nil, uc.serviceHelper.WrapErrorForSelect(err, entity.ModelNameCatalogProduct)
+		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogProduct, id)
 	}
 
 	return item, nil
@@ -90,7 +90,7 @@ func (uc *Product) Create(ctx context.Context, item *entity.Product) error {
 	item.Status = mrenum.ItemStatusDraft
 
 	if err := uc.storage.Insert(ctx, item); err != nil {
-		return mrcore.FactoryErrServiceEntityNotCreated.Wrap(err, entity.ModelNameCatalogProduct)
+		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCatalogProduct)
 	}
 
 	uc.eventBox.Emit(
@@ -111,15 +111,15 @@ func (uc *Product) Create(ctx context.Context, item *entity.Product) error {
 
 func (uc *Product) Store(ctx context.Context, item *entity.Product) error {
 	if item.ID < 1 {
-		return mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogProduct)
+		return mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
 	if item.TagVersion < 1 {
-		return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"tagVersion": item.TagVersion})
+		return mrcore.FactoryErrServiceEntityVersionInvalid.New()
 	}
 
 	if err := uc.storage.IsExists(ctx, item.ID); err != nil {
-		return uc.serviceHelper.WrapErrorForSelect(err, entity.ModelNameCatalogProduct)
+		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogProduct, item.ID)
 	}
 
 	if err := uc.checkProduct(ctx, item); err != nil {
@@ -129,7 +129,12 @@ func (uc *Product) Store(ctx context.Context, item *entity.Product) error {
 	version, err := uc.storage.Update(ctx, item)
 
 	if err != nil {
-		return uc.serviceHelper.WrapErrorForUpdateWithVersion(err, entity.ModelNameCatalogProduct)
+		return uc.serviceHelper.WrapErrorEntity(
+			mrcore.FactoryErrServiceEntityVersionInvalid,
+			err,
+			entity.ModelNameCatalogProduct,
+			mrerr.Arg{"id": item.ID, "ver": item.TagVersion},
+		)
 	}
 
 	uc.eventBox.Emit(
@@ -144,17 +149,17 @@ func (uc *Product) Store(ctx context.Context, item *entity.Product) error {
 
 func (uc *Product) ChangeStatus(ctx context.Context, item *entity.Product) error {
 	if item.ID < 1 {
-		return mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogProduct)
+		return mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
 	if item.TagVersion < 1 {
-		return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"tagVersion": item.TagVersion})
+		return mrcore.FactoryErrServiceEntityVersionInvalid.New()
 	}
 
 	currentStatus, err := uc.storage.FetchStatus(ctx, item)
 
 	if err != nil {
-		return uc.serviceHelper.WrapErrorForSelect(err, entity.ModelNameCatalogProduct)
+		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogProduct, item.ID)
 	}
 
 	if currentStatus == item.Status {
@@ -162,13 +167,18 @@ func (uc *Product) ChangeStatus(ctx context.Context, item *entity.Product) error
 	}
 
 	if !uc.statusFlow.Check(currentStatus, item.Status) {
-		return mrcore.FactoryErrServiceIncorrectSwitchStatus.New(currentStatus, item.Status, entity.ModelNameCatalogProduct, item.ID)
+		return mrcore.FactoryErrServiceSwitchStatusRejected.New(currentStatus, item.Status)
 	}
 
 	version, err := uc.storage.UpdateStatus(ctx, item)
 
 	if err != nil {
-		return uc.serviceHelper.WrapErrorForUpdateWithVersion(err, entity.ModelNameCatalogProduct)
+		return uc.serviceHelper.WrapErrorEntity(
+			mrcore.FactoryErrServiceEntityVersionInvalid,
+			err,
+			entity.ModelNameCatalogProduct,
+			mrerr.Arg{"id": item.ID, "ver": item.TagVersion},
+		)
 	}
 
 	uc.eventBox.Emit(
@@ -184,11 +194,11 @@ func (uc *Product) ChangeStatus(ctx context.Context, item *entity.Product) error
 
 func (uc *Product) Remove(ctx context.Context, id mrtype.KeyInt32) error {
 	if id < 1 {
-		return mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogProduct)
+		return mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
 	if err := uc.storage.Delete(ctx, id); err != nil {
-		return uc.serviceHelper.WrapErrorForRemove(err, entity.ModelNameCatalogProduct)
+		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogProduct, id)
 	}
 
 	uc.eventBox.Emit(
@@ -201,16 +211,20 @@ func (uc *Product) Remove(ctx context.Context, id mrtype.KeyInt32) error {
 }
 
 func (uc *Product) MoveAfterID(ctx context.Context, id mrtype.KeyInt32, afterID mrtype.KeyInt32) error {
+	if id < 1 {
+		return mrcore.FactoryErrServiceEntityNotFound.New()
+	}
+
 	item := entity.Product{
 		ID: id,
 	}
 
 	if err := uc.storage.LoadOne(ctx, &item); err != nil {
-		return err
+		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogProduct, id)
 	}
 
 	if item.CategoryID < 1 {
-		return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"categoryId": item.CategoryID})
+		return mrcore.FactoryErrInternalWithData.New(entity.ModelNameCatalogProduct+"::categoryId", item.CategoryID)
 	}
 
 	meta := uc.storage.GetMetaData(item.CategoryID)
@@ -224,20 +238,16 @@ func (uc *Product) checkProduct(ctx context.Context, item *entity.Product) error
 		return err
 	}
 
-	if err := uc.storageCategory.IsExists(ctx, item.CategoryID); err != nil {
-		if mrcore.FactoryErrStorageNoRowFound.Is(err) {
-			return usecase_shared.FactoryErrCategoryNotFound.Wrap(err, item.CategoryID)
+	if item.ID == 0 || item.CategoryID > 0 {
+		if err := uc.categoryAPI.CheckingAvailability(ctx, item.CategoryID); err != nil {
+			return err
 		}
-
-		return err
 	}
 
-	if err := uc.storageTrademark.IsExists(ctx, item.TrademarkID); err != nil {
-		if mrcore.FactoryErrStorageNoRowFound.Is(err) {
-			return usecase_shared.FactoryErrTrademarkNotFound.Wrap(err, item.TrademarkID)
+	if item.ID == 0 || item.TrademarkID > 0 {
+		if err := uc.trademarkAPI.CheckingAvailability(ctx, item.TrademarkID); err != nil {
+			return err
 		}
-
-		return err
 	}
 
 	return nil
@@ -251,7 +261,7 @@ func (uc *Product) checkArticle(ctx context.Context, item *entity.Product) error
 			return nil
 		}
 
-		return mrcore.FactoryErrServiceTemporarilyUnavailable.Wrap(err, entity.ModelNameCatalogProduct)
+		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCatalogProduct)
 	}
 
 	if item.ID != id {

@@ -1,6 +1,31 @@
 # Go Sample Changelog
 Все изменения сервиса Go Sample будут документироваться на этой странице.
 
+## 2023-12-07
+### Changed
+- Доработаны настройки конфига, добавлены `APPX_SERVER_*` и другие переменные;
+- Добавлено управление callstack в отладочном режиме (cм. `mrerr.SetCallStackOptions`);
+- Префикс в записях логов теперь стал необязательным параметром;
+- Переработана работа с ошибками под новое ядро системы, в связи с этим:
+    - из `mrcore.FactoryErrServiceEntityNotFound` удалены параметры;
+    - для обработки `tagVersion` теперь используется `mrcore.FactoryErrServiceEntityVersionInvalid`;
+    - `mrcore.FactoryErrServiceTemporarilyUnavailable` заменено на `uc.serviceHelper.WrapErrorFailed`;
+    - `uc.serviceHelper.WrapErrorForSelect` -> `uc.serviceHelper.WrapErrorEntityNotFoundOrFailed`;
+    - `mrcore.FactoryErrServiceIncorrectSwitchStatus` -> `mrcore.FactoryErrServiceSwitchStatusRejected`;
+    - добавлены ошибки: `FactoryErrCategoryImageNotFound`, `FactoryErrProductNotFound`;
+- Добавлен механизм виртуальных файловых провайдеров (S3 хранилищ).
+  В конфиге прописан виртуальный файловый провайдер `imageStorage` с привязкой к реальному бакету S3 хранилища.
+  Его уже используют другие модули системы. Тем самым убрана прямая зависимость модулей от реального бакета.
+- В контроллере из `category.go` функционал работы с изображениями перенесён в `category_images.go`;
+- Доработана структура БД, добавлены тестовые данные. Схема `public` переименована в `gosample`.
+  Для каждого юнита добавлена своя константа с названием схемы БД;
+- Изменения в REST API:
+    - добавлен `App.Response.Model.ErrorList` (массив `App.Response.Model.ErrorAttribute`);
+    - переименован `App.Response.Model.Error` -> `App.Response.Model.ErrorDetails`;
+    - переименовано поле у `App.Response.Model.ErrorDetails`: `detail` -> `details`;
+- Теперь юниты используют обращение друг к другу через API.
+  Для этого вместо storageCategory и storageTrademark ранее используемые юнитом product добавлены соответствующие CategoryServiceAPI и TrademarkServiceAPI;
+
 ## 2023-11-23
 ### Changed
 - Отладочная информация о загрузке картинки теперь вызывается из пакета mrdebug;

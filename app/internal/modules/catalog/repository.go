@@ -1,5 +1,7 @@
 package module
 
 const (
-	DBSchema = "public"
+	DBSchemaCategory  = "gosample"
+	DBSchemaProduct   = "gosample"
+	DBSchemaTrademark = "gosample"
 )

@@ -1,7 +1,7 @@
--- DROP SCHEMA public;
+DROP TABLE gosample.catalog_products;
+DROP TABLE gosample.catalog_trademarks;
+DROP TABLE gosample.catalog_categories;
 
-DROP TABLE catalog_products;
-DROP TABLE catalog_trademarks;
-DROP TABLE catalog_categories;
+DROP TYPE gosample.item_status;
 
-DROP TYPE item_status;
+DROP SCHEMA gosample;

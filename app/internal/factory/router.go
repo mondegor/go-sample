@@ -29,7 +29,7 @@ func NewHttpRouter(cfg *config.Config, logger mrcore.Logger) (mrcore.HttpRouter,
 		AllowedHeaders:   cfg.Cors.AllowedHeaders,
 		ExposedHeaders:   cfg.Cors.ExposedHeaders,
 		AllowCredentials: cfg.Cors.AllowCredentials,
-		Debug:            cfg.Debug,
+		Logger:           logger,
 	}
 
 	router := mrserver.NewRouter(logger, mrserver.HandlerAdapter(nil))

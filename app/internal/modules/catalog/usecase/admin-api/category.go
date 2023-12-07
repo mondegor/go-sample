@@ -38,7 +38,7 @@ func (uc *Category) GetList(ctx context.Context, params entity.CategoryParams) (
 	total, err := uc.storage.FetchTotal(ctx, fetchParams.Where)
 
 	if err != nil {
-		return nil, 0, mrcore.FactoryErrServiceTemporarilyUnavailable.Wrap(err, entity.ModelNameCatalogCategory)
+		return nil, 0, uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCatalogCategory)
 	}
 
 	if total < 1 {
@@ -48,7 +48,7 @@ func (uc *Category) GetList(ctx context.Context, params entity.CategoryParams) (
 	items, err := uc.storage.Fetch(ctx, fetchParams)
 
 	if err != nil {
-		return nil, 0, mrcore.FactoryErrServiceTemporarilyUnavailable.Wrap(err, entity.ModelNameCatalogCategory)
+		return nil, 0, uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCatalogCategory)
 	}
 
 	return items, total, nil
@@ -56,26 +56,16 @@ func (uc *Category) GetList(ctx context.Context, params entity.CategoryParams) (
 
 func (uc *Category) GetItem(ctx context.Context, id mrtype.KeyInt32) (*entity.Category, error) {
 	if id < 1 {
-		return nil, mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogCategory)
+		return nil, mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
 	item := &entity.Category{ID: id}
 
 	if err := uc.storage.LoadOne(ctx, item); err != nil {
-		return nil, uc.serviceHelper.WrapErrorForSelect(err, entity.ModelNameCatalogCategory)
+		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogCategory, id)
 	}
 
 	return item, nil
-}
-
-func (uc *Category) CheckAvailability(ctx context.Context, id mrtype.KeyInt32) error {
-	if id < 1 {
-		return mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogCategory)
-	}
-
-	err := uc.storage.IsExists(ctx, id)
-
-	return uc.serviceHelper.ReturnErrorIfItemNotFound(err, entity.ModelNameCatalogCategory)
 }
 
 // Create
@@ -84,7 +74,7 @@ func (uc *Category) Create(ctx context.Context, item *entity.Category) error {
 	item.Status = mrenum.ItemStatusDraft
 
 	if err := uc.storage.Insert(ctx, item); err != nil {
-		return mrcore.FactoryErrServiceEntityNotCreated.Wrap(err, entity.ModelNameCatalogCategory)
+		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCatalogCategory)
 	}
 
 	uc.eventBox.Emit(
@@ -98,21 +88,26 @@ func (uc *Category) Create(ctx context.Context, item *entity.Category) error {
 
 func (uc *Category) Store(ctx context.Context, item *entity.Category) error {
 	if item.ID < 1 {
-		return mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogCategory)
+		return mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
 	if item.TagVersion < 1 {
-		return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"tagVersion": item.TagVersion})
+		return mrcore.FactoryErrServiceEntityVersionInvalid.New()
 	}
 
 	if err := uc.storage.IsExists(ctx, item.ID); err != nil {
-		return uc.serviceHelper.WrapErrorForSelect(err, entity.ModelNameCatalogCategory)
+		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogCategory, item.ID)
 	}
 
 	version, err := uc.storage.Update(ctx, item)
 
 	if err != nil {
-		return uc.serviceHelper.WrapErrorForUpdateWithVersion(err, entity.ModelNameCatalogCategory)
+		return uc.serviceHelper.WrapErrorEntity(
+			mrcore.FactoryErrServiceEntityVersionInvalid,
+			err,
+			entity.ModelNameCatalogCategory,
+			mrerr.Arg{"id": item.ID, "ver": item.TagVersion},
+		)
 	}
 
 	uc.eventBox.Emit(
@@ -127,17 +122,17 @@ func (uc *Category) Store(ctx context.Context, item *entity.Category) error {
 
 func (uc *Category) ChangeStatus(ctx context.Context, item *entity.Category) error {
 	if item.ID < 1 {
-		return mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogCategory)
+		return mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
 	if item.TagVersion < 1 {
-		return mrcore.FactoryErrServiceIncorrectInputData.New(mrerr.Arg{"tagVersion": item.TagVersion})
+		return mrcore.FactoryErrServiceEntityVersionInvalid.New()
 	}
 
 	currentStatus, err := uc.storage.FetchStatus(ctx, item)
 
 	if err != nil {
-		return uc.serviceHelper.WrapErrorForSelect(err, entity.ModelNameCatalogCategory)
+		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogCategory, item.ID)
 	}
 
 	if currentStatus == item.Status {
@@ -145,13 +140,18 @@ func (uc *Category) ChangeStatus(ctx context.Context, item *entity.Category) err
 	}
 
 	if !uc.statusFlow.Check(currentStatus, item.Status) {
-		return mrcore.FactoryErrServiceIncorrectSwitchStatus.New(currentStatus, item.Status, entity.ModelNameCatalogCategory, item.ID)
+		return mrcore.FactoryErrServiceSwitchStatusRejected.New(currentStatus, item.Status)
 	}
 
 	version, err := uc.storage.UpdateStatus(ctx, item)
 
 	if err != nil {
-		return uc.serviceHelper.WrapErrorForUpdateWithVersion(err, entity.ModelNameCatalogCategory)
+		return uc.serviceHelper.WrapErrorEntity(
+			mrcore.FactoryErrServiceEntityVersionInvalid,
+			err,
+			entity.ModelNameCatalogCategory,
+			mrerr.Arg{"id": item.ID, "ver": item.TagVersion},
+		)
 	}
 
 	uc.eventBox.Emit(
@@ -167,11 +167,11 @@ func (uc *Category) ChangeStatus(ctx context.Context, item *entity.Category) err
 
 func (uc *Category) Remove(ctx context.Context, id mrtype.KeyInt32) error {
 	if id < 1 {
-		return mrcore.FactoryErrServiceEntityNotFound.New(entity.ModelNameCatalogCategory)
+		return mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
 	if err := uc.storage.Delete(ctx, id); err != nil {
-		return uc.serviceHelper.WrapErrorForRemove(err, entity.ModelNameCatalogCategory)
+		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogCategory, id)
 	}
 
 	uc.eventBox.Emit(

@@ -13,7 +13,6 @@ type (
 	CategoryService interface {
 		GetList(ctx context.Context, params entity.CategoryParams) ([]entity.Category, int64, error)
 		GetItem(ctx context.Context, id mrtype.KeyInt32) (*entity.Category, error)
-		CheckAvailability(ctx context.Context, id mrtype.KeyInt32) error
 		Create(ctx context.Context, item *entity.Category) error
 		Store(ctx context.Context, item *entity.Category) error
 		ChangeStatus(ctx context.Context, item *entity.Category) error

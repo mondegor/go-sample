@@ -35,7 +35,7 @@ func NewProduct(
 
 func (re *Product) GetMetaData(categoryID mrtype.KeyInt32) mrorderer.EntityMeta {
 	return mrorderer.NewEntityMeta(
-		module.DBSchema + ".catalog_products",
+		module.DBSchemaProduct+".catalog_products",
 		"product_id",
 		re.sqlSelect.Where(func(w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
 			return w.JoinAnd(
@@ -85,7 +85,7 @@ func (re *Product) Fetch(ctx context.Context, params mrstorage.SqlSelectParams) 
 			product_price,
 			product_status
 		FROM
-			` + module.DBSchema + `.catalog_products
+			` + module.DBSchemaProduct + `.catalog_products
 		WHERE
 			` + whereStr + `
 		ORDER BY
@@ -137,7 +137,7 @@ func (re *Product) FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPar
 		SELECT
 			COUNT(*)
 		FROM
-			` + module.DBSchema + `.catalog_products
+			` + module.DBSchemaProduct + `.catalog_products
 		WHERE
 			` + whereStr + `;`
 
@@ -159,13 +159,14 @@ func (re *Product) LoadOne(ctx context.Context, row *entity.Product) error {
 		SELECT
 			tag_version,
 			datetime_created,
+			category_id,
 			trademark_id,
 			product_article,
 			product_caption,
 			product_price,
 			product_status
 		FROM
-			` + module.DBSchema + `.catalog_products
+			` + module.DBSchemaProduct + `.catalog_products
 		WHERE
 			product_id = $1 AND product_status <> $2
 		LIMIT 1;`
@@ -178,6 +179,7 @@ func (re *Product) LoadOne(ctx context.Context, row *entity.Product) error {
 	).Scan(
 		&row.TagVersion,
 		&row.CreatedAt,
+		&row.CategoryID,
 		&row.TrademarkID,
 		&row.Article,
 		&row.Caption,
@@ -191,7 +193,7 @@ func (re *Product) FetchIdByArticle(ctx context.Context, article string) (mrtype
 		SELECT
 			product_id
 		FROM
-			` + module.DBSchema + `.catalog_products
+			` + module.DBSchemaProduct + `.catalog_products
 		WHERE
 			product_article = $1
 		LIMIT 1;`
@@ -214,7 +216,7 @@ func (re *Product) FetchStatus(ctx context.Context, row *entity.Product) (mrenum
 		SELECT
 			product_status
 		FROM
-			` + module.DBSchema + `.catalog_products
+			` + module.DBSchemaProduct + `.catalog_products
 		WHERE
 			product_id = $1 AND product_status <> $2
 		LIMIT 1;`
@@ -240,7 +242,7 @@ func (re *Product) IsExists(ctx context.Context, id mrtype.KeyInt32) error {
 		SELECT
 			1
 		FROM
-			` + module.DBSchema + `.catalog_products
+			` + module.DBSchemaProduct + `.catalog_products
 		WHERE
 			product_id = $1 AND product_status <> $2
 		LIMIT 1;`
@@ -257,7 +259,7 @@ func (re *Product) IsExists(ctx context.Context, id mrtype.KeyInt32) error {
 
 func (re *Product) Insert(ctx context.Context, row *entity.Product) error {
 	sql := `
-		INSERT INTO ` + module.DBSchema + `.catalog_products
+		INSERT INTO ` + module.DBSchemaProduct + `.catalog_products
 			(
 				category_id,
 				trademark_id,
@@ -308,7 +310,7 @@ func (re *Product) Update(ctx context.Context, row *entity.Product) (int32, erro
 
 	sql := `
 		UPDATE
-			` + module.DBSchema + `.catalog_products
+			` + module.DBSchemaProduct + `.catalog_products
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),
@@ -334,7 +336,7 @@ func (re *Product) Update(ctx context.Context, row *entity.Product) (int32, erro
 func (re *Product) UpdateStatus(ctx context.Context, row *entity.Product) (int32, error) {
 	sql := `
 		UPDATE
-			` + module.DBSchema + `.catalog_products
+			` + module.DBSchemaProduct + `.catalog_products
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),
@@ -363,7 +365,7 @@ func (re *Product) UpdateStatus(ctx context.Context, row *entity.Product) (int32
 func (re *Product) Delete(ctx context.Context, id mrtype.KeyInt32) error {
 	sql := `
 		UPDATE
-			` + module.DBSchema + `.catalog_products
+			` + module.DBSchemaProduct + `.catalog_products
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),
