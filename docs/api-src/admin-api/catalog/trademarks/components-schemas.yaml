@@ -49,7 +49,9 @@ Catalog.Trademarks.AdminAPI.Response.Model.Trademark:
     version:
       $ref: "#/components/schemas/App.Field.TagVersion"
     createdAt:
-      $ref: "#/components/schemas/App.Field.CreatedAt"
+      $ref: "#/components/schemas/App.Field.Date.CreatedAt"
+    updatedAt:
+      $ref: "#/components/schemas/App.Field.Date.UpdatedAt"
     caption:
       $ref: "#/components/schemas/App.Field.Caption"
     status:

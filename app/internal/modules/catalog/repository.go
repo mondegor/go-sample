@@ -1,7 +1,7 @@
 package module
 
 const (
-	DBSchemaCategory  = "gosample"
-	DBSchemaProduct   = "gosample"
-	DBSchemaTrademark = "gosample"
+	DBSchemaCategory  = "gs_catalog"
+	DBSchemaProduct   = "gs_catalog"
+	DBSchemaTrademark = "gs_catalog"
 )

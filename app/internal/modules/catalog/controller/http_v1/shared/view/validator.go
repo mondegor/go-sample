@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	regexpArticle = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_.+-]*[a-zA-Z0-9]$`)
+	regexpArticle = regexp.MustCompile(`^\S+$`)
 )
 
 func ValidateArticle(value string) bool {

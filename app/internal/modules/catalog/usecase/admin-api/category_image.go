@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/mondegor/go-storage/mrstorage"
+	"github.com/mondegor/go-sysmess/mrmsg"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrctx"
 	"github.com/mondegor/go-webcore/mrtool"
@@ -16,7 +17,6 @@ import (
 
 type (
 	CategoryImage struct {
-		baseImageURL  string
 		storage       CategoryImageStorage
 		fileAPI       mrstorage.FileProviderAPI
 		locker        mrcore.Locker
@@ -26,7 +26,6 @@ type (
 )
 
 func NewCategoryImage(
-	baseImageURL string,
 	storage CategoryImageStorage,
 	fileAPI mrstorage.FileProviderAPI,
 	locker mrcore.Locker,
@@ -34,7 +33,6 @@ func NewCategoryImage(
 	serviceHelper *mrtool.ServiceHelper,
 ) *CategoryImage {
 	return &CategoryImage{
-		baseImageURL:  baseImageURL,
 		storage:       storage,
 		fileAPI:       fileAPI,
 		locker:        locker,
@@ -52,7 +50,7 @@ func (uc *CategoryImage) Get(ctx context.Context, categoryID mrtype.KeyInt32) (*
 	imagePath, err := uc.storage.FetchPath(ctx, categoryID)
 
 	if err != nil {
-		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogCategoryImage, categoryID)
+		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategoryImage, categoryID)
 	}
 
 	if imagePath == "" {
@@ -96,7 +94,7 @@ func (uc *CategoryImage) Store(ctx context.Context, categoryID mrtype.KeyInt32, 
 	unlock, err := uc.locker.Lock(ctx, uc.getLockKey(categoryID))
 
 	if err != nil {
-		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCatalogCategoryImage)
+		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCategoryImage)
 	}
 
 	defer unlock()
@@ -104,7 +102,7 @@ func (uc *CategoryImage) Store(ctx context.Context, categoryID mrtype.KeyInt32, 
 	oldImagePath, err := uc.storage.FetchPath(ctx, categoryID)
 
 	if err != nil {
-		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogCategoryImage, categoryID)
+		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategoryImage, categoryID)
 	}
 
 	file.Path = newImagePath
@@ -115,16 +113,10 @@ func (uc *CategoryImage) Store(ctx context.Context, categoryID mrtype.KeyInt32, 
 
 	if err = uc.storage.Update(ctx, categoryID, newImagePath); err != nil {
 		uc.removeImageFile(ctx, newImagePath)
-		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogCategoryImage, categoryID)
+		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategoryImage, categoryID)
 	}
 
-	uc.eventBox.Emit(
-		"%s::Upload: cid=%d; path=%s; old-path=%s",
-		entity.ModelNameCatalogCategoryImage,
-		categoryID,
-		newImagePath,
-		oldImagePath,
-	)
+	uc.eventBoxEmitEntity(ctx, "Store", mrmsg.Data{"categoryId": categoryID, "path": newImagePath, "old-path": oldImagePath})
 
 	uc.removeImageFile(ctx, oldImagePath)
 
@@ -139,35 +131,30 @@ func (uc *CategoryImage) Remove(ctx context.Context, categoryID mrtype.KeyInt32)
 	unlock, err := uc.locker.Lock(ctx, uc.getLockKey(categoryID))
 
 	if err != nil {
-		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCatalogCategoryImage)
+		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCategoryImage)
 	}
 
 	defer unlock()
 
-	imagePath, err := uc.storage.FetchPath(ctx, categoryID)
+	oldImagePath, err := uc.storage.FetchPath(ctx, categoryID)
 
 	if err != nil {
-		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogCategoryImage, categoryID)
+		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategoryImage, categoryID)
 	}
 
 	if err = uc.storage.Delete(ctx, categoryID); err != nil {
-		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogCategoryImage, categoryID)
+		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategoryImage, categoryID)
 	}
 
-	uc.eventBox.Emit(
-		"%s::Remove: cid=%d; path=%s",
-		entity.ModelNameCatalogCategoryImage,
-		categoryID,
-		imagePath,
-	)
+	uc.eventBoxEmitEntity(ctx, "Remove", mrmsg.Data{"categoryId": categoryID, "old-path": oldImagePath})
 
-	uc.removeImageFile(ctx, imagePath)
+	uc.removeImageFile(ctx, oldImagePath)
 
 	return nil
 }
 
 func (uc *CategoryImage) getLockKey(categoryID mrtype.KeyInt32) string {
-	return fmt.Sprintf("%s:%d", entity.ModelNameCatalogCategoryImage, categoryID)
+	return fmt.Sprintf("%s:%d", entity.ModelNameCategoryImage, categoryID)
 }
 
 func (uc *CategoryImage) getImagePath(categoryID mrtype.KeyInt32, path string) (string, error) {
@@ -178,8 +165,7 @@ func (uc *CategoryImage) getImagePath(categoryID mrtype.KeyInt32, path string) (
 	}
 
 	return fmt.Sprintf(
-		"%s/%03x-%x%s",
-		uc.baseImageURL,
+		"%03x-%x%s",
 		categoryID,
 		time.Now().UnixNano()&0xffff,
 		ext,
@@ -194,4 +180,13 @@ func (uc *CategoryImage) removeImageFile(ctx context.Context, filePath string) {
 	if err := uc.fileAPI.Remove(ctx, filePath); err != nil {
 		mrctx.Logger(ctx).Err(err)
 	}
+}
+
+func (uc *CategoryImage) eventBoxEmitEntity(ctx context.Context, eventName string, data mrmsg.Data) {
+	uc.eventBox.Emit(
+		"%s::%s: %s",
+		entity.ModelNameCategoryImage,
+		eventName,
+		data,
+	)
 }

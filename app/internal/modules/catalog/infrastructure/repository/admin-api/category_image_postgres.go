@@ -28,7 +28,7 @@ func (re *CategoryImage) FetchPath(ctx context.Context, categoryID mrtype.KeyInt
 		SELECT
 			image_path
 		FROM
-			` + module.DBSchemaCategory + `.catalog_categories
+			` + module.DBSchemaCategory + `.categories
 		WHERE
 			category_id = $1 AND category_status <> $2
 		LIMIT 1;`
@@ -50,7 +50,7 @@ func (re *CategoryImage) FetchPath(ctx context.Context, categoryID mrtype.KeyInt
 func (re *CategoryImage) Update(ctx context.Context, categoryID mrtype.KeyInt32, imagePath string) error {
 	sql := `
 		UPDATE
-			` + module.DBSchemaCategory + `.catalog_categories
+			` + module.DBSchemaCategory + `.categories
 		SET
 			datetime_updated = NOW(),
 			image_path = $3

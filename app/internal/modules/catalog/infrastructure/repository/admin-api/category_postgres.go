@@ -56,12 +56,13 @@ func (re *Category) Fetch(ctx context.Context, params mrstorage.SqlSelectParams)
 		SELECT
 			category_id,
 			tag_version,
-			datetime_created,
-			category_caption,
+			datetime_created as createdAt,
+			datetime_updated as updatedAt,
+			category_caption as caption,
 			image_path,
 			category_status
 		FROM
-			` + module.DBSchemaCategory + `.catalog_categories
+			` + module.DBSchemaCategory + `.categories
 		WHERE
 			` + whereStr + `
 		ORDER BY
@@ -88,6 +89,7 @@ func (re *Category) Fetch(ctx context.Context, params mrstorage.SqlSelectParams)
 			&row.ID,
 			&row.TagVersion,
 			&row.CreatedAt,
+			&row.UpdatedAt,
 			&row.Caption,
 			&row.ImagePath,
 			&row.Status,
@@ -110,7 +112,7 @@ func (re *Category) FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPa
 		SELECT
 			COUNT(*)
 		FROM
-			` + module.DBSchemaCategory + `.catalog_categories
+			` + module.DBSchemaCategory + `.categories
 		WHERE
 			` + whereStr + `;`
 
@@ -132,11 +134,12 @@ func (re *Category) LoadOne(ctx context.Context, row *entity.Category) error {
 		SELECT
 			tag_version,
 			datetime_created,
+			datetime_updated,
 			category_caption,
 			image_path,
 			category_status
 		FROM
-			` + module.DBSchemaCategory + `.catalog_categories
+			` + module.DBSchemaCategory + `.categories
 		WHERE
 			category_id = $1 AND category_status <> $2
 		LIMIT 1;`
@@ -149,6 +152,7 @@ func (re *Category) LoadOne(ctx context.Context, row *entity.Category) error {
 	).Scan(
 		&row.TagVersion,
 		&row.CreatedAt,
+		&row.UpdatedAt,
 		&row.Caption,
 		&row.ImagePath,
 		&row.Status,
@@ -160,7 +164,7 @@ func (re *Category) FetchStatus(ctx context.Context, row *entity.Category) (mren
 		SELECT
 			category_status
 		FROM
-			` + module.DBSchemaCategory + `.catalog_categories
+			` + module.DBSchemaCategory + `.categories
 		WHERE
 			category_id = $1 AND category_status <> $2
 		LIMIT 1;`
@@ -186,7 +190,7 @@ func (re *Category) IsExists(ctx context.Context, id mrtype.KeyInt32) error {
 		SELECT
 			1
 		FROM
-			` + module.DBSchemaCategory + `.catalog_categories
+			` + module.DBSchemaCategory + `.categories
 		WHERE
 			category_id = $1 AND category_status <> $2
 		LIMIT 1;`
@@ -203,7 +207,7 @@ func (re *Category) IsExists(ctx context.Context, id mrtype.KeyInt32) error {
 
 func (re *Category) Insert(ctx context.Context, row *entity.Category) error {
 	sql := `
-		INSERT INTO ` + module.DBSchemaCategory + `.catalog_categories
+		INSERT INTO ` + module.DBSchemaCategory + `.categories
 			(
 				category_caption,
 				category_status
@@ -226,7 +230,7 @@ func (re *Category) Insert(ctx context.Context, row *entity.Category) error {
 func (re *Category) Update(ctx context.Context, row *entity.Category) (int32, error) {
 	sql := `
 		UPDATE
-			` + module.DBSchemaCategory + `.catalog_categories
+			` + module.DBSchemaCategory + `.categories
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),
@@ -255,7 +259,7 @@ func (re *Category) Update(ctx context.Context, row *entity.Category) (int32, er
 func (re *Category) UpdateStatus(ctx context.Context, row *entity.Category) (int32, error) {
 	sql := `
 		UPDATE
-			` + module.DBSchemaCategory + `.catalog_categories
+			` + module.DBSchemaCategory + `.categories
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),
@@ -284,7 +288,7 @@ func (re *Category) UpdateStatus(ctx context.Context, row *entity.Category) (int
 func (re *Category) Delete(ctx context.Context, id mrtype.KeyInt32) error {
 	sql := `
 		UPDATE
-			` + module.DBSchemaCategory + `.catalog_categories
+			` + module.DBSchemaCategory + `.categories
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),

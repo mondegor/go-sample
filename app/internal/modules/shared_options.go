@@ -18,7 +18,7 @@ type Options struct {
 	ServiceHelper    *mrtool.ServiceHelper
 	PostgresAdapter  *mrpostgres.ConnAdapter
 	RedisAdapter     *mrredis.ConnAdapter
-	S3Pool           *mrstorage.FileProviderPool
+	FileProviderPool *mrstorage.FileProviderPool
 	Locker           mrcore.Locker
 	OrdererComponent mrorderer.Component
 }

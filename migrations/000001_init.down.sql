@@ -1,7 +1,9 @@
-DROP TABLE gosample.catalog_products;
-DROP TABLE gosample.catalog_trademarks;
-DROP TABLE gosample.catalog_categories;
+-- --------------------------------------------------------------------------------------------------
 
-DROP TYPE gosample.item_status;
+DROP TABLE gs_catalog.products;
+DROP TABLE gs_catalog.trademarks;
+DROP TABLE gs_catalog.categories;
 
-DROP SCHEMA gosample;
+DROP TYPE gs_catalog.item_status;
+
+DROP SCHEMA gs_catalog;

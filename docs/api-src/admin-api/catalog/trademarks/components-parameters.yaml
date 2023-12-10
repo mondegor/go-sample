@@ -6,4 +6,4 @@ Catalog.Trademarks.AdminAPI.Request.Path.TrademarkID:
   schema:
     type: integer
     minimum: 1
-  example: 1736
+  example: 1000

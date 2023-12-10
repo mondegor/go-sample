@@ -6,4 +6,4 @@ Catalog.Categories.AdminAPI.Request.Path.CategoryID:
   schema:
     type: integer
     minimum: 1
-  example: 21
+  example: 1000

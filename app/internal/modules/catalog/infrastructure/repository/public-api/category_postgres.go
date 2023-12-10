@@ -47,7 +47,7 @@ func (re *Category) Fetch(ctx context.Context, params mrstorage.SqlSelectParams)
 			category_caption,
 			image_path
 		FROM
-			` + module.DBSchemaCategory + `.catalog_categories
+			` + module.DBSchemaCategory + `.categories
 		WHERE
 			` + whereStr + `
 		ORDER BY
@@ -93,7 +93,7 @@ func (re *Category) FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPa
 		SELECT
 			COUNT(*)
 		FROM
-			` + module.DBSchemaCategory + `.catalog_categories
+			` + module.DBSchemaCategory + `.categories
 		WHERE
 			` + whereStr + `;`
 
@@ -116,7 +116,7 @@ func (re *Category) LoadOne(ctx context.Context, row *entity.Category) error {
 			category_caption,
 			image_path
 		FROM
-			` + module.DBSchemaCategory + `.catalog_categories
+			` + module.DBSchemaCategory + `.categories
 		WHERE
 			category_id = $1 AND category_status = $2
 		LIMIT 1;`

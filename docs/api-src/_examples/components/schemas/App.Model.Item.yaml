@@ -1,0 +1,38 @@
+App.Response.Model.ItemList:
+  type: object
+  required:
+    - items
+    - total
+  properties:
+    items:
+      description: Список записей ограниченный фильтром и pageSize
+      type: array
+      items:
+        $ref: "#/components/schemas/App.Model.Item"
+    total:
+      $ref: "#/components/schemas/App.Field.ListPager.Total"
+
+App.Model.Item:
+  type: object
+  required:
+    - id
+    - version
+    - createdAt
+    - updatedAt
+    - caption
+    - status
+  properties:
+    id: # itemId
+      $ref: "#/components/schemas/App.Field.IntegerID"
+      # $ref: "#/components/schemas/App.Field.StringID"
+      # $ref: "#/components/schemas/App.Field.UUID"
+    version:
+      $ref: "#/components/schemas/App.Field.TagVersion"
+    createdAt:
+      $ref: "#/components/schemas/App.Field.Date.CreatedAt"
+    updatedAt:
+      $ref: "#/components/schemas/App.Field.Date.UpdatedAt"
+    caption:
+      $ref: "#/components/schemas/App.Field.Caption"
+    status:
+      $ref: "#/components/schemas/App.Enum.Status"

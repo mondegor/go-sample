@@ -25,7 +25,7 @@ type (
 		Listen        `yaml:"listen"`
 		Storage       `yaml:"storage"`
 		Redis         `yaml:"redis"`
-		FileStorage   `yaml:"file_storage"`
+		FileSystem    `yaml:"file_system"`
 		S3            `yaml:"s3"`
 		FileProviders `yaml:"file_providers"`
 		// Sentry        `yaml:"sentry"`
@@ -37,19 +37,26 @@ type (
 	}
 
 	Debugging struct {
-		Debug     bool `yaml:"debug" env:"APPX_DEBUG"`
-		CallStack `yaml:"call_stack"`
+		Debug       bool `yaml:"debug" env:"APPX_DEBUG"`
+		ErrorCaller `yaml:"caller"`
 	}
 
-	CallStack struct {
-		Deep         int    `yaml:"deep" env:"APPX_CALLSTACK_DEEP"`
-		UseShortPath bool   `yaml:"use_short_path" env:"APPX_CALLSTACK_USE_SHORT_PATH"`
+	ErrorCaller struct {
+		Deep         int    `yaml:"deep" env:"APPX_ERR_CALLER_DEEP"`
+		UseShortPath bool   `yaml:"use_short_path" env:"APPX_ERR_CALLER_USE_SHORT_PATH"`
 		RootPath     string `yaml:"root_path"`
 	}
 
 	Log struct {
-		Prefix string `yaml:"prefix" env:"APPX_LOG_PREFIX"`
-		Level  string `yaml:"level" env:"APPX_LOG_LEVEL"`
+		Prefix    string `yaml:"prefix" env:"APPX_LOG_PREFIX"`
+		Level     string `yaml:"level" env:"APPX_LOG_LEVEL"`
+		LogCaller `yaml:"caller"`
+	}
+
+	LogCaller struct {
+		Deep         int    `yaml:"deep" env:"APPX_LOG_CALLER_DEEP"`
+		UseShortPath bool   `yaml:"use_short_path" env:"APPX_LOG_CALLER_USE_SHORT_PATH"`
+		RootPath     string `yaml:"root_path"`
 	}
 
 	Server struct {
@@ -82,8 +89,9 @@ type (
 		Timeout  int    `yaml:"timeout"` // in sec
 	}
 
-	FileStorage struct {
-		DownloadDir string `yaml:"download_dir" env:"APPX_FS_DOWNLOAD_DIR"`
+	FileSystem struct {
+		DirMode    uint32 `yaml:"dir_mode" env:"APPX_FILESYSTEM_DIR_MODE"`
+		CreateDirs bool   `yaml:"create_dirs" env:"APPX_FILESYSTEM_CREATE_DIRS"`
 	}
 
 	S3 struct {
@@ -98,8 +106,12 @@ type (
 	FileProviders struct {
 		ImageStorage struct {
 			Name       string `yaml:"name"`
-			BucketName string `yaml:"bucket_name" env:"APPX_FILEPROVIDERS_IMAGESTORAGE_BUCKET"`
+			BucketName string `yaml:"bucket_name" env:"APPX_IMAGESTORAGE_BUCKET"`
 		} `yaml:"image_storage"`
+		ImageStorage2 struct {
+			Name    string `yaml:"name"`
+			RootDir string `yaml:"root_dir" env:"APPX_IMAGESTORAGE2_ROOT_DIR"`
+		} `yaml:"image_storage2"`
 	}
 
 	//Sentry struct {
@@ -147,14 +159,14 @@ type (
 		CatalogCategory struct {
 			Image struct {
 				BaseDir      string `yaml:"base_dir"`
-				FileProvider string `yaml:"file_provider"` // registered in FileProviders
+				FileProvider string `yaml:"file_provider"` // FileProviders.ImageStorage or ImageStorage2
 			} `yaml:"image"`
 		} `yaml:"catalog_category"`
 		FileStation struct {
 			ImageProxy struct {
 				Host         string `yaml:"host" env:"APPX_IMAGE_HOST"`
 				BaseURL      string `yaml:"base_url"`
-				FileProvider string `yaml:"file_provider"` // registered in FileProviders
+				FileProvider string `yaml:"file_provider"` // FileProviders.ImageStorage or ImageStorage2
 			} `yaml:"image_proxy"`
 		} `yaml:"file_station"`
 	}

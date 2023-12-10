@@ -6,7 +6,7 @@ Catalog.Products.AdminAPI.Request.Path.ProductID:
   schema:
     type: integer
     minimum: 1
-  example: 729114
+  example: 1000
 
 Catalog.Products.AdminAPI.Request.Query.Filter.CategoryID:
   description: Идентификатор категории
@@ -16,7 +16,7 @@ Catalog.Products.AdminAPI.Request.Query.Filter.CategoryID:
   schema:
     type: integer
     minimum: 1
-  example: 21
+  example: 1000
 
 Catalog.Products.AdminAPI.Request.Query.Filter.TrademarkIDs:
   description: Список идентификаторов торговых марок через ","

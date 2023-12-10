@@ -1,7 +1,7 @@
 App.Field.Article:
-  description: Уникальный артикул записи
+  description: Уникальный артикул записи (любые буквы без пробелов)
   type: string
-  pattern: "^[a-zA-Z0-9][a-zA-Z0-9_.+-]*[a-zA-Z0-9]$"
-  minLength: 4
-  maxLength: 32
-  example: "item-01843"
+  pattern: "^S+$"
+  minLength: 2
+  maxLength: 64
+  example: "item-FLEX-92744"

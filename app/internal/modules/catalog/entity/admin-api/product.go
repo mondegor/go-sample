@@ -9,21 +9,21 @@ import (
 )
 
 const (
-	ModelNameCatalogProduct = "admin-api.CatalogProduct"
+	ModelNameProduct = "admin-api.CatalogProduct"
 )
 
 type (
-	Product struct { // DB: catalog_products
-		ID         mrtype.KeyInt32 `json:"id" sort:"product_id"` // product_id
-		TagVersion int32           `json:"version"`              // tag_version
-		CreatedAt  time.Time       `json:"createdAt" sort:"datetime_created"`
-		UpdateAt   time.Time       `json:"updateAt"` // datetime_updated
+	Product struct { // DB: ps_catalog.products
+		ID         mrtype.KeyInt32 `json:"id"`                                   // product_id
+		TagVersion int32           `json:"version"`                              // tag_version
+		CreatedAt  time.Time       `json:"createdAt" sort:"createdAt"`           // datetime_created
+		UpdatedAt  *time.Time      `json:"updatedAt,omitempty" sort:"updatedAt"` // datetime_updated
 
-		CategoryID  mrtype.KeyInt32     `json:"categoryId" upd:"category_id"`   // catalog_categories::category_id
-		TrademarkID mrtype.KeyInt32     `json:"trademarkId" upd:"trademark_id"` // catalog_trademarks::trademark_id
-		Article     string              `json:"article" sort:"product_article" upd:"product_article"`
-		Caption     string              `json:"caption" sort:"product_caption,default" upd:"product_caption"`
-		Price       entity_shared.Money `json:"price" sort:"product_price" upd:"product_price"` // (coins)
+		CategoryID  mrtype.KeyInt32     `json:"categoryId" upd:"category_id"`   // ps_catalog.categories::category_id
+		TrademarkID mrtype.KeyInt32     `json:"trademarkId" upd:"trademark_id"` // ps_catalog.trademarks::trademark_id
+		Article     string              `json:"article" sort:"article" upd:"product_article"`
+		Caption     string              `json:"caption" sort:"caption,default" upd:"product_caption"`
+		Price       entity_shared.Money `json:"price" sort:"price" upd:"product_price"` // (coins)
 
 		Status mrenum.ItemStatus `json:"status"` // product_status
 	}

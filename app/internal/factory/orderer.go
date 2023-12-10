@@ -9,7 +9,7 @@ import (
 )
 
 func NewOrdererComponent(cfg *config.Config, client mrstorage.DBConn, logger mrcore.Logger, eventBox mrcore.EventBox) mrorderer.Component {
-	logger.Info("Create and init roles and permissions for modules access")
+	logger.Info("Create and init orderer component")
 
 	itemOrdererStorage := mrorderer.NewRepository(client)
 

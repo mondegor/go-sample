@@ -66,7 +66,7 @@ func (ht *CategoryImage) UploadImage() mrcore.HttpHandlerFunc {
 
 		if err != nil {
 			mrdebug.MultipartForm(logger, c.Request().MultipartForm)
-			return mrcore.FactoryErrHttpMultipartFormFile.Caller(-1).Wrap(err, module.ParamNameFileCatalogCategoryImage)
+			return mrcore.FactoryErrHttpMultipartFormFile.Wrap(err, module.ParamNameFileCatalogCategoryImage)
 		}
 
 		defer file.Close()

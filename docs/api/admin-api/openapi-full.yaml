@@ -3,12 +3,31 @@ openapi: 3.0.3
 info:
   version: 0.3.0
   title: Private API go-sample
-  description: Private REST API проекта go-sample
   license:
     name: Apache-2.0
     url: https://www.apache.org/licenses/LICENSE-2.0
   contact:
     name: Andrey Nazarov
+  description: |-
+    Private REST API проекта go-sample
+
+    ### Пользовательские ограничения полей и ошибки
+
+    #### Ограничения полей
+    - required - поле обязательно для заполнения;
+    - omitempty - поле может быть не указано (не будет использоваться методом, в который было передано);
+    - min=N - поле должно быть не менее N символов;
+    - max=N - поле должно быть не более N символов;
+    - gte=N - числовое поле должно быть равно или более N;
+    - lte=N - числовое поле должно быть равно или менее N;
+    - enum - поле должно содержать одно из ENUM значений;
+    - pattern=P - поле должно соответствовать регулярному выражению P;
+
+    #### Ошибки
+    - ErrVersionInvalid - если передаваемая версия объекта не совпала с текущей версией объекта.\
+      Как правило, это означает, что объект был ранее изменён другим процессом;
+    - ErrSwitchStatusRejected - перевод в указанный статус объекта отклонён.\
+      WorkFlow объекта запрещает переключение в указанный статус;
 servers:
   - url: http://localhost:8080/adm
     description: Local Host
@@ -63,9 +82,8 @@ paths:
       description: |-
         Метод предназначен для создания информации о новой категории в БД
 
-        **Пользовательские ошибки валидации 400:**
-        - Заголовок записи не может быть пустым;
-        - Заголовок записи не может быть более N символов;
+        **Ограничения и ошибки полей:**
+        - caption: required,max=128
       operationId: createCategory
       tags:
         - Catalog.Categories
@@ -137,9 +155,9 @@ paths:
       description: |-
         Метод предназначен для сохранения информации об указанной категории в БД
 
-        **Пользовательские ошибки валидации 400:**
-        - Заголовок записи не может быть пустым;
-        - Заголовок записи не может быть более N символов;
+        **Ограничения и ошибки полей:**
+        - version: required,gte=1 | ErrVersionInvalid
+        - caption: required,max=128
       operationId: storeCategory
       tags:
         - Catalog.Categories
@@ -206,9 +224,9 @@ paths:
       description: |-
         Метод предназначен для изменения статуса категории в БД
 
-        **Пользовательские ошибки валидации 400:**
-        - Указанный статус содержит недопустимое значение;
-        - В данный статус переключение невозможно;
+        **Ограничения и ошибки полей:**
+        - version: required,gte=1 | ErrVersionInvalid
+        - status: required,enum | ErrSwitchStatusRejected
       operationId: changeCategoryStatus
       tags:
         - Catalog.Categories
@@ -276,7 +294,7 @@ paths:
         Метод предназначен для загруки нового изображения для указанной категории в файловое хранилище.\
         При этом старое изображение удаляется.
 
-        **Пользовательские ошибки валидации 400:**
+        **Ограничения и валидация загрузки:**
         - Загруженная картинка некорректная (битый файл, расширение, ...);
       operationId: uploadCategoryImage
       tags:
@@ -379,16 +397,12 @@ paths:
       description: |-
         Метод предназначен для создания информации о новом товаре в БД
 
-        **Пользовательские ошибки валидации 400:**
-        - Артикул не может быть пустым;
-        - Артикул не может быть более N символов;
-        - Артикул должен соответствовать указанному шаблону;
-        - Указанный артикул уже существует;
-        - Заголовок записи не может быть пустым;
-        - Заголовок записи не может быть более N символов;
-        - Указанная категория не найдена;
-        - Указанная торговая марка не найдена;
-        - Указанная цена содержит недопустимое значение;
+        **Ограничения и ошибки полей:**
+        - categoryId: required,gte=1
+        - trademarkId: required,gte=1
+        - article: required,min=4,max=32,pattern=article
+        - caption: required,max=128
+        - price: gte=0
       operationId: createProduct
       tags:
         - Catalog.Products
@@ -460,16 +474,12 @@ paths:
       description: |-
         Метод предназначен для сохранения информации о товаре в БД
 
-        **Пользовательские ошибки валидации 400:**
-        - Артикул не может быть пустым;
-        - Артикул не может быть более N символов;
-        - Артикул должен соответствовать указанному шаблону;
-        - Указанный артикул уже существует;
-        - Заголовок записи не может быть пустым;
-        - Заголовок записи не может быть более N символов;
-        - Указанная категория не найдена;
-        - Указанная торговая марка не найдена;
-        - Указанная цена содержит недопустимое значение;
+        **Ограничения и ошибки полей:**
+        - version: required,gte=1 | ErrVersionInvalid
+        - trademarkId: omitempty,gte=1
+        - article: omitempty,min=4,max=32,pattern=article
+        - caption: omitempty,max=128
+        - price: omitempty,gte=0
       operationId: storeProduct
       tags:
         - Catalog.Products
@@ -536,9 +546,9 @@ paths:
       description: |-
         Метод предназначен для изменения статуса товара в БД
 
-        **Пользовательские ошибки валидации 400:**
-        - Указанный статус содержит недопустимое значение;
-        - В данный статус переключение невозможно;
+        **Ограничения и ошибки полей:**
+        - version: required,gte=1 | ErrVersionInvalid
+        - status: required,enum | ErrSwitchStatusRejected
       operationId: changeProductStatus
       tags:
         - Catalog.Products
@@ -578,7 +588,7 @@ paths:
       description: |-
         Метод предназначен для изменения позиции товара в рамках категории в БД
 
-        **Пользовательские ошибки валидации 400:**
+        **Ограничения и валидация:**
         - Не найдено поле, после которого необходимо вставить указанное поле;
       operationId: moveProduct
       tags:
@@ -653,9 +663,8 @@ paths:
       description: |-
         Метод предназначен для создания информации о новой торговой марки в БД
 
-        **Пользовательские ошибки валидации 400:**
-        - Заголовок записи не может быть пустым;
-        - Заголовок записи не может быть более N символов;
+        **Ограничения и ошибки полей:**
+        - caption: required,max=128
       operationId: createTrademark
       tags:
         - Catalog.Trademarks
@@ -727,9 +736,9 @@ paths:
       description: |-
         Метод предназначен для сохранения информации о торговой марке в БД
 
-        **Пользовательские ошибки валидации 400:**
-        - Заголовок записи не может быть пустым;
-        - Заголовок записи не может быть более N символов;
+        **Ограничения и ошибки полей:**
+        - version: required,gte=1 | ErrVersionInvalid
+        - caption: required,max=128
       operationId: storeTrademark
       tags:
         - Catalog.Trademarks
@@ -796,9 +805,9 @@ paths:
       description: |-
         Метод предназначен для изменения статуса торговой марки в БД
 
-        **Пользовательские ошибки валидации 400:**
-        - Указанный статус содержит недопустимое значение;
-        - В данный статус переключение невозможно;
+        **Ограничения и ошибки полей:**
+        - version: required,gte=1 | ErrVersionInvalid
+        - status: required,enum | ErrSwitchStatusRejected
       operationId: changeTrademarkStatus
       tags:
         - Catalog.Trademarks
@@ -933,7 +942,7 @@ components:
       schema:
         type: integer
         minimum: 1
-      example: 21
+      example: 1000
 
     Catalog.Products.AdminAPI.Request.Path.ProductID:
       description: Идентификатор товара
@@ -943,7 +952,7 @@ components:
       schema:
         type: integer
         minimum: 1
-      example: 729114
+      example: 1000
 
     Catalog.Products.AdminAPI.Request.Query.Filter.CategoryID:
       description: Идентификатор категории
@@ -953,7 +962,7 @@ components:
       schema:
         type: integer
         minimum: 1
-      example: 21
+      example: 1000
 
     Catalog.Products.AdminAPI.Request.Query.Filter.TrademarkIDs:
       description: Список идентификаторов торговых марок через ","
@@ -972,7 +981,7 @@ components:
       schema:
         type: integer
         minimum: 1
-      example: 1736
+      example: 1000
 
   schemas:
     App.Enum.Status:
@@ -989,12 +998,12 @@ components:
       example: "ENABLED"
 
     App.Field.Article:
-      description: Уникальный артикул записи
+      description: Уникальный артикул записи (любые буквы без пробелов)
       type: string
-      pattern: "^[a-zA-Z0-9][a-zA-Z0-9_.+-]*[a-zA-Z0-9]$"
-      minLength: 4
-      maxLength: 32
-      example: "item-01843"
+      pattern: "^S+$"
+      minLength: 2
+      maxLength: 64
+      example: "item-FLEX-92744"
 
     App.Field.Caption:
       description: Название записи
@@ -1002,17 +1011,24 @@ components:
       maxLength: 128
       example: "Название"
 
-    App.Field.CreatedAt:
+    App.Field.Date.CreatedAt:
       description: Дата и время создания записи (UTC)
       type: string
       format: date-time
+      example: "2023-01-01T12:00:00.000+02:00"
+
+    App.Field.Date.UpdatedAt:
+      description: Дата и время обновления записи (UTC)
+      type: string
+      format: date-time
+      nullable: true
       example: "2023-01-01T12:00:00.000+02:00"
 
     App.Field.IntegerID:
       description: Идентификатор записи
       type: integer
       minimum: 1
-      example: 80402010
+      example: 1000
 
     App.Field.ListPager.Total:
       description: Количество записей в БД с учётом указанных в запросе фильтров
@@ -1020,17 +1036,17 @@ components:
       minimum: 0
       example: 584
 
-    App.Field.Price:
+    App.Field.TagVersion:
+      description: Текущая версия записи
+      type: integer
+      minimum: 1
+      example: 5
+
+    App.Measure.Price:
       description: Цена изделия (10^2)
       type: integer # Money
       minimum: 0
       example: 8234500 # 82345 coins
-
-    App.Field.TagVersion:
-      description: Текущая версия записи
-      type: number
-      minimum: 1
-      example: 7
 
     App.Request.Model.ChangeStatus:
       description: |-
@@ -1042,6 +1058,7 @@ components:
         - DISABLED -> ENABLED;
       type: object
       required:
+        - version
         - status
       properties:
         version:
@@ -1059,7 +1076,7 @@ components:
           description: |-
             Идентификатор записи, после которой необходимо вставить указанную запись.\
             При afterId = 0 запись вставляется в начало списка.
-          type: number
+          type: integer
           example: 7
 
     App.Response.Model.BinaryFile:
@@ -1140,7 +1157,7 @@ components:
           example: "Название"
         size:
           description: Размер файла в байтах
-          type: number
+          type: integer
           example: 7
 
     App.Response.Model.SuccessCreatedItem:
@@ -1171,6 +1188,7 @@ components:
       description: DTO сохранения категории каталога
       type: object
       required:
+        - version
         - caption
       properties:
         version:
@@ -1208,7 +1226,9 @@ components:
         version:
           $ref: "#/components/schemas/App.Field.TagVersion"
         createdAt:
-          $ref: "#/components/schemas/App.Field.CreatedAt"
+          $ref: "#/components/schemas/App.Field.Date.CreatedAt"
+        updatedAt:
+          $ref: "#/components/schemas/App.Field.Date.UpdatedAt"
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
         imageInfo:
@@ -1234,13 +1254,13 @@ components:
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
         price:
-          $ref: "#/components/schemas/App.Field.Price"
+          $ref: "#/components/schemas/App.Measure.Price"
 
     Catalog.Products.AdminAPI.Request.Model.StoreProduct:
       description: DTO сохранения товара каталога
       type: object
       required:
-        - caption
+        - version
       properties:
         version:
           $ref: "#/components/schemas/App.Field.TagVersion"
@@ -1251,7 +1271,7 @@ components:
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
         price:
-          $ref: "#/components/schemas/App.Field.Price"
+          $ref: "#/components/schemas/App.Measure.Price"
 
     Catalog.Products.AdminAPI.Response.Model.ProductList:
       description: DTO - список товаров каталога
@@ -1271,13 +1291,25 @@ components:
     Catalog.Products.AdminAPI.Response.Model.Product:
       description: DTO - товар каталога
       type: object
+      required:
+        - id
+        - version
+        - createdAt
+        - categoryId
+        - trademarkId
+        - article
+        - caption
+        - price
+        - status
       properties:
         id: # productId
           $ref: "#/components/schemas/App.Field.IntegerID"
         version:
           $ref: "#/components/schemas/App.Field.TagVersion"
         createdAt:
-          $ref: "#/components/schemas/App.Field.CreatedAt"
+          $ref: "#/components/schemas/App.Field.Date.CreatedAt"
+        updatedAt:
+          $ref: "#/components/schemas/App.Field.Date.UpdatedAt"
         categoryId:
           $ref: "#/components/schemas/App.Field.IntegerID"
         trademarkId:
@@ -1287,7 +1319,7 @@ components:
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
         price:
-          $ref: "#/components/schemas/App.Field.Price"
+          $ref: "#/components/schemas/App.Measure.Price"
         status:
           $ref: "#/components/schemas/App.Enum.Status"
 
@@ -1342,7 +1374,9 @@ components:
         version:
           $ref: "#/components/schemas/App.Field.TagVersion"
         createdAt:
-          $ref: "#/components/schemas/App.Field.CreatedAt"
+          $ref: "#/components/schemas/App.Field.Date.CreatedAt"
+        updatedAt:
+          $ref: "#/components/schemas/App.Field.Date.UpdatedAt"
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
         status:

@@ -38,9 +38,8 @@
     description: |-
       Метод предназначен для создания информации о новой торговой марки в БД
 
-      **Пользовательские ошибки валидации 400:**
-      - Заголовок записи не может быть пустым;
-      - Заголовок записи не может быть более N символов;
+      **Ограничения и ошибки полей:**
+      - caption: required,max=128
     operationId: createTrademark
     tags:
       - Catalog.Trademarks
@@ -112,9 +111,9 @@
     description: |-
       Метод предназначен для сохранения информации о торговой марке в БД
 
-      **Пользовательские ошибки валидации 400:**
-      - Заголовок записи не может быть пустым;
-      - Заголовок записи не может быть более N символов;
+      **Ограничения и ошибки полей:**
+      - version: required,gte=1 | ErrVersionInvalid
+      - caption: required,max=128
     operationId: storeTrademark
     tags:
       - Catalog.Trademarks
@@ -181,9 +180,9 @@
     description: |-
       Метод предназначен для изменения статуса торговой марки в БД
 
-      **Пользовательские ошибки валидации 400:**
-      - Указанный статус содержит недопустимое значение;
-      - В данный статус переключение невозможно;
+      **Ограничения и ошибки полей:**
+      - version: required,gte=1 | ErrVersionInvalid
+      - status: required,enum | ErrSwitchStatusRejected
     operationId: changeTrademarkStatus
     tags:
       - Catalog.Trademarks

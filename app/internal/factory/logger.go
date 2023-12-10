@@ -3,17 +3,43 @@ package factory
 import (
 	"go-sample/config"
 
+	"github.com/mondegor/go-sysmess/mrerr"
 	"github.com/mondegor/go-webcore/mrcore"
 )
 
 func NewLogger(cfg *config.Config) (*mrcore.LoggerAdapter, error) {
+	mrcore.SetDebug(cfg.Debugging.Debug)
+
+	mrerr.SetCallerOptions(
+		mrerr.CallerOptions{
+			Deep:         cfg.Debugging.ErrorCaller.Deep,
+			UseShortPath: cfg.Debugging.ErrorCaller.UseShortPath,
+		},
+	)
+
 	prefix := cfg.Log.Prefix
 
 	if prefix != "" {
 		prefix = "[" + prefix + "] "
 	}
 
-	logger, err := mrcore.NewLogger(prefix, cfg.Log.Level)
+	logger, err := mrcore.NewLogger(
+		mrcore.LoggerOptions{
+			Prefix: prefix,
+			Level:  cfg.Log.Level,
+			Caller: mrerr.CallerOptions{
+				Deep:         cfg.Log.LogCaller.Deep,
+				UseShortPath: cfg.Log.LogCaller.UseShortPath,
+			},
+			CallerEnabledFunc: func(err error) bool {
+				if appErr, ok := err.(*mrerr.AppError); ok {
+					return appErr.Kind() == mrerr.ErrorKindUser
+				}
+
+				return true
+			},
+		},
+	)
 
 	if err != nil {
 		return nil, err

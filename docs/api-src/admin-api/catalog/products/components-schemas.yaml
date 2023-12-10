@@ -16,13 +16,13 @@ Catalog.Products.AdminAPI.Request.Model.CreateProduct:
     caption:
       $ref: "#/components/schemas/App.Field.Caption"
     price:
-      $ref: "#/components/schemas/App.Field.Price"
+      $ref: "#/components/schemas/App.Measure.Price"
 
 Catalog.Products.AdminAPI.Request.Model.StoreProduct:
   description: DTO сохранения товара каталога
   type: object
   required:
-    - caption
+    - version
   properties:
     version:
       $ref: "#/components/schemas/App.Field.TagVersion"
@@ -33,7 +33,7 @@ Catalog.Products.AdminAPI.Request.Model.StoreProduct:
     caption:
       $ref: "#/components/schemas/App.Field.Caption"
     price:
-      $ref: "#/components/schemas/App.Field.Price"
+      $ref: "#/components/schemas/App.Measure.Price"
 
 Catalog.Products.AdminAPI.Response.Model.ProductList:
   description: DTO - список товаров каталога
@@ -53,13 +53,25 @@ Catalog.Products.AdminAPI.Response.Model.ProductList:
 Catalog.Products.AdminAPI.Response.Model.Product:
   description: DTO - товар каталога
   type: object
+  required:
+    - id
+    - version
+    - createdAt
+    - categoryId
+    - trademarkId
+    - article
+    - caption
+    - price
+    - status
   properties:
     id: # productId
       $ref: "#/components/schemas/App.Field.IntegerID"
     version:
       $ref: "#/components/schemas/App.Field.TagVersion"
     createdAt:
-      $ref: "#/components/schemas/App.Field.CreatedAt"
+      $ref: "#/components/schemas/App.Field.Date.CreatedAt"
+    updatedAt:
+      $ref: "#/components/schemas/App.Field.Date.UpdatedAt"
     categoryId:
       $ref: "#/components/schemas/App.Field.IntegerID"
     trademarkId:
@@ -69,6 +81,6 @@ Catalog.Products.AdminAPI.Response.Model.Product:
     caption:
       $ref: "#/components/schemas/App.Field.Caption"
     price:
-      $ref: "#/components/schemas/App.Field.Price"
+      $ref: "#/components/schemas/App.Measure.Price"
     status:
       $ref: "#/components/schemas/App.Enum.Status"

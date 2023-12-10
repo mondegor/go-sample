@@ -1,0 +1,5 @@
+App.Measure.Micrometer:
+  description: Микрометр (µm, 1000mm)
+  type: integer
+  maxLength: 8
+  example: 100000 # 100mm

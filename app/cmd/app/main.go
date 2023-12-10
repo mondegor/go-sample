@@ -13,8 +13,6 @@ import (
 	"net/http"
 
 	"github.com/mondegor/go-storage/mrredislock"
-	"github.com/mondegor/go-sysmess/mrerr"
-	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrtool"
 )
 
@@ -42,15 +40,6 @@ func main() {
 		cfg.Log.Level = logLevel
 	}
 
-	mrcore.SetDebug(cfg.Debugging.Debug)
-
-	mrerr.SetCallStackOptions(
-		mrerr.CallStackOptions{
-			Deep:         cfg.Debugging.CallStack.Deep,
-			UseShortPath: cfg.Debugging.CallStack.UseShortPath,
-		},
-	)
-
 	logger, err := factory.NewLogger(cfg)
 
 	if err != nil {
@@ -72,8 +61,7 @@ func main() {
 	appHelper.ExitOnError(err)
 	defer appHelper.Close(sharedOptions.RedisAdapter)
 
-	// fileProviderAPI, err := factory.NewFileStorage(cfg, logger)
-	sharedOptions.S3Pool, err = factory.NewS3Pool(cfg, logger)
+	sharedOptions.FileProviderPool, err = factory.NewFileProviderPool(cfg, logger)
 	appHelper.ExitOnError(err)
 
 	sharedOptions.Locker = mrredislock.NewLockerAdapter(sharedOptions.RedisAdapter.Cli())

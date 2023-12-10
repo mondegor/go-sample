@@ -17,7 +17,7 @@ func newUnitImageProxy(
 	opts *modules.Options,
 	section mrcore.ClientSection,
 ) error {
-	fileAPI, err := opts.S3Pool.Provider(opts.Cfg.ModulesSettings.FileStation.ImageProxy.FileProvider)
+	fileAPI, err := opts.FileProviderPool.Provider(opts.Cfg.ModulesSettings.FileStation.ImageProxy.FileProvider)
 
 	if err != nil {
 		return err

@@ -1,4 +1,4 @@
-App.Field.CreatedAt:
+App.Field.Date.CreatedAt:
   description: Дата и время создания записи (UTC)
   type: string
   format: date-time

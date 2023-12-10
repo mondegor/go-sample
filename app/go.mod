@@ -4,10 +4,10 @@ go 1.20
 
 require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
-	github.com/mondegor/go-components v0.3.6
-	github.com/mondegor/go-storage v0.6.7
-	github.com/mondegor/go-sysmess v0.5.2
-	github.com/mondegor/go-webcore v0.9.1
+	github.com/mondegor/go-components v0.3.8
+	github.com/mondegor/go-storage v0.6.10
+	github.com/mondegor/go-sysmess v0.5.3
+	github.com/mondegor/go-webcore v0.9.3
 )
 
 require (
@@ -23,7 +23,7 @@ require (
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20231201235250-de7065d80cb9 // indirect
-	github.com/jackc/pgx/v5 v5.5.0 // indirect
+	github.com/jackc/pgx/v5 v5.5.1 // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect

@@ -3,7 +3,7 @@ app_path:
 
 debugging:
   debug: true
-  call_stack:
+  caller:
     deep: 3
     use_short_path: true
     # root_path:
@@ -11,6 +11,10 @@ debugging:
 logger:
   # prefix: go-sample
   level: debug # debug, info, warn, error
+  caller:
+    deep: 1
+    # use_short_path: true
+    # root_path:
 
 server:
   read_timeout: 30
@@ -38,8 +42,9 @@ redis:
   port: 6379
   password: 123456
 
-file_storage:
-  download_dir: "./downloads"
+file_system:
+  dir_mode: 0775
+  create_dirs: true # check and create if not exists
 
 s3:
   host: 127.0.0.1
@@ -52,7 +57,10 @@ s3:
 file_providers:
   image_storage:
     name: imageStorage
-    bucket_name: go-sample-bucket
+    bucket_name: go-sample-img
+  image_storage2:
+    name: imageStorage2
+    root_dir: "./img"
 
 #sentry:
 #  use: false
@@ -107,10 +115,10 @@ modules_access:
 modules_settings:
   catalog_category:
     image:
-      base_dir: "catalog/categories" # s3
-      file_provider: imageStorage # registered in file_providers
+      base_dir: "catalog/categories" # key prefix
+      file_provider: imageStorage # file_providers.image_storage or image_storage2
   file_station:
     image_proxy:
       host: http://127.0.0.1/
-      base_url: "images"
-      file_provider: imageStorage # registered in file_providers
+      base_url: /images
+      file_provider: imageStorage # file_providers.image_storage or image_storage2

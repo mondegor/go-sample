@@ -3,12 +3,31 @@ openapi: 3.0.3
 info:
   version: 0.3.0
   title: Private API управления категориями товаров
-  description: Private REST API проекта go-sample управления категориями товаров
   license:
     name: Apache-2.0
     url: https://www.apache.org/licenses/LICENSE-2.0
   contact:
     name: Andrey Nazarov
+  description: |-
+    Private REST API проекта go-sample управления категориями товаров
+
+    ### Пользовательские ограничения полей и ошибки
+
+    #### Ограничения полей
+    - required - поле обязательно для заполнения;
+    - omitempty - поле может быть не указано (не будет использоваться методом, в который было передано);
+    - min=N - поле должно быть не менее N символов;
+    - max=N - поле должно быть не более N символов;
+    - gte=N - числовое поле должно быть равно или более N;
+    - lte=N - числовое поле должно быть равно или менее N;
+    - enum - поле должно содержать одно из ENUM значений;
+    - pattern=P - поле должно соответствовать регулярному выражению P;
+
+    #### Ошибки
+    - ErrVersionInvalid - если передаваемая версия объекта не совпала с текущей версией объекта.\
+      Как правило, это означает, что объект был ранее изменён другим процессом;
+    - ErrSwitchStatusRejected - перевод в указанный статус объекта отклонён.\
+      WorkFlow объекта запрещает переключение в указанный статус;
 servers:
   - url: http://localhost:8080/adm
     description: Local Host
@@ -57,9 +76,8 @@ paths:
       description: |-
         Метод предназначен для создания информации о новой категории в БД
 
-        **Пользовательские ошибки валидации 400:**
-        - Заголовок записи не может быть пустым;
-        - Заголовок записи не может быть более N символов;
+        **Ограничения и ошибки полей:**
+        - caption: required,max=128
       operationId: createCategory
       tags:
         - Catalog.Categories
@@ -131,9 +149,9 @@ paths:
       description: |-
         Метод предназначен для сохранения информации об указанной категории в БД
 
-        **Пользовательские ошибки валидации 400:**
-        - Заголовок записи не может быть пустым;
-        - Заголовок записи не может быть более N символов;
+        **Ограничения и ошибки полей:**
+        - version: required,gte=1 | ErrVersionInvalid
+        - caption: required,max=128
       operationId: storeCategory
       tags:
         - Catalog.Categories
@@ -200,9 +218,9 @@ paths:
       description: |-
         Метод предназначен для изменения статуса категории в БД
 
-        **Пользовательские ошибки валидации 400:**
-        - Указанный статус содержит недопустимое значение;
-        - В данный статус переключение невозможно;
+        **Ограничения и ошибки полей:**
+        - version: required,gte=1 | ErrVersionInvalid
+        - status: required,enum | ErrSwitchStatusRejected
       operationId: changeCategoryStatus
       tags:
         - Catalog.Categories
@@ -270,7 +288,7 @@ paths:
         Метод предназначен для загруки нового изображения для указанной категории в файловое хранилище.\
         При этом старое изображение удаляется.
 
-        **Пользовательские ошибки валидации 400:**
+        **Ограничения и валидация загрузки:**
         - Загруженная картинка некорректная (битый файл, расширение, ...);
       operationId: uploadCategoryImage
       tags:
@@ -432,7 +450,7 @@ components:
       schema:
         type: integer
         minimum: 1
-      example: 21
+      example: 1000
 
   schemas:
     App.Enum.Status:
@@ -454,17 +472,24 @@ components:
       maxLength: 128
       example: "Название"
 
-    App.Field.CreatedAt:
+    App.Field.Date.CreatedAt:
       description: Дата и время создания записи (UTC)
       type: string
       format: date-time
+      example: "2023-01-01T12:00:00.000+02:00"
+
+    App.Field.Date.UpdatedAt:
+      description: Дата и время обновления записи (UTC)
+      type: string
+      format: date-time
+      nullable: true
       example: "2023-01-01T12:00:00.000+02:00"
 
     App.Field.IntegerID:
       description: Идентификатор записи
       type: integer
       minimum: 1
-      example: 80402010
+      example: 1000
 
     App.Field.ListPager.Total:
       description: Количество записей в БД с учётом указанных в запросе фильтров
@@ -474,9 +499,9 @@ components:
 
     App.Field.TagVersion:
       description: Текущая версия записи
-      type: number
+      type: integer
       minimum: 1
-      example: 7
+      example: 5
 
     App.Request.Model.ChangeStatus:
       description: |-
@@ -488,6 +513,7 @@ components:
         - DISABLED -> ENABLED;
       type: object
       required:
+        - version
         - status
       properties:
         version:
@@ -573,7 +599,7 @@ components:
           example: "Название"
         size:
           description: Размер файла в байтах
-          type: number
+          type: integer
           example: 7
 
     App.Response.Model.SuccessCreatedItem:
@@ -604,6 +630,7 @@ components:
       description: DTO сохранения категории каталога
       type: object
       required:
+        - version
         - caption
       properties:
         version:
@@ -641,7 +668,9 @@ components:
         version:
           $ref: "#/components/schemas/App.Field.TagVersion"
         createdAt:
-          $ref: "#/components/schemas/App.Field.CreatedAt"
+          $ref: "#/components/schemas/App.Field.Date.CreatedAt"
+        updatedAt:
+          $ref: "#/components/schemas/App.Field.Date.UpdatedAt"
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
         imageInfo:

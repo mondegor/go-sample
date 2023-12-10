@@ -9,24 +9,7 @@ import (
 	"github.com/mondegor/go-webcore/mrcore"
 )
 
-func NewS3Pool(cfg *config.Config, logger mrcore.Logger) (*mrstorage.FileProviderPool, error) {
-	logger.Info("Create and init file provider pool")
-
-	pool := mrstorage.NewFileProviderPool()
-	minioAdapter, err := newS3Minio(cfg, logger)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if err = newS3ImageStorage(cfg, pool, minioAdapter, logger); err != nil {
-		return nil, err
-	}
-
-	return pool, nil
-}
-
-func newS3Minio(cfg *config.Config, logger mrcore.Logger) (*mrminio.ConnAdapter, error) {
+func NewS3Minio(cfg *config.Config, logger mrcore.Logger) (*mrminio.ConnAdapter, error) {
 	logger.Info("Create and init S3 minio connection")
 
 	opt := mrminio.Options{
@@ -37,7 +20,7 @@ func newS3Minio(cfg *config.Config, logger mrcore.Logger) (*mrminio.ConnAdapter,
 		Password: cfg.S3.Password,
 	}
 
-	conn := mrminio.New()
+	conn := mrminio.New(cfg.S3.CreateBuckets)
 
 	if err := conn.Connect(opt); err != nil {
 		return nil, err
@@ -50,15 +33,33 @@ func newS3Minio(cfg *config.Config, logger mrcore.Logger) (*mrminio.ConnAdapter,
 	return conn, nil
 }
 
+func RegisterS3ImageStorage(
+	cfg *config.Config,
+	pool *mrstorage.FileProviderPool,
+	conn *mrminio.ConnAdapter,
+	logger mrcore.Logger,
+) error {
+	storage, err := newS3MinioFileProvider(
+		conn,
+		cfg.FileProviders.ImageStorage.BucketName,
+		logger,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return pool.Register(cfg.FileProviders.ImageStorage.Name, storage)
+}
+
 func newS3MinioFileProvider(
 	conn *mrminio.ConnAdapter,
 	bucketName string,
-	createBucket bool,
 	logger mrcore.Logger,
-) (mrstorage.FileProviderAPI, error) {
+) (*mrminio.FileProvider, error) {
 	logger.Info("Create and init file provider with bucket '%s'", bucketName)
 
-	created, err := conn.InitBucket(context.Background(), bucketName, createBucket)
+	created, err := conn.InitBucket(context.Background(), bucketName)
 
 	if err != nil {
 		return nil, err
@@ -71,24 +72,4 @@ func newS3MinioFileProvider(
 	}
 
 	return mrminio.NewFileProvider(conn, bucketName), nil
-}
-
-func newS3ImageStorage(
-	cfg *config.Config,
-	pool *mrstorage.FileProviderPool,
-	conn *mrminio.ConnAdapter,
-	logger mrcore.Logger,
-) error {
-	imageStorage, err := newS3MinioFileProvider(
-		conn,
-		cfg.FileProviders.ImageStorage.BucketName,
-		cfg.S3.CreateBuckets,
-		logger,
-	)
-
-	if err != nil {
-		return err
-	}
-
-	return pool.Register(cfg.FileProviders.ImageStorage.Name, imageStorage)
 }

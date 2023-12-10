@@ -5,11 +5,11 @@ import (
 )
 
 const (
-	ModelNameCatalogCategory = "public-api.CatalogCategory"
+	ModelNameCategory = "public-api.CatalogCategory"
 )
 
 type (
-	Category struct { // DB: catalog_categories
+	Category struct { // DB: ps_catalog.categories
 		ID        mrtype.KeyInt32 `json:"id"`       // category_id
 		Caption   string          `json:"caption"`  // category_caption
 		ImagePath string          `json:"imageURL"` // image_path

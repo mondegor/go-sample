@@ -1,5 +1,5 @@
 App.Field.TagVersion:
   description: Текущая версия записи
-  type: number
+  type: integer
   minimum: 1
-  example: 7
+  example: 5

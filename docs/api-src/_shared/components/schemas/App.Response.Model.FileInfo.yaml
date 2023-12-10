@@ -17,5 +17,5 @@ App.Response.Model.FileInfo:
       example: "Название"
     size:
       description: Размер файла в байтах
-      type: number
+      type: integer
       example: 7

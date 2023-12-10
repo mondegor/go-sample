@@ -6,7 +6,7 @@ import (
 	usecase_shared "go-sample/internal/modules/catalog/usecase/shared"
 
 	"github.com/mondegor/go-components/mrorderer"
-	"github.com/mondegor/go-sysmess/mrerr"
+	"github.com/mondegor/go-sysmess/mrmsg"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrctx"
 	"github.com/mondegor/go-webcore/mrenum"
@@ -50,7 +50,7 @@ func (uc *Product) GetList(ctx context.Context, params entity.ProductParams) ([]
 	total, err := uc.storage.FetchTotal(ctx, fetchParams.Where)
 
 	if err != nil {
-		return nil, 0, uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCatalogProduct)
+		return nil, 0, uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameProduct)
 	}
 
 	if total < 1 {
@@ -60,7 +60,7 @@ func (uc *Product) GetList(ctx context.Context, params entity.ProductParams) ([]
 	items, err := uc.storage.Fetch(ctx, fetchParams)
 
 	if err != nil {
-		return nil, 0, uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCatalogProduct)
+		return nil, 0, uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameProduct)
 	}
 
 	return items, total, nil
@@ -74,7 +74,7 @@ func (uc *Product) GetItem(ctx context.Context, id mrtype.KeyInt32) (*entity.Pro
 	item := &entity.Product{ID: id}
 
 	if err := uc.storage.LoadOne(ctx, item); err != nil {
-		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogProduct, id)
+		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, id)
 	}
 
 	return item, nil
@@ -90,14 +90,10 @@ func (uc *Product) Create(ctx context.Context, item *entity.Product) error {
 	item.Status = mrenum.ItemStatusDraft
 
 	if err := uc.storage.Insert(ctx, item); err != nil {
-		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCatalogProduct)
+		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameProduct)
 	}
 
-	uc.eventBox.Emit(
-		"%s::Create: id=%d",
-		entity.ModelNameCatalogProduct,
-		item.ID,
-	)
+	uc.eventBoxEmitEntity(ctx, "Create", mrmsg.Data{"id": item.ID})
 
 	meta := uc.storage.GetMetaData(item.CategoryID)
 	component := uc.componentOrderer.WithMetaData(meta)
@@ -119,7 +115,7 @@ func (uc *Product) Store(ctx context.Context, item *entity.Product) error {
 	}
 
 	if err := uc.storage.IsExists(ctx, item.ID); err != nil {
-		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogProduct, item.ID)
+		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, item.ID)
 	}
 
 	if err := uc.checkProduct(ctx, item); err != nil {
@@ -132,17 +128,12 @@ func (uc *Product) Store(ctx context.Context, item *entity.Product) error {
 		return uc.serviceHelper.WrapErrorEntity(
 			mrcore.FactoryErrServiceEntityVersionInvalid,
 			err,
-			entity.ModelNameCatalogProduct,
-			mrerr.Arg{"id": item.ID, "ver": item.TagVersion},
+			entity.ModelNameProduct,
+			mrmsg.Data{"id": item.ID, "ver": item.TagVersion},
 		)
 	}
 
-	uc.eventBox.Emit(
-		"%s::Store: id=%d, ver=%d",
-		entity.ModelNameCatalogProduct,
-		item.ID,
-		version,
-	)
+	uc.eventBoxEmitEntity(ctx, "Store", mrmsg.Data{"id": item.ID, "ver": version})
 
 	return nil
 }
@@ -159,7 +150,7 @@ func (uc *Product) ChangeStatus(ctx context.Context, item *entity.Product) error
 	currentStatus, err := uc.storage.FetchStatus(ctx, item)
 
 	if err != nil {
-		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogProduct, item.ID)
+		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, item.ID)
 	}
 
 	if currentStatus == item.Status {
@@ -176,18 +167,12 @@ func (uc *Product) ChangeStatus(ctx context.Context, item *entity.Product) error
 		return uc.serviceHelper.WrapErrorEntity(
 			mrcore.FactoryErrServiceEntityVersionInvalid,
 			err,
-			entity.ModelNameCatalogProduct,
-			mrerr.Arg{"id": item.ID, "ver": item.TagVersion},
+			entity.ModelNameProduct,
+			mrmsg.Data{"id": item.ID, "ver": item.TagVersion},
 		)
 	}
 
-	uc.eventBox.Emit(
-		"%s::ChangeStatus: id=%d, ver=%d, status=%s",
-		entity.ModelNameCatalogProduct,
-		item.ID,
-		version,
-		item.Status,
-	)
+	uc.eventBoxEmitEntity(ctx, "ChangeStatus", mrmsg.Data{"id": item.ID, "ver": version, "status": item.Status})
 
 	return nil
 }
@@ -198,14 +183,10 @@ func (uc *Product) Remove(ctx context.Context, id mrtype.KeyInt32) error {
 	}
 
 	if err := uc.storage.Delete(ctx, id); err != nil {
-		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogProduct, id)
+		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, id)
 	}
 
-	uc.eventBox.Emit(
-		"%s::Remove: id=%d",
-		entity.ModelNameCatalogProduct,
-		id,
-	)
+	uc.eventBoxEmitEntity(ctx, "Remove", mrmsg.Data{"id": id})
 
 	return nil
 }
@@ -220,17 +201,23 @@ func (uc *Product) MoveAfterID(ctx context.Context, id mrtype.KeyInt32, afterID 
 	}
 
 	if err := uc.storage.LoadOne(ctx, &item); err != nil {
-		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCatalogProduct, id)
+		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, id)
 	}
 
 	if item.CategoryID < 1 {
-		return mrcore.FactoryErrInternalWithData.New(entity.ModelNameCatalogProduct+"::categoryId", item.CategoryID)
+		return mrcore.FactoryErrInternalWithData.New(entity.ModelNameProduct, mrmsg.Data{"categoryId": item.CategoryID})
 	}
 
 	meta := uc.storage.GetMetaData(item.CategoryID)
 	component := uc.componentOrderer.WithMetaData(meta)
 
-	return component.MoveAfterID(ctx, id, afterID)
+	if err := component.MoveAfterID(ctx, id, afterID); err != nil {
+		return err
+	}
+
+	uc.eventBoxEmitEntity(ctx, "Move", mrmsg.Data{"id": id, "afterId": afterID})
+
+	return nil
 }
 
 func (uc *Product) checkProduct(ctx context.Context, item *entity.Product) error {
@@ -261,7 +248,7 @@ func (uc *Product) checkArticle(ctx context.Context, item *entity.Product) error
 			return nil
 		}
 
-		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCatalogProduct)
+		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameProduct)
 	}
 
 	if item.ID != id {
@@ -269,4 +256,13 @@ func (uc *Product) checkArticle(ctx context.Context, item *entity.Product) error
 	}
 
 	return nil
+}
+
+func (uc *Product) eventBoxEmitEntity(ctx context.Context, eventName string, data mrmsg.Data) {
+	uc.eventBox.Emit(
+		"%s::%s: %s",
+		entity.ModelNameProduct,
+		eventName,
+		data,
+	)
 }

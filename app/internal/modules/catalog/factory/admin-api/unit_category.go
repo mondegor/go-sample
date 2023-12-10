@@ -50,15 +50,22 @@ func newUnitCategoryImage(
 	opts *modules.Options,
 	section mrcore.ClientSection,
 ) (*usecase.CategoryImage, error) {
-	fileAPI, err := opts.S3Pool.Provider(opts.Cfg.ModulesSettings.CatalogCategory.Image.FileProvider)
+	fileAPI, err := opts.FileProviderPool.Provider(opts.Cfg.ModulesSettings.CatalogCategory.Image.FileProvider)
 
 	if err != nil {
 		return nil, err
 	}
 
+	fileAPI, err = fileAPI.WithBaseDir(opts.Cfg.ModulesSettings.CatalogCategory.Image.BaseDir)
+
+	if err != nil {
+		return nil, err
+	}
+
+	mrcore.LogInfo("CatalogCategory.Image dir '%s', OK", opts.Cfg.ModulesSettings.CatalogCategory.Image.BaseDir)
+
 	storage := repository.NewCategoryImage(opts.PostgresAdapter)
 	service := usecase.NewCategoryImage(
-		opts.Cfg.ModulesSettings.CatalogCategory.Image.BaseDir,
 		storage,
 		fileAPI,
 		opts.Locker,

@@ -1,7 +1,6 @@
 package http_v1
 
 import (
-	"fmt"
 	module "go-sample/internal/modules/catalog"
 	"go-sample/internal/modules/catalog/controller/http_v1/admin-api/view"
 	view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared/view"
@@ -9,6 +8,7 @@ import (
 	usecase "go-sample/internal/modules/catalog/usecase/admin-api"
 	usecase_shared "go-sample/internal/modules/catalog/usecase/shared"
 	"net/http"
+	"strconv"
 
 	"github.com/mondegor/go-sysmess/mrerr"
 	"github.com/mondegor/go-webcore/mrcore"
@@ -118,7 +118,7 @@ func (ht *Trademark) Create() mrcore.HttpHandlerFunc {
 		return c.SendResponse(
 			http.StatusCreated,
 			view.SuccessCreatedItemResponse{
-				ItemID: fmt.Sprintf("%d", item.ID),
+				ItemID: strconv.Itoa(int(item.ID)),
 				Message: mrctx.Locale(c.Context()).TranslateMessage(
 					"msgTrademarkSuccessCreated",
 					"entity has been success created",

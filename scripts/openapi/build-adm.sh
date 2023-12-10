@@ -7,7 +7,12 @@ mrcmd_func_openapi_build_adm() {
   local catalogProductsDir="${sectionDir}/catalog/products"
   local catalogTrademarksDir="${sectionDir}/catalog/trademarks"
 
-  OPENAPI_HEAD_PATH="${sectionDir}/head.yaml"
+  # OPENAPI_VERSION="3.0.3"
+
+  OPENAPI_HEADERS=(
+    "${sectionDir}/header.yaml"
+    "${sharedDir}/description-errors.md"
+  )
 
   OPENAPI_SERVERS=(
     "${sectionDir}/servers.yaml"
@@ -52,7 +57,8 @@ mrcmd_func_openapi_build_adm() {
     "${sharedDir}/components/schemas/fields/App.Field.Article.yaml"
     # "${sharedDir}/components/schemas/fields/App.Field.Boolean.yaml"
     "${sharedDir}/components/schemas/fields/App.Field.Caption.yaml"
-    "${sharedDir}/components/schemas/fields/App.Field.CreatedAt.yaml"
+    "${sharedDir}/components/schemas/fields/App.Field.Date.CreatedAt.yaml"
+    "${sharedDir}/components/schemas/fields/App.Field.Date.UpdatedAt.yaml"
     # "${sharedDir}/components/schemas/fields/App.Field.Date.yaml"
     # "${sharedDir}/components/schemas/fields/App.Field.Datetime.yaml"
     # "${sharedDir}/components/schemas/fields/App.Field.Email.yaml"
@@ -61,12 +67,17 @@ mrcmd_func_openapi_build_adm() {
     "${sharedDir}/components/schemas/fields/App.Field.IntegerID.yaml"
     "${sharedDir}/components/schemas/fields/App.Field.ListPager.Total.yaml"
     # "${sharedDir}/components/schemas/fields/App.Field.Phone.yaml"
-    "${sharedDir}/components/schemas/fields/App.Field.Price.yaml"
     # "${sharedDir}/components/schemas/fields/App.Field.StringID.yaml"
     "${sharedDir}/components/schemas/fields/App.Field.TagVersion.yaml"
     # "${sharedDir}/components/schemas/fields/App.Field.Timezone.yaml"
-    # "${sharedDir}/components/schemas/fields/App.Field.UpdatedAt.yaml"
     # "${sharedDir}/components/schemas/fields/App.Field.UUID.yaml"
+    # "${sharedDir}/components/schemas/fields/App.Field.VariableCamelCase.yaml"
+
+    # "${sharedDir}/components/schemas/measures/App.Measure.Gram.yaml"
+    # "${sharedDir}/components/schemas/measures/App.Measure.GramPerMeter2.yaml"
+    # "${sharedDir}/components/schemas/measures/App.Measure.Micrometer.yaml"
+    "${sharedDir}/components/schemas/measures/App.Measure.Price.yaml"
+
     # "${sharedDir}/components/schemas/App.Request.Model.ChangeFlag.yaml"
     "${sharedDir}/components/schemas/App.Request.Model.ChangeStatus.yaml"
     "${sharedDir}/components/schemas/App.Request.Model.MoveItem.yaml"
