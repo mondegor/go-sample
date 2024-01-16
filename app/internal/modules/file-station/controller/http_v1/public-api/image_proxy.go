@@ -32,7 +32,7 @@ func NewImageProxy(
 
 func (ht *ImageProxy) AddHandlers(router mrcore.HttpRouter) {
 	moduleAccessFunc := func(next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
-		return ht.section.MiddlewareWithPermission(module.PermissionFileStationImageProxy, next)
+		return ht.section.MiddlewareWithPermission(module.UnitImageProxyPermission, next)
 	}
 
 	router.HttpHandlerFunc(http.MethodGet, ht.section.Path(ht.imagesURL), moduleAccessFunc(ht.Get()))

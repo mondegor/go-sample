@@ -13,16 +13,19 @@ type (
 	Category struct {
 		storage       CategoryStorage
 		serviceHelper *mrtool.ServiceHelper
+		imgBaseURL    mrcore.BuilderPath
 	}
 )
 
 func NewCategory(
 	storage CategoryStorage,
 	serviceHelper *mrtool.ServiceHelper,
+	imgBaseURL mrcore.BuilderPath,
 ) *Category {
 	return &Category{
 		storage:       storage,
 		serviceHelper: serviceHelper,
+		imgBaseURL:    imgBaseURL,
 	}
 }
 
@@ -44,6 +47,10 @@ func (uc *Category) GetList(ctx context.Context, params entity.CategoryParams) (
 		return nil, 0, uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCategory)
 	}
 
+	for i := range items {
+		items[i].ImageURL = uc.imgBaseURL.FullPath(items[i].ImageURL)
+	}
+
 	return items, total, nil
 }
 
@@ -57,6 +64,8 @@ func (uc *Category) GetItem(ctx context.Context, id mrtype.KeyInt32) (*entity.Ca
 	if err := uc.storage.LoadOne(ctx, item); err != nil {
 		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategory, id)
 	}
+
+	item.ImageURL = uc.imgBaseURL.FullPath(item.ImageURL)
 
 	return item, nil
 }

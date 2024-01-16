@@ -4,6 +4,7 @@ import (
 	"context"
 	module "go-sample/internal/modules/catalog"
 	"go-sample/internal/modules/catalog/entity/admin-api"
+	repository_shared "go-sample/internal/modules/catalog/infrastructure/repository/shared"
 	"strings"
 
 	"github.com/mondegor/go-storage/mrstorage"
@@ -12,23 +13,23 @@ import (
 )
 
 type (
-	Trademark struct {
+	TrademarkPostgres struct {
 		client    mrstorage.DBConn
 		sqlSelect mrstorage.SqlBuilderSelect
 	}
 )
 
-func NewTrademark(
+func NewTrademarkPostgres(
 	client mrstorage.DBConn,
 	sqlSelect mrstorage.SqlBuilderSelect,
-) *Trademark {
-	return &Trademark{
+) *TrademarkPostgres {
+	return &TrademarkPostgres{
 		client:    client,
 		sqlSelect: sqlSelect,
 	}
 }
 
-func (re *Trademark) NewFetchParams(params entity.TrademarkParams) mrstorage.SqlSelectParams {
+func (re *TrademarkPostgres) NewFetchParams(params entity.TrademarkParams) mrstorage.SqlSelectParams {
 	return mrstorage.SqlSelectParams{
 		Where: re.sqlSelect.Where(func(w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
 			return w.JoinAnd(
@@ -49,7 +50,7 @@ func (re *Trademark) NewFetchParams(params entity.TrademarkParams) mrstorage.Sql
 	}
 }
 
-func (re *Trademark) Fetch(ctx context.Context, params mrstorage.SqlSelectParams) ([]entity.Trademark, error) {
+func (re *TrademarkPostgres) Fetch(ctx context.Context, params mrstorage.SqlSelectParams) ([]entity.Trademark, error) {
 	whereStr, whereArgs := params.Where.ToSql()
 
 	sql := `
@@ -61,7 +62,7 @@ func (re *Trademark) Fetch(ctx context.Context, params mrstorage.SqlSelectParams
 			trademark_caption as caption,
 			trademark_status
 		FROM
-			` + module.DBSchemaTrademark + `.trademarks
+			` + module.UnitTrademarkDBSchema + `.trademarks
 		WHERE
 			` + whereStr + `
 		ORDER BY
@@ -103,14 +104,14 @@ func (re *Trademark) Fetch(ctx context.Context, params mrstorage.SqlSelectParams
 	return rows, cursor.Err()
 }
 
-func (re *Trademark) FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPart) (int64, error) {
+func (re *TrademarkPostgres) FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPart) (int64, error) {
 	whereStr, whereArgs := where.ToSql()
 
 	sql := `
 		SELECT
 			COUNT(*)
 		FROM
-			` + module.DBSchemaTrademark + `.trademarks
+			` + module.UnitTrademarkDBSchema + `.trademarks
 		WHERE
 			` + whereStr + `;`
 
@@ -127,7 +128,7 @@ func (re *Trademark) FetchTotal(ctx context.Context, where mrstorage.SqlBuilderP
 	return totalRow, err
 }
 
-func (re *Trademark) LoadOne(ctx context.Context, row *entity.Trademark) error {
+func (re *TrademarkPostgres) LoadOne(ctx context.Context, row *entity.Trademark) error {
 	sql := `
 		SELECT
 			tag_version,
@@ -136,7 +137,7 @@ func (re *Trademark) LoadOne(ctx context.Context, row *entity.Trademark) error {
 			trademark_caption,
 			trademark_status
 		FROM
-			` + module.DBSchemaTrademark + `.trademarks
+			` + module.UnitTrademarkDBSchema + `.trademarks
 		WHERE
 			trademark_id = $1 AND trademark_status <> $2
 		LIMIT 1;`
@@ -155,12 +156,12 @@ func (re *Trademark) LoadOne(ctx context.Context, row *entity.Trademark) error {
 	)
 }
 
-func (re *Trademark) FetchStatus(ctx context.Context, row *entity.Trademark) (mrenum.ItemStatus, error) {
+func (re *TrademarkPostgres) FetchStatus(ctx context.Context, row *entity.Trademark) (mrenum.ItemStatus, error) {
 	sql := `
 		SELECT
 			trademark_status
 		FROM
-			` + module.DBSchemaTrademark + `.trademarks
+			` + module.UnitTrademarkDBSchema + `.trademarks
 		WHERE
 			trademark_id = $1 AND trademark_status <> $2
 		LIMIT 1;`
@@ -181,29 +182,13 @@ func (re *Trademark) FetchStatus(ctx context.Context, row *entity.Trademark) (mr
 
 // IsExists
 // result: nil - exists, ErrStorageNoRowFound - not exists, error - query error
-func (re *Trademark) IsExists(ctx context.Context, id mrtype.KeyInt32) error {
-	sql := `
-		SELECT
-			1
-		FROM
-			` + module.DBSchemaTrademark + `.trademarks
-		WHERE
-			trademark_id = $1 AND trademark_status <> $2
-		LIMIT 1;`
-
-	return re.client.QueryRow(
-		ctx,
-		sql,
-		id,
-		mrenum.ItemStatusRemoved,
-	).Scan(
-		&id,
-	)
+func (re *TrademarkPostgres) IsExists(ctx context.Context, id mrtype.KeyInt32) error {
+	return repository_shared.TrademarkIsExistsPostgres(ctx, re.client, id)
 }
 
-func (re *Trademark) Insert(ctx context.Context, row *entity.Trademark) error {
+func (re *TrademarkPostgres) Insert(ctx context.Context, row *entity.Trademark) error {
 	sql := `
-		INSERT INTO ` + module.DBSchemaTrademark + `.trademarks
+		INSERT INTO ` + module.UnitTrademarkDBSchema + `.trademarks
 			(
 				trademark_caption,
 				trademark_status
@@ -223,10 +208,10 @@ func (re *Trademark) Insert(ctx context.Context, row *entity.Trademark) error {
 	)
 }
 
-func (re *Trademark) Update(ctx context.Context, row *entity.Trademark) (int32, error) {
+func (re *TrademarkPostgres) Update(ctx context.Context, row *entity.Trademark) (int32, error) {
 	sql := `
 		UPDATE
-			` + module.DBSchemaTrademark + `.trademarks
+			` + module.UnitTrademarkDBSchema + `.trademarks
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),
@@ -252,10 +237,10 @@ func (re *Trademark) Update(ctx context.Context, row *entity.Trademark) (int32, 
 	return tagVersion, err
 }
 
-func (re *Trademark) UpdateStatus(ctx context.Context, row *entity.Trademark) (int32, error) {
+func (re *TrademarkPostgres) UpdateStatus(ctx context.Context, row *entity.Trademark) (int32, error) {
 	sql := `
 		UPDATE
-			` + module.DBSchemaTrademark + `.trademarks
+			` + module.UnitTrademarkDBSchema + `.trademarks
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),
@@ -281,10 +266,10 @@ func (re *Trademark) UpdateStatus(ctx context.Context, row *entity.Trademark) (i
 	return tagVersion, err
 }
 
-func (re *Trademark) Delete(ctx context.Context, id mrtype.KeyInt32) error {
+func (re *TrademarkPostgres) Delete(ctx context.Context, id mrtype.KeyInt32) error {
 	sql := `
 		UPDATE
-			` + module.DBSchemaTrademark + `.trademarks
+			` + module.UnitTrademarkDBSchema + `.trademarks
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),

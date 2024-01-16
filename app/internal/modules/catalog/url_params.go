@@ -3,9 +3,10 @@ package module
 const (
 	ParamNameFilterSearchText = "query"
 
-	ParamNameFilterCategoryID        = "categoryId"
-	ParamNameFilterStatuses          = "statuses"
-	ParamNameFilterCatalogTrademarks = "trademarks"
+	ParamNameFilterStatuses = "statuses"
+
+	ParamNameFilterCatalogCategoryID   = "categoryId"
+	ParamNameFilterCatalogTrademarkIDs = "trademarks"
 
 	ParamNameFilterPriceRange = "price"
 

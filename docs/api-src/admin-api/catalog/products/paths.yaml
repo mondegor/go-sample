@@ -12,9 +12,11 @@
     parameters:
       - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
       - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
-      - $ref: "#/components/parameters/App.Request.Query.Filter.SearchText"
       - $ref: "#/components/parameters/Catalog.Products.AdminAPI.Request.Query.Filter.CategoryID"
+      - $ref: "#/components/parameters/App.Request.Query.Filter.SearchText"
       - $ref: "#/components/parameters/Catalog.Products.AdminAPI.Request.Query.Filter.TrademarkIDs"
+      - $ref: "#/components/parameters/Custom.Request.Query.Filter.PriceMin"
+      - $ref: "#/components/parameters/Custom.Request.Query.Filter.PriceMax"
       - $ref: "#/components/parameters/App.Request.Query.Filter.Statuses"
       - $ref: "#/components/parameters/App.Request.Query.ListSorter.SortField"
       - $ref: "#/components/parameters/App.Request.Query.ListSorter.SortDirection"
@@ -42,9 +44,9 @@
 
       **Ограничения и ошибки полей:**
       - categoryId: required,gte=1
-      - trademarkId: required,gte=1
       - article: required,min=4,max=32,pattern=article
       - caption: required,max=128
+      - trademarkId: required,gte=1
       - price: gte=0
     operationId: createProduct
     tags:
@@ -119,9 +121,9 @@
 
       **Ограничения и ошибки полей:**
       - version: required,gte=1 | ErrVersionInvalid
-      - trademarkId: omitempty,gte=1
       - article: omitempty,min=4,max=32,pattern=article
       - caption: omitempty,max=128
+      - trademarkId: omitempty,gte=1
       - price: omitempty,gte=0
     operationId: storeProduct
     tags:
@@ -254,7 +256,7 @@
 
     responses:
       "204":
-        description: Статус поля формы успешно изменён
+        description: Товар был успешно перемещён
       "400":
         $ref: "#/components/responses/App.ResponseJson.Error400"
       "401":

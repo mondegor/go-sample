@@ -1,17 +1,14 @@
 package factory
 
 import (
-	"go-sample/internal/modules"
+	module "go-sample/internal/modules/file-station"
+	"go-sample/internal/modules/file-station/factory"
 
 	"github.com/mondegor/go-webcore/mrcore"
 )
 
-const (
-	moduleName = "FileStation"
-)
-
-func NewModule(opts *modules.Options, section mrcore.ClientSection) ([]mrcore.HttpController, error) {
-	opts.Logger.Info("Init module %s in section %s", moduleName, section.Caption())
+func NewModule(opts *factory.Options, section mrcore.ClientSection) ([]mrcore.HttpController, error) {
+	opts.Logger.Info("Init module %s in section %s", module.Name, section.Caption())
 
 	var c []mrcore.HttpController
 
@@ -22,8 +19,8 @@ func NewModule(opts *modules.Options, section mrcore.ClientSection) ([]mrcore.Ht
 	return c, nil
 }
 
-func newModule(c *[]mrcore.HttpController, opts *modules.Options, section mrcore.ClientSection) error {
-	opts.Logger.Info("Init unit %s in %s section", unitNameImageProxy, section.Caption())
+func newModule(c *[]mrcore.HttpController, opts *factory.Options, section mrcore.ClientSection) error {
+	opts.Logger.Info("Init unit %s in %s section", module.UnitImageProxyName, section.Caption())
 
 	return newUnitImageProxy(c, opts, section)
 }

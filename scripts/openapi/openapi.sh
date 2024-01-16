@@ -38,6 +38,7 @@ function mrcmd_plugins_openapi_method_exec() {
     build-all)
       mrcmd openapi build-adm-all
       mrcmd openapi build-pub-all
+      mrcmd openapi build-system
       ;;
 
     build-adm-all)
@@ -92,6 +93,10 @@ function mrcmd_plugins_openapi_method_exec() {
       fileNamePostfix="file-station"
       ;;
 
+    build-system)
+      sectionName="system"
+      ;;
+
     *)
       ${RETURN_FALSE}
       ;;
@@ -119,4 +124,5 @@ function mrcmd_plugins_openapi_method_help() {
   echo -e "    build-pub-all     Builds all public API docs"
   echo -e "    build-adm         Builds only admin API docs"
   echo -e "    build-pub         Builds only public API docs"
+  echo -e "    build-system      Builds only system API docs"
 }

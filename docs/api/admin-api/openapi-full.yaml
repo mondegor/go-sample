@@ -369,9 +369,11 @@ paths:
       parameters:
         - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
         - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
-        - $ref: "#/components/parameters/App.Request.Query.Filter.SearchText"
         - $ref: "#/components/parameters/Catalog.Products.AdminAPI.Request.Query.Filter.CategoryID"
+        - $ref: "#/components/parameters/App.Request.Query.Filter.SearchText"
         - $ref: "#/components/parameters/Catalog.Products.AdminAPI.Request.Query.Filter.TrademarkIDs"
+        - $ref: "#/components/parameters/Custom.Request.Query.Filter.PriceMin"
+        - $ref: "#/components/parameters/Custom.Request.Query.Filter.PriceMax"
         - $ref: "#/components/parameters/App.Request.Query.Filter.Statuses"
         - $ref: "#/components/parameters/App.Request.Query.ListSorter.SortField"
         - $ref: "#/components/parameters/App.Request.Query.ListSorter.SortDirection"
@@ -399,9 +401,9 @@ paths:
 
         **Ограничения и ошибки полей:**
         - categoryId: required,gte=1
-        - trademarkId: required,gte=1
         - article: required,min=4,max=32,pattern=article
         - caption: required,max=128
+        - trademarkId: required,gte=1
         - price: gte=0
       operationId: createProduct
       tags:
@@ -476,9 +478,9 @@ paths:
 
         **Ограничения и ошибки полей:**
         - version: required,gte=1 | ErrVersionInvalid
-        - trademarkId: omitempty,gte=1
         - article: omitempty,min=4,max=32,pattern=article
         - caption: omitempty,max=128
+        - trademarkId: omitempty,gte=1
         - price: omitempty,gte=0
       operationId: storeProduct
       tags:
@@ -611,7 +613,7 @@ paths:
 
       responses:
         "204":
-          description: Статус поля формы успешно изменён
+          description: Товар был успешно перемещён
         "400":
           $ref: "#/components/responses/App.ResponseJson.Error400"
         "401":
@@ -934,6 +936,26 @@ components:
         default: "ASC"
       example: "DESC"
 
+    Custom.Request.Query.Filter.PriceMin:
+      description: Минимальная цена (10^2)
+      name: price-min
+      in: query
+      required: false
+      schema:
+        type: integer
+        maxLength: 10
+      example: 100000 # 100g/m2
+
+    Custom.Request.Query.Filter.PriceMax:
+      description: Максимальная цена (10^2)
+      name: price-max
+      in: query
+      required: false
+      schema:
+        type: integer
+        maxLength: 10
+      example: 100000 # 100g/m2
+
     Catalog.Categories.AdminAPI.Request.Path.CategoryID:
       description: Идентификатор категории
       name: categoryId
@@ -1045,6 +1067,7 @@ components:
     App.Measure.Price:
       description: Цена изделия (10^2)
       type: integer # Money
+      maxLength: 12
       minimum: 0
       example: 8234500 # 82345 coins
 
@@ -1138,27 +1161,51 @@ components:
           type: string
           example: "5add1be1-90ab5d42-02fa8b1f-672503f2"
 
-    App.Response.Model.FileInfo:
-      description: DTO - информация о файле
+    App.Response.Model.ImageInfo:
+      description: DTO - информация об изображении
       type: object
       required:
-        - originalName
+        - name
         - size
       properties:
         contentType:
           description: Тип файла
           type: string
           maxLength: 64
-          example: "image/png"
+          example: "image/jpeg"
         originalName:
-          description: Оригинальное название файла
+          description: Оригинальное название файла изображения
           type: string
           maxLength: 128
-          example: "Название"
+          example: "image-original-name.jpg"
+        name:
+          description: Название файла изображения
+          type: string
+          maxLength: 128
+          example: "image-name.jpg"
+        url:
+          description: URL файла изображения
+          type: string
+          maxLength: 128
+          example: "http://localhost/path/image-name.jpg"
+        width:
+          description: Ширина изображения (px)
+          type: integer
+          example: 1024
+        height:
+          description: Высота изображения (px)
+          type: integer
+          example: 768
         size:
-          description: Размер файла в байтах
+          description: Размер файла изображения в байтах
           type: integer
           example: 7
+        lastModified:
+          description: Дата и время обновления файла изображения (UTC)
+          type: string
+          format: date-time
+          nullable: true
+          example: "2023-01-01T12:00:00.000+02:00"
 
     App.Response.Model.SuccessCreatedItem:
       description: DTO результата создания записи
@@ -1176,7 +1223,7 @@ components:
           example: "Запись была успешно создана"
 
     Catalog.Categories.AdminAPI.Request.Model.CreateCategory:
-      description: DTO создания категории каталога
+      description: DTO добавления новой категории каталога
       type: object
       required:
         - caption
@@ -1232,27 +1279,27 @@ components:
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
         imageInfo:
-          $ref: "#/components/schemas/App.Response.Model.FileInfo"
+          $ref: "#/components/schemas/App.Response.Model.ImageInfo"
         status:
           $ref: "#/components/schemas/App.Enum.Status"
 
     Catalog.Products.AdminAPI.Request.Model.CreateProduct:
-      description: DTO создания товара каталога
+      description: DTO добавления нового товара каталога
       type: object
       required:
         - categoryId
-        - trademarkId
         - article
         - caption
+        - trademarkId
       properties:
         categoryId:
-          $ref: "#/components/schemas/App.Field.IntegerID"
-        trademarkId:
           $ref: "#/components/schemas/App.Field.IntegerID"
         article:
           $ref: "#/components/schemas/App.Field.Article"
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
+        trademarkId:
+          $ref: "#/components/schemas/App.Field.IntegerID"
         price:
           $ref: "#/components/schemas/App.Measure.Price"
 
@@ -1264,12 +1311,12 @@ components:
       properties:
         version:
           $ref: "#/components/schemas/App.Field.TagVersion"
-        trademarkId:
-          $ref: "#/components/schemas/App.Field.IntegerID"
         article:
           $ref: "#/components/schemas/App.Field.Article"
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
+        trademarkId:
+          $ref: "#/components/schemas/App.Field.IntegerID"
         price:
           $ref: "#/components/schemas/App.Measure.Price"
 
@@ -1296,9 +1343,9 @@ components:
         - version
         - createdAt
         - categoryId
-        - trademarkId
         - article
         - caption
+        - trademarkId
         - price
         - status
       properties:
@@ -1312,19 +1359,19 @@ components:
           $ref: "#/components/schemas/App.Field.Date.UpdatedAt"
         categoryId:
           $ref: "#/components/schemas/App.Field.IntegerID"
-        trademarkId:
-          $ref: "#/components/schemas/App.Field.IntegerID"
         article:
           $ref: "#/components/schemas/App.Field.Article"
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
+        trademarkId:
+          $ref: "#/components/schemas/App.Field.IntegerID"
         price:
           $ref: "#/components/schemas/App.Measure.Price"
         status:
           $ref: "#/components/schemas/App.Enum.Status"
 
     Catalog.Trademarks.AdminAPI.Request.Model.CreateTrademark:
-      description: DTO создания торговой марки
+      description: DTO добавления новой торговой марки
       type: object
       required:
         - caption

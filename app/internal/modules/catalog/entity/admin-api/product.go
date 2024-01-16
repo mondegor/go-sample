@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	ModelNameProduct = "admin-api.CatalogProduct"
+	ModelNameProduct = "admin-api.Catalog.Product"
 )
 
 type (
@@ -19,10 +19,10 @@ type (
 		CreatedAt  time.Time       `json:"createdAt" sort:"createdAt"`           // datetime_created
 		UpdatedAt  *time.Time      `json:"updatedAt,omitempty" sort:"updatedAt"` // datetime_updated
 
-		CategoryID  mrtype.KeyInt32     `json:"categoryId" upd:"category_id"`   // ps_catalog.categories::category_id
-		TrademarkID mrtype.KeyInt32     `json:"trademarkId" upd:"trademark_id"` // ps_catalog.trademarks::trademark_id
+		CategoryID  mrtype.KeyInt32     `json:"categoryId" upd:"category_id"` // ps_catalog.categories::category_id
 		Article     string              `json:"article" sort:"article" upd:"product_article"`
 		Caption     string              `json:"caption" sort:"caption,default" upd:"product_caption"`
+		TrademarkID mrtype.KeyInt32     `json:"trademarkId" upd:"trademark_id"`         // ps_catalog.trademarks::trademark_id
 		Price       entity_shared.Money `json:"price" sort:"price" upd:"product_price"` // (coins)
 
 		Status mrenum.ItemStatus `json:"status"` // product_status
@@ -35,10 +35,10 @@ type (
 	}
 
 	ProductListFilter struct {
-		CategoryID mrtype.KeyInt32
-		Trademarks []mrtype.KeyInt32
-		SearchText string
-		Price      mrtype.RangeInt64
-		Statuses   []mrenum.ItemStatus
+		CategoryID   mrtype.KeyInt32
+		SearchText   string
+		TrademarkIDs []mrtype.KeyInt32
+		Price        mrtype.RangeInt64
+		Statuses     []mrenum.ItemStatus
 	}
 )

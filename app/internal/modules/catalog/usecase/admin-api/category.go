@@ -4,6 +4,7 @@ import (
 	"context"
 	"go-sample/internal/modules/catalog/entity/admin-api"
 
+	"github.com/mondegor/go-storage/mrentity"
 	"github.com/mondegor/go-sysmess/mrmsg"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrenum"
@@ -16,6 +17,7 @@ type (
 		storage       CategoryStorage
 		eventBox      mrcore.EventBox
 		serviceHelper *mrtool.ServiceHelper
+		imgBaseURL    mrcore.BuilderPath
 		statusFlow    mrenum.StatusFlow
 	}
 )
@@ -24,11 +26,13 @@ func NewCategory(
 	storage CategoryStorage,
 	eventBox mrcore.EventBox,
 	serviceHelper *mrtool.ServiceHelper,
+	imgBaseURL mrcore.BuilderPath,
 ) *Category {
 	return &Category{
 		storage:       storage,
 		eventBox:      eventBox,
 		serviceHelper: serviceHelper,
+		imgBaseURL:    imgBaseURL,
 		statusFlow:    mrenum.ItemStatusFlow,
 	}
 }
@@ -51,6 +55,10 @@ func (uc *Category) GetList(ctx context.Context, params entity.CategoryParams) (
 		return nil, 0, uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCategory)
 	}
 
+	for i := range items {
+		items[i].ImageInfo = uc.getImageInfo(items[i].ImageMeta)
+	}
+
 	return items, total, nil
 }
 
@@ -65,11 +73,11 @@ func (uc *Category) GetItem(ctx context.Context, id mrtype.KeyInt32) (*entity.Ca
 		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategory, id)
 	}
 
+	item.ImageInfo = uc.getImageInfo(item.ImageMeta)
+
 	return item, nil
 }
 
-// Create
-// modifies: item{ID}
 func (uc *Category) Create(ctx context.Context, item *entity.Category) error {
 	item.Status = mrenum.ItemStatusDraft
 
@@ -98,12 +106,11 @@ func (uc *Category) Store(ctx context.Context, item *entity.Category) error {
 	version, err := uc.storage.Update(ctx, item)
 
 	if err != nil {
-		return uc.serviceHelper.WrapErrorEntity(
-			mrcore.FactoryErrServiceEntityVersionInvalid,
-			err,
-			entity.ModelNameCategory,
-			mrmsg.Data{"id": item.ID, "ver": item.TagVersion},
-		)
+		if uc.serviceHelper.IsNotFoundError(err) {
+			return mrcore.FactoryErrServiceEntityVersionInvalid.Wrap(err)
+		}
+
+		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCategory)
 	}
 
 	uc.eventBoxEmitEntity(ctx, "Store", mrmsg.Data{"id": item.ID, "ver": version})
@@ -137,12 +144,11 @@ func (uc *Category) ChangeStatus(ctx context.Context, item *entity.Category) err
 	version, err := uc.storage.UpdateStatus(ctx, item)
 
 	if err != nil {
-		return uc.serviceHelper.WrapErrorEntity(
-			mrcore.FactoryErrServiceEntityVersionInvalid,
-			err,
-			entity.ModelNameCategory,
-			mrmsg.Data{"id": item.ID, "ver": item.TagVersion},
-		)
+		if uc.serviceHelper.IsNotFoundError(err) {
+			return mrcore.FactoryErrServiceEntityVersionInvalid.Wrap(err)
+		}
+
+		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCategory)
 	}
 
 	uc.eventBoxEmitEntity(ctx, "ChangeStatus", mrmsg.Data{"id": item.ID, "ver": version, "status": item.Status})
@@ -160,6 +166,15 @@ func (uc *Category) Remove(ctx context.Context, id mrtype.KeyInt32) error {
 	}
 
 	uc.eventBoxEmitEntity(ctx, "Remove", mrmsg.Data{"id": id})
+
+	return nil
+}
+
+func (uc *Category) getImageInfo(meta *mrentity.ImageMeta) *mrtype.ImageInfo {
+	if imageInfo := mrentity.ConvertImageMetaToInfo(meta); imageInfo != nil {
+		imageInfo.URL = uc.imgBaseURL.FullPath(imageInfo.Path)
+		return imageInfo
+	}
 
 	return nil
 }

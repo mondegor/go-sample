@@ -14,28 +14,28 @@ import (
 )
 
 type (
-	Product struct {
+	ProductPostgres struct {
 		client    mrstorage.DBConn
 		sqlSelect mrstorage.SqlBuilderSelect
 		sqlUpdate mrstorage.SqlBuilderUpdate
 	}
 )
 
-func NewProduct(
+func NewProductPostgres(
 	client mrstorage.DBConn,
 	sqlSelect mrstorage.SqlBuilderSelect,
 	sqlUpdate mrstorage.SqlBuilderUpdate,
-) *Product {
-	return &Product{
+) *ProductPostgres {
+	return &ProductPostgres{
 		client:    client,
 		sqlSelect: sqlSelect,
 		sqlUpdate: sqlUpdate,
 	}
 }
 
-func (re *Product) GetMetaData(categoryID mrtype.KeyInt32) mrorderer.EntityMeta {
+func (re *ProductPostgres) GetMetaData(categoryID mrtype.KeyInt32) mrorderer.EntityMeta {
 	return mrorderer.NewEntityMeta(
-		module.DBSchemaProduct+".products",
+		module.UnitProductDBSchema+".products",
 		"product_id",
 		re.sqlSelect.Where(func(w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
 			return w.JoinAnd(
@@ -46,14 +46,14 @@ func (re *Product) GetMetaData(categoryID mrtype.KeyInt32) mrorderer.EntityMeta 
 	)
 }
 
-func (re *Product) NewFetchParams(params entity.ProductParams) mrstorage.SqlSelectParams {
+func (re *ProductPostgres) NewFetchParams(params entity.ProductParams) mrstorage.SqlSelectParams {
 	return mrstorage.SqlSelectParams{
 		Where: re.sqlSelect.Where(func(w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
 			return w.JoinAnd(
 				w.NotEqual("product_status", mrenum.ItemStatusRemoved),
 				w.FilterEqualInt64("category_id", int64(params.Filter.CategoryID), 0),
-				w.FilterAnyOf("trademark_id", params.Filter.Trademarks),
 				w.FilterLikeFields([]string{"UPPER(product_article)", "UPPER(product_caption)"}, strings.ToUpper(params.Filter.SearchText)),
+				w.FilterAnyOf("trademark_id", params.Filter.TrademarkIDs),
 				w.FilterRangeInt64("product_price", params.Filter.Price, 0),
 				w.FilterAnyOf("product_status", params.Filter.Statuses),
 			)
@@ -70,7 +70,7 @@ func (re *Product) NewFetchParams(params entity.ProductParams) mrstorage.SqlSele
 	}
 }
 
-func (re *Product) Fetch(ctx context.Context, params mrstorage.SqlSelectParams) ([]entity.Product, error) {
+func (re *ProductPostgres) Fetch(ctx context.Context, params mrstorage.SqlSelectParams) ([]entity.Product, error) {
 	whereStr, whereArgs := params.Where.ToSql()
 
 	sql := `
@@ -80,13 +80,13 @@ func (re *Product) Fetch(ctx context.Context, params mrstorage.SqlSelectParams) 
 			datetime_created as createdAt,
 			datetime_updated as updatedAt,
 			category_id,
-			trademark_id,
 			product_article as article,
 			product_caption as caption,
+			trademark_id,
 			product_price as price,
 			product_status
 		FROM
-			` + module.DBSchemaProduct + `.products
+			` + module.UnitProductDBSchema + `.products
 		WHERE
 			` + whereStr + `
 		ORDER BY
@@ -115,9 +115,9 @@ func (re *Product) Fetch(ctx context.Context, params mrstorage.SqlSelectParams) 
 			&row.CreatedAt,
 			&row.UpdatedAt,
 			&row.CategoryID,
-			&row.TrademarkID,
 			&row.Article,
 			&row.Caption,
+			&row.TrademarkID,
 			&row.Price,
 			&row.Status,
 		)
@@ -132,14 +132,14 @@ func (re *Product) Fetch(ctx context.Context, params mrstorage.SqlSelectParams) 
 	return rows, cursor.Err()
 }
 
-func (re *Product) FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPart) (int64, error) {
+func (re *ProductPostgres) FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPart) (int64, error) {
 	whereStr, whereArgs := where.ToSql()
 
 	sql := `
 		SELECT
 			COUNT(*)
 		FROM
-			` + module.DBSchemaProduct + `.products
+			` + module.UnitProductDBSchema + `.products
 		WHERE
 			` + whereStr + `;`
 
@@ -156,20 +156,20 @@ func (re *Product) FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPar
 	return totalRow, err
 }
 
-func (re *Product) LoadOne(ctx context.Context, row *entity.Product) error {
+func (re *ProductPostgres) LoadOne(ctx context.Context, row *entity.Product) error {
 	sql := `
 		SELECT
 			tag_version,
 			datetime_created,
 			datetime_updated,
 			category_id,
-			trademark_id,
 			product_article,
 			product_caption,
+			trademark_id,
 			product_price,
 			product_status
 		FROM
-			` + module.DBSchemaProduct + `.products
+			` + module.UnitProductDBSchema + `.products
 		WHERE
 			product_id = $1 AND product_status <> $2
 		LIMIT 1;`
@@ -184,20 +184,20 @@ func (re *Product) LoadOne(ctx context.Context, row *entity.Product) error {
 		&row.CreatedAt,
 		&row.UpdatedAt,
 		&row.CategoryID,
-		&row.TrademarkID,
 		&row.Article,
 		&row.Caption,
+		&row.TrademarkID,
 		&row.Price,
 		&row.Status,
 	)
 }
 
-func (re *Product) FetchIdByArticle(ctx context.Context, article string) (mrtype.KeyInt32, error) {
+func (re *ProductPostgres) FetchIdByArticle(ctx context.Context, article string) (mrtype.KeyInt32, error) {
 	sql := `
 		SELECT
 			product_id
 		FROM
-			` + module.DBSchemaProduct + `.products
+			` + module.UnitProductDBSchema + `.products
 		WHERE
 			product_article = $1
 		LIMIT 1;`
@@ -215,12 +215,12 @@ func (re *Product) FetchIdByArticle(ctx context.Context, article string) (mrtype
 	return id, err
 }
 
-func (re *Product) FetchStatus(ctx context.Context, row *entity.Product) (mrenum.ItemStatus, error) {
+func (re *ProductPostgres) FetchStatus(ctx context.Context, row *entity.Product) (mrenum.ItemStatus, error) {
 	sql := `
 		SELECT
 			product_status
 		FROM
-			` + module.DBSchemaProduct + `.products
+			` + module.UnitProductDBSchema + `.products
 		WHERE
 			product_id = $1 AND product_status <> $2
 		LIMIT 1;`
@@ -241,12 +241,12 @@ func (re *Product) FetchStatus(ctx context.Context, row *entity.Product) (mrenum
 
 // IsExists
 // result: nil - exists, ErrStorageNoRowFound - not exists, error - query error
-func (re *Product) IsExists(ctx context.Context, id mrtype.KeyInt32) error {
+func (re *ProductPostgres) IsExists(ctx context.Context, id mrtype.KeyInt32) error {
 	sql := `
 		SELECT
 			1
 		FROM
-			` + module.DBSchemaProduct + `.products
+			` + module.UnitProductDBSchema + `.products
 		WHERE
 			product_id = $1 AND product_status <> $2
 		LIMIT 1;`
@@ -261,14 +261,14 @@ func (re *Product) IsExists(ctx context.Context, id mrtype.KeyInt32) error {
 	)
 }
 
-func (re *Product) Insert(ctx context.Context, row *entity.Product) error {
+func (re *ProductPostgres) Insert(ctx context.Context, row *entity.Product) error {
 	sql := `
-		INSERT INTO ` + module.DBSchemaProduct + `.products
+		INSERT INTO ` + module.UnitProductDBSchema + `.products
 			(
 				category_id,
-				trademark_id,
 				product_article,
 				product_caption,
+				trademark_id,
 				product_price,
 				product_status
 			)
@@ -281,9 +281,9 @@ func (re *Product) Insert(ctx context.Context, row *entity.Product) error {
 		ctx,
 		sql,
 		row.CategoryID,
-		row.TrademarkID,
 		row.Article,
 		row.Caption,
+		row.TrademarkID,
 		row.Price,
 		row.Status,
 	).Scan(
@@ -293,15 +293,11 @@ func (re *Product) Insert(ctx context.Context, row *entity.Product) error {
 	return err
 }
 
-func (re *Product) Update(ctx context.Context, row *entity.Product) (int32, error) {
+func (re *ProductPostgres) Update(ctx context.Context, row *entity.Product) (int32, error) {
 	set, err := re.sqlUpdate.SetFromEntity(row)
 
-	if err != nil {
+	if err != nil || set.Empty() {
 		return 0, err
-	}
-
-	if set.Empty() {
-		return 0, nil
 	}
 
 	args := []any{
@@ -314,7 +310,7 @@ func (re *Product) Update(ctx context.Context, row *entity.Product) (int32, erro
 
 	sql := `
 		UPDATE
-			` + module.DBSchemaProduct + `.products
+			` + module.UnitProductDBSchema + `.products
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),
@@ -337,10 +333,10 @@ func (re *Product) Update(ctx context.Context, row *entity.Product) (int32, erro
 	return tagVersion, err
 }
 
-func (re *Product) UpdateStatus(ctx context.Context, row *entity.Product) (int32, error) {
+func (re *ProductPostgres) UpdateStatus(ctx context.Context, row *entity.Product) (int32, error) {
 	sql := `
 		UPDATE
-			` + module.DBSchemaProduct + `.products
+			` + module.UnitProductDBSchema + `.products
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),
@@ -366,16 +362,14 @@ func (re *Product) UpdateStatus(ctx context.Context, row *entity.Product) (int32
 	return tagVersion, err
 }
 
-func (re *Product) Delete(ctx context.Context, id mrtype.KeyInt32) error {
+func (re *ProductPostgres) Delete(ctx context.Context, id mrtype.KeyInt32) error {
 	sql := `
 		UPDATE
-			` + module.DBSchemaProduct + `.products
+			` + module.UnitProductDBSchema + `.products
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),
 			product_article = NULL,
-			prev_field_id = NULL,
-			next_field_id = NULL,
 			order_field = NULL,
 			product_status = $2
 		WHERE

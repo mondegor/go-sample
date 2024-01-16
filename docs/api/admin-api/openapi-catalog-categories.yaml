@@ -580,27 +580,51 @@ components:
           type: string
           example: "5add1be1-90ab5d42-02fa8b1f-672503f2"
 
-    App.Response.Model.FileInfo:
-      description: DTO - информация о файле
+    App.Response.Model.ImageInfo:
+      description: DTO - информация об изображении
       type: object
       required:
-        - originalName
+        - name
         - size
       properties:
         contentType:
           description: Тип файла
           type: string
           maxLength: 64
-          example: "image/png"
+          example: "image/jpeg"
         originalName:
-          description: Оригинальное название файла
+          description: Оригинальное название файла изображения
           type: string
           maxLength: 128
-          example: "Название"
+          example: "image-original-name.jpg"
+        name:
+          description: Название файла изображения
+          type: string
+          maxLength: 128
+          example: "image-name.jpg"
+        url:
+          description: URL файла изображения
+          type: string
+          maxLength: 128
+          example: "http://localhost/path/image-name.jpg"
+        width:
+          description: Ширина изображения (px)
+          type: integer
+          example: 1024
+        height:
+          description: Высота изображения (px)
+          type: integer
+          example: 768
         size:
-          description: Размер файла в байтах
+          description: Размер файла изображения в байтах
           type: integer
           example: 7
+        lastModified:
+          description: Дата и время обновления файла изображения (UTC)
+          type: string
+          format: date-time
+          nullable: true
+          example: "2023-01-01T12:00:00.000+02:00"
 
     App.Response.Model.SuccessCreatedItem:
       description: DTO результата создания записи
@@ -618,7 +642,7 @@ components:
           example: "Запись была успешно создана"
 
     Catalog.Categories.AdminAPI.Request.Model.CreateCategory:
-      description: DTO создания категории каталога
+      description: DTO добавления новой категории каталога
       type: object
       required:
         - caption
@@ -674,7 +698,7 @@ components:
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
         imageInfo:
-          $ref: "#/components/schemas/App.Response.Model.FileInfo"
+          $ref: "#/components/schemas/App.Response.Model.ImageInfo"
         status:
           $ref: "#/components/schemas/App.Enum.Status"
 

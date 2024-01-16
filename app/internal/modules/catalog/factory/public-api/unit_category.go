@@ -1,10 +1,9 @@
 package factory
 
 import (
-	"go-sample/internal/factory"
-	"go-sample/internal/modules"
 	module "go-sample/internal/modules/catalog"
 	http_v1 "go-sample/internal/modules/catalog/controller/http_v1/public-api"
+	"go-sample/internal/modules/catalog/factory"
 	repository "go-sample/internal/modules/catalog/infrastructure/repository/public-api"
 	usecase "go-sample/internal/modules/catalog/usecase/public-api"
 
@@ -13,16 +12,12 @@ import (
 	"github.com/mondegor/go-webcore/mrcore"
 )
 
-const (
-	unitNameCategory = "Category"
-)
-
 func newUnitCategory(
 	c *[]mrcore.HttpController,
-	opts *modules.Options,
+	opts *factory.Options,
 	section mrcore.ClientSection,
 ) error {
-	storage := repository.NewCategory(
+	storage := repository.NewCategoryPostgres(
 		opts.PostgresAdapter,
 		mrsql.NewBuilderSelect(
 			mrpostgres.NewSqlBuilderWhere(),
@@ -30,9 +25,11 @@ func newUnitCategory(
 			mrpostgres.NewSqlBuilderPager(module.PageSizeMax),
 		),
 	)
-	imagesURL := factory.NewBuilderImagesURL(opts.Cfg)
-	service := usecase.NewCategory(storage, opts.ServiceHelper)
-	*c = append(*c, http_v1.NewCategory(section, service, imagesURL))
+	service := usecase.NewCategoryLangDecorator(
+		usecase.NewCategory(storage, opts.ServiceHelper, opts.UnitCategory.ImageURLBuilder),
+		opts.UnitCategory.Dictionary,
+	)
+	*c = append(*c, http_v1.NewCategory(section, service))
 
 	return nil
 }

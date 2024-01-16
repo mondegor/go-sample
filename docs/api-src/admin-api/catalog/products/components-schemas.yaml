@@ -1,20 +1,20 @@
 Catalog.Products.AdminAPI.Request.Model.CreateProduct:
-  description: DTO создания товара каталога
+  description: DTO добавления нового товара каталога
   type: object
   required:
     - categoryId
-    - trademarkId
     - article
     - caption
+    - trademarkId
   properties:
     categoryId:
-      $ref: "#/components/schemas/App.Field.IntegerID"
-    trademarkId:
       $ref: "#/components/schemas/App.Field.IntegerID"
     article:
       $ref: "#/components/schemas/App.Field.Article"
     caption:
       $ref: "#/components/schemas/App.Field.Caption"
+    trademarkId:
+      $ref: "#/components/schemas/App.Field.IntegerID"
     price:
       $ref: "#/components/schemas/App.Measure.Price"
 
@@ -26,12 +26,12 @@ Catalog.Products.AdminAPI.Request.Model.StoreProduct:
   properties:
     version:
       $ref: "#/components/schemas/App.Field.TagVersion"
-    trademarkId:
-      $ref: "#/components/schemas/App.Field.IntegerID"
     article:
       $ref: "#/components/schemas/App.Field.Article"
     caption:
       $ref: "#/components/schemas/App.Field.Caption"
+    trademarkId:
+      $ref: "#/components/schemas/App.Field.IntegerID"
     price:
       $ref: "#/components/schemas/App.Measure.Price"
 
@@ -58,9 +58,9 @@ Catalog.Products.AdminAPI.Response.Model.Product:
     - version
     - createdAt
     - categoryId
-    - trademarkId
     - article
     - caption
+    - trademarkId
     - price
     - status
   properties:
@@ -74,12 +74,12 @@ Catalog.Products.AdminAPI.Response.Model.Product:
       $ref: "#/components/schemas/App.Field.Date.UpdatedAt"
     categoryId:
       $ref: "#/components/schemas/App.Field.IntegerID"
-    trademarkId:
-      $ref: "#/components/schemas/App.Field.IntegerID"
     article:
       $ref: "#/components/schemas/App.Field.Article"
     caption:
       $ref: "#/components/schemas/App.Field.Caption"
+    trademarkId:
+      $ref: "#/components/schemas/App.Field.IntegerID"
     price:
       $ref: "#/components/schemas/App.Measure.Price"
     status:

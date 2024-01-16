@@ -3,21 +3,21 @@ package usecase
 import (
 	"context"
 
+	"github.com/mondegor/go-storage/mrentity"
 	"github.com/mondegor/go-webcore/mrtype"
 )
 
 type (
 	CategoryImageService interface {
-		// Get - WARNING you don't forget to call item.Body.Close()
-		Get(ctx context.Context, categoryID mrtype.KeyInt32) (*mrtype.File, error)
-		GetInfoByPath(ctx context.Context, imagePath string) (*mrtype.FileInfo, error)
-		Store(ctx context.Context, categoryID mrtype.KeyInt32, file *mrtype.File) error
-		Remove(ctx context.Context, categoryID mrtype.KeyInt32) error
+		// GetFile - WARNING you don't forget to call item.Body.Close()
+		GetFile(ctx context.Context, categoryID mrtype.KeyInt32) (mrtype.File, error)
+		StoreFile(ctx context.Context, categoryID mrtype.KeyInt32, image mrtype.File) error
+		RemoveFile(ctx context.Context, categoryID mrtype.KeyInt32) error
 	}
 
 	CategoryImageStorage interface {
-		FetchPath(ctx context.Context, categoryID mrtype.KeyInt32) (string, error)
-		Update(ctx context.Context, categoryID mrtype.KeyInt32, path string) error
-		Delete(ctx context.Context, categoryID mrtype.KeyInt32) error
+		FetchMeta(ctx context.Context, categoryID mrtype.KeyInt32) (mrentity.ImageMeta, error)
+		UpdateMeta(ctx context.Context, categoryID mrtype.KeyInt32, meta mrentity.ImageMeta) error
+		DeleteMeta(ctx context.Context, categoryID mrtype.KeyInt32) error
 	}
 )

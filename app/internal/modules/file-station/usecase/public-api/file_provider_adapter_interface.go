@@ -8,6 +8,6 @@ import (
 
 type (
 	FileProviderAdapterService interface {
-		Get(ctx context.Context, path string) (*mrtype.File, error)
+		Get(ctx context.Context, filePath string) (mrtype.File, error)
 	}
 )

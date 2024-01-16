@@ -3,7 +3,6 @@ package factory
 import (
 	"context"
 	"go-sample/config"
-	"time"
 
 	"github.com/mondegor/go-storage/mrredis"
 	"github.com/mondegor/go-webcore/mrcore"
@@ -16,17 +15,14 @@ func NewRedis(cfg *config.Config, logger mrcore.Logger) (*mrredis.ConnAdapter, e
 		Host:        cfg.Redis.Host,
 		Port:        cfg.Redis.Port,
 		Password:    cfg.Redis.Password,
-		ConnTimeout: time.Duration(cfg.Redis.Timeout),
+		ConnTimeout: cfg.Redis.Timeout,
 	}
 
 	conn := mrredis.New()
-	err := conn.Connect(opt)
 
-	if err != nil {
+	if err := conn.Connect(opt); err != nil {
 		return nil, err
 	}
 
-	err = conn.Ping(context.Background())
-
-	return conn, err
+	return conn, conn.Ping(context.Background())
 }

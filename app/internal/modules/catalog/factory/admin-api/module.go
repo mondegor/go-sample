@@ -1,17 +1,14 @@
 package factory
 
 import (
-	"go-sample/internal/modules"
+	module "go-sample/internal/modules/catalog"
+	"go-sample/internal/modules/catalog/factory"
 
 	"github.com/mondegor/go-webcore/mrcore"
 )
 
-const (
-	moduleName = "Catalog"
-)
-
-func NewModule(opts *modules.Options, section mrcore.ClientSection) ([]mrcore.HttpController, error) {
-	opts.Logger.Info("Init module %s in section %s", moduleName, section.Caption())
+func NewModule(opts *factory.Options, section mrcore.ClientSection) ([]mrcore.HttpController, error) {
+	opts.Logger.Info("Init module %s in section %s", module.Name, section.Caption())
 
 	var c []mrcore.HttpController
 
@@ -22,32 +19,22 @@ func NewModule(opts *modules.Options, section mrcore.ClientSection) ([]mrcore.Ht
 	return c, nil
 }
 
-func newModule(c *[]mrcore.HttpController, opts *modules.Options, section mrcore.ClientSection) error {
-	opts.Logger.Info("Init unit %s in %s section", unitNameCategory, section.Caption())
+func newModule(c *[]mrcore.HttpController, opts *factory.Options, section mrcore.ClientSection) error {
+	opts.Logger.Info("Init unit %s in %s section", module.UnitCategoryName, section.Caption())
 
-	categoryImage, err := newUnitCategoryImage(c, opts, section)
-
-	if err != nil {
+	if err := newUnitCategory(c, opts, section); err != nil {
 		return err
 	}
 
-	categoryAPI, err := newUnitCategory(c, opts, section, categoryImage)
+	opts.Logger.Info("Init unit %s in %s section", module.UnitTrademarkName, section.Caption())
 
-	if err != nil {
+	if err := newUnitTrademark(c, opts, section); err != nil {
 		return err
 	}
 
-	opts.Logger.Info("Init unit %s in %s section", unitNameTrademark, section.Caption())
+	opts.Logger.Info("Init unit %s in %s section", module.UnitProductName, section.Caption())
 
-	trademarkAPI, err := newUnitTrademark(c, opts, section)
-
-	if err != nil {
-		return err
-	}
-
-	opts.Logger.Info("Init unit %s in %s section", unitNameProduct, section.Caption())
-
-	if err = newUnitProduct(c, opts, section, categoryAPI, trademarkAPI); err != nil {
+	if err := newUnitProduct(c, opts, section); err != nil {
 		return err
 	}
 

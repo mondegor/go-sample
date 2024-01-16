@@ -1,4 +1,4 @@
-package usecase
+package catalog
 
 import (
 	"context"
@@ -7,11 +7,8 @@ import (
 )
 
 type (
-	CategoryServiceAPI interface {
+	TrademarkAPI interface {
+		// CheckingAvailability - error: FactoryErrTrademarkNotFound or Failed
 		CheckingAvailability(ctx context.Context, id mrtype.KeyInt32) error
-	}
-
-	CategoryStorage interface {
-		IsExists(ctx context.Context, id mrtype.KeyInt32) error
 	}
 )

@@ -11,23 +11,23 @@ import (
 )
 
 type (
-	Category struct {
+	CategoryPostgres struct {
 		client    mrstorage.DBConn
 		sqlSelect mrstorage.SqlBuilderSelect
 	}
 )
 
-func NewCategory(
+func NewCategoryPostgres(
 	client mrstorage.DBConn,
 	sqlSelect mrstorage.SqlBuilderSelect,
-) *Category {
-	return &Category{
+) *CategoryPostgres {
+	return &CategoryPostgres{
 		client:    client,
 		sqlSelect: sqlSelect,
 	}
 }
 
-func (re *Category) NewFetchParams(params entity.CategoryParams) mrstorage.SqlSelectParams {
+func (re *CategoryPostgres) NewFetchParams(params entity.CategoryParams) mrstorage.SqlSelectParams {
 	return mrstorage.SqlSelectParams{
 		Where: re.sqlSelect.Where(func(w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
 			return w.JoinAnd(
@@ -38,16 +38,16 @@ func (re *Category) NewFetchParams(params entity.CategoryParams) mrstorage.SqlSe
 	}
 }
 
-func (re *Category) Fetch(ctx context.Context, params mrstorage.SqlSelectParams) ([]entity.Category, error) {
+func (re *CategoryPostgres) Fetch(ctx context.Context, params mrstorage.SqlSelectParams) ([]entity.Category, error) {
 	whereStr, whereArgs := params.Where.ToSql()
 
 	sql := `
 		SELECT
 			category_id,
 			category_caption,
-			image_path
+			COALESCE(image_meta ->> 'path', '') as image_url
 		FROM
-			` + module.DBSchemaCategory + `.categories
+			` + module.UnitCategoryDBSchema + `.categories
 		WHERE
 			` + whereStr + `
 		ORDER BY
@@ -73,7 +73,7 @@ func (re *Category) Fetch(ctx context.Context, params mrstorage.SqlSelectParams)
 		err = cursor.Scan(
 			&row.ID,
 			&row.Caption,
-			&row.ImagePath,
+			&row.ImageURL,
 		)
 
 		if err != nil {
@@ -86,14 +86,14 @@ func (re *Category) Fetch(ctx context.Context, params mrstorage.SqlSelectParams)
 	return rows, cursor.Err()
 }
 
-func (re *Category) FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPart) (int64, error) {
+func (re *CategoryPostgres) FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPart) (int64, error) {
 	whereStr, whereArgs := where.ToSql()
 
 	sql := `
 		SELECT
 			COUNT(*)
 		FROM
-			` + module.DBSchemaCategory + `.categories
+			` + module.UnitCategoryDBSchema + `.categories
 		WHERE
 			` + whereStr + `;`
 
@@ -110,13 +110,13 @@ func (re *Category) FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPa
 	return totalRow, err
 }
 
-func (re *Category) LoadOne(ctx context.Context, row *entity.Category) error {
+func (re *CategoryPostgres) LoadOne(ctx context.Context, row *entity.Category) error {
 	sql := `
 		SELECT
 			category_caption,
-			image_path
+			COALESCE(image_meta ->> 'path', '') as image_url
 		FROM
-			` + module.DBSchemaCategory + `.categories
+			` + module.UnitCategoryDBSchema + `.categories
 		WHERE
 			category_id = $1 AND category_status = $2
 		LIMIT 1;`
@@ -128,6 +128,6 @@ func (re *Category) LoadOne(ctx context.Context, row *entity.Category) error {
 		mrenum.ItemStatusEnabled,
 	).Scan(
 		&row.Caption,
-		&row.ImagePath,
+		&row.ImageURL,
 	)
 }

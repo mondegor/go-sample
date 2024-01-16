@@ -1,9 +1,9 @@
 package global
 
 const (
-	SectionAdminAPI         = "admin-api"
-	SectionAdminAPIRootPath = "adm"
+	SectionAdminAPICaption  = "Admin API"
+	SectionAdminAPIRootPath = "/adm/"
 
-	SectionPublicAPI         = "public-api"
-	SectionPublicAPIRootPath = "pub"
+	SectionPublicAPICaption  = "Public API"
+	SectionPublicAPIRootPath = "/"
 )

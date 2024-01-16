@@ -12,7 +12,7 @@ import (
 	"github.com/mondegor/go-webcore/mrview"
 )
 
-func ParseIDFromPath(c mrcore.ClientContext, key string) mrtype.KeyInt32 {
+func ParseKeyInt32FromPath(c mrcore.ClientContext, key string) mrtype.KeyInt32 {
 	value, err := strconv.ParseInt(c.ParamFromPath(key), 10, 32)
 
 	if err != nil {
@@ -41,6 +41,46 @@ func ParseFilterRangeInt64(c mrcore.ClientContext, key string) mrtype.RangeInt64
 	}
 
 	return str
+}
+
+func ParseFilterKeyInt32(c mrcore.ClientContext, key string) mrtype.KeyInt32 {
+	value, err := mrreq.ParseInt64(c.Request(), key, false)
+
+	if err != nil {
+		mrctx.Logger(c.Context()).Warn(err)
+	}
+
+	return mrtype.KeyInt32(value)
+}
+
+func ParseFilterKeyInt32List(c mrcore.ClientContext, key string) []mrtype.KeyInt32 {
+	int64s, err := mrreq.ParseInt64List(c.Request(), key)
+
+	if err != nil {
+		mrctx.Logger(c.Context()).Warn(err)
+	}
+
+	items := make([]mrtype.KeyInt32, len(int64s))
+
+	for i := range int64s {
+		items[i] = mrtype.KeyInt32(int64s[i])
+	}
+
+	return items
+}
+
+func ParseFilterStatusList(c mrcore.ClientContext, key string) []mrenum.ItemStatus {
+	items, err := mrreq.ParseItemStatusList(
+		c.Request(),
+		key,
+		mrenum.ItemStatusEnabled,
+	)
+
+	if err != nil {
+		mrctx.Logger(c.Context()).Warn(err)
+	}
+
+	return items
 }
 
 func ParseSortParams(c mrcore.ClientContext, sorter mrview.ListSorter) mrtype.SortParams {
@@ -84,44 +124,4 @@ func ParsePageParams(c mrcore.ClientContext) mrtype.PageParams {
 	}
 
 	return value
-}
-
-func ParseFilterCategoryID(c mrcore.ClientContext, key string) mrtype.KeyInt32 {
-	value, err := mrreq.ParseInt64(c.Request(), key, false)
-
-	if err != nil {
-		mrctx.Logger(c.Context()).Warn(err)
-	}
-
-	return mrtype.KeyInt32(value)
-}
-
-func ParseFilterStatusList(c mrcore.ClientContext, key string) []mrenum.ItemStatus {
-	items, err := mrreq.ParseItemStatusList(
-		c.Request(),
-		key,
-		mrenum.ItemStatusEnabled,
-	)
-
-	if err != nil {
-		mrctx.Logger(c.Context()).Warn(err)
-	}
-
-	return items
-}
-
-func ParseFilterTrademarkList(c mrcore.ClientContext, key string) []mrtype.KeyInt32 {
-	int64s, err := mrreq.ParseInt64List(c.Request(), key)
-
-	if err != nil {
-		mrctx.Logger(c.Context()).Warn(err)
-	}
-
-	items := make([]mrtype.KeyInt32, len(int64s))
-
-	for i := range int64s {
-		items[i] = mrtype.KeyInt32(int64s[i])
-	}
-
-	return items
 }

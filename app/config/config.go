@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
@@ -17,7 +18,8 @@ type (
 		AppName       string
 		AppVersion    string
 		AppInfo       string
-		AppPath       string `yaml:"app_path"`
+		AppPath       string
+		AppStartedAt  time.Time
 		ConfigPath    string
 		Debugging     `yaml:"debugging"`
 		Log           `yaml:"logger"`
@@ -60,9 +62,9 @@ type (
 	}
 
 	Server struct {
-		ReadTimeout     int32 `yaml:"read_timeout" env:"APPX_SERVER_READ_TIMEOUT"`
-		WriteTimeout    int32 `yaml:"write_timeout" env:"APPX_SERVER_WRITE_TIMEOUT"`
-		ShutdownTimeout int32 `yaml:"shutdown_timeout" env:"APPX_SERVER_SHUTDOWN_TIMEOUT"`
+		ReadTimeout     time.Duration `yaml:"read_timeout" env:"APPX_SERVER_READ_TIMEOUT"`
+		WriteTimeout    time.Duration `yaml:"write_timeout" env:"APPX_SERVER_WRITE_TIMEOUT"`
+		ShutdownTimeout time.Duration `yaml:"shutdown_timeout" env:"APPX_SERVER_SHUTDOWN_TIMEOUT"`
 	}
 
 	Listen struct {
@@ -73,20 +75,20 @@ type (
 	}
 
 	Storage struct {
-		Host        string `yaml:"host" env:"APPX_DB_HOST"`
-		Port        string `yaml:"port" env:"APPX_DB_PORT"`
-		Username    string `yaml:"username" env:"APPX_DB_USER"`
-		Password    string `yaml:"password" env:"APPX_DB_PASSWORD"`
-		Database    string `yaml:"database" env:"APPX_DB_NAME"`
-		MaxPoolSize int32  `yaml:"max_pool_size" env:"APPX_DB_MAX_POOL_SIZE"`
-		Timeout     int32  `yaml:"timeout"` // in sec
+		Host        string        `yaml:"host" env:"APPX_DB_HOST"`
+		Port        string        `yaml:"port" env:"APPX_DB_PORT"`
+		Username    string        `yaml:"username" env:"APPX_DB_USER"`
+		Password    string        `yaml:"password" env:"APPX_DB_PASSWORD"`
+		Database    string        `yaml:"database" env:"APPX_DB_NAME"`
+		MaxPoolSize int           `yaml:"max_pool_size" env:"APPX_DB_MAX_POOL_SIZE"`
+		Timeout     time.Duration `yaml:"timeout"`
 	}
 
 	Redis struct {
-		Host     string `yaml:"host" env:"APPX_REDIS_HOST"`
-		Port     string `yaml:"port" env:"APPX_REDIS_PORT"`
-		Password string `yaml:"password" env:"APPX_REDIS_PASSWORD"`
-		Timeout  int    `yaml:"timeout"` // in sec
+		Host     string        `yaml:"host" env:"APPX_REDIS_HOST"`
+		Port     string        `yaml:"port" env:"APPX_REDIS_PORT"`
+		Password string        `yaml:"password" env:"APPX_REDIS_PASSWORD"`
+		Timeout  time.Duration `yaml:"timeout"`
 	}
 
 	FileSystem struct {
@@ -128,19 +130,29 @@ type (
 	}
 
 	Translation struct {
-		DirPath   string   `yaml:"dir_path"`
-		FileType  string   `yaml:"file_type"`
-		LangCodes []string `yaml:"lang_codes" env:"APPX_TRANSLATION_LANGS"` // items by "," separated
+		DirPath      string   `yaml:"dir_path"`
+		LangCodes    []string `yaml:"lang_codes" env:"APPX_TRANSLATION_LANGS"` // items by "," separated
+		Dictionaries struct {
+			DirPath string   `yaml:"dir_path"`
+			List    []string `yaml:"list"`
+		} `yaml:"dictionaries"`
 	}
 
 	ClientSections struct {
-		AdminAPI  ClientSection `yaml:"admin_api"`
-		PublicAPI ClientSection `yaml:"public_api"`
-	}
-
-	ClientSection struct {
-		Caption   string `yaml:"caption"`
-		Privilege string `yaml:"privilege"`
+		AdminAPI struct {
+			Privilege string `yaml:"privilege"`
+			Auth      struct {
+				Secret   string `yaml:"secret" env:"APPX_ADMIN_API_AUTH_SECRET"`
+				Audience string `yaml:"audience" env:"APPX_ADMIN_API_AUTH_AUDIENCE"`
+			} `yaml:"auth"`
+		} `yaml:"admin_api"`
+		PublicAPI struct {
+			Privilege string `yaml:"privilege"`
+			Auth      struct {
+				Secret   string `yaml:"secret" env:"APPX_PUBLIC_API_AUTH_SECRET"`
+				Audience string `yaml:"audience" env:"APPX_PUBLIC_API_AUTH_AUDIENCE"`
+			} `yaml:"auth"`
+		} `yaml:"public_api"`
 	}
 
 	ModulesAccess struct {
@@ -158,7 +170,6 @@ type (
 	ModulesSettings struct {
 		CatalogCategory struct {
 			Image struct {
-				BaseDir      string `yaml:"base_dir"`
 				FileProvider string `yaml:"file_provider"` // FileProviders.ImageStorage or ImageStorage2
 			} `yaml:"image"`
 		} `yaml:"catalog_category"`
@@ -180,16 +191,15 @@ func New(filePath string) (*Config, error) {
 	}
 
 	if err := cleanenv.ReadConfig(filePath, cfg); err != nil {
-		return nil, fmt.Errorf("while reading config '%s', error '%s' occurred", filePath, err)
+		return nil, fmt.Errorf("error parsing config file '%s': %w", filePath, err)
 	}
 
 	if err := cleanenv.ReadEnv(cfg); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error reading ENV from config file '%s': %w", filePath, err)
 	}
 
-	if cfg.AppPath == "" {
-		cfg.AppPath = os.Args[0]
-	}
+	cfg.AppPath = os.Args[0]
+	cfg.AppStartedAt = time.Now().UTC()
 
 	return cfg, nil
 }

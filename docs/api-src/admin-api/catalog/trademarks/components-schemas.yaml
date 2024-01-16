@@ -1,5 +1,5 @@
 Catalog.Trademarks.AdminAPI.Request.Model.CreateTrademark:
-  description: DTO создания торговой марки
+  description: DTO добавления новой торговой марки
   type: object
   required:
     - caption

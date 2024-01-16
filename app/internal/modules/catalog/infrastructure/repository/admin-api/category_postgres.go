@@ -4,6 +4,7 @@ import (
 	"context"
 	module "go-sample/internal/modules/catalog"
 	"go-sample/internal/modules/catalog/entity/admin-api"
+	repository_shared "go-sample/internal/modules/catalog/infrastructure/repository/shared"
 	"strings"
 
 	"github.com/mondegor/go-storage/mrstorage"
@@ -12,23 +13,23 @@ import (
 )
 
 type (
-	Category struct {
+	CategoryPostgres struct {
 		client    mrstorage.DBConn
 		sqlSelect mrstorage.SqlBuilderSelect
 	}
 )
 
-func NewCategory(
+func NewCategoryPostgres(
 	client mrstorage.DBConn,
 	sqlSelect mrstorage.SqlBuilderSelect,
-) *Category {
-	return &Category{
+) *CategoryPostgres {
+	return &CategoryPostgres{
 		client:    client,
 		sqlSelect: sqlSelect,
 	}
 }
 
-func (re *Category) NewFetchParams(params entity.CategoryParams) mrstorage.SqlSelectParams {
+func (re *CategoryPostgres) NewFetchParams(params entity.CategoryParams) mrstorage.SqlSelectParams {
 	return mrstorage.SqlSelectParams{
 		Where: re.sqlSelect.Where(func(w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
 			return w.JoinAnd(
@@ -49,7 +50,7 @@ func (re *Category) NewFetchParams(params entity.CategoryParams) mrstorage.SqlSe
 	}
 }
 
-func (re *Category) Fetch(ctx context.Context, params mrstorage.SqlSelectParams) ([]entity.Category, error) {
+func (re *CategoryPostgres) Fetch(ctx context.Context, params mrstorage.SqlSelectParams) ([]entity.Category, error) {
 	whereStr, whereArgs := params.Where.ToSql()
 
 	sql := `
@@ -59,10 +60,10 @@ func (re *Category) Fetch(ctx context.Context, params mrstorage.SqlSelectParams)
 			datetime_created as createdAt,
 			datetime_updated as updatedAt,
 			category_caption as caption,
-			image_path,
+			image_meta,
 			category_status
 		FROM
-			` + module.DBSchemaCategory + `.categories
+			` + module.UnitCategoryDBSchema + `.categories
 		WHERE
 			` + whereStr + `
 		ORDER BY
@@ -91,7 +92,7 @@ func (re *Category) Fetch(ctx context.Context, params mrstorage.SqlSelectParams)
 			&row.CreatedAt,
 			&row.UpdatedAt,
 			&row.Caption,
-			&row.ImagePath,
+			&row.ImageMeta,
 			&row.Status,
 		)
 
@@ -105,14 +106,14 @@ func (re *Category) Fetch(ctx context.Context, params mrstorage.SqlSelectParams)
 	return rows, cursor.Err()
 }
 
-func (re *Category) FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPart) (int64, error) {
+func (re *CategoryPostgres) FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPart) (int64, error) {
 	whereStr, whereArgs := where.ToSql()
 
 	sql := `
 		SELECT
 			COUNT(*)
 		FROM
-			` + module.DBSchemaCategory + `.categories
+			` + module.UnitCategoryDBSchema + `.categories
 		WHERE
 			` + whereStr + `;`
 
@@ -129,17 +130,17 @@ func (re *Category) FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPa
 	return totalRow, err
 }
 
-func (re *Category) LoadOne(ctx context.Context, row *entity.Category) error {
+func (re *CategoryPostgres) LoadOne(ctx context.Context, row *entity.Category) error {
 	sql := `
 		SELECT
 			tag_version,
 			datetime_created,
 			datetime_updated,
 			category_caption,
-			image_path,
+			image_meta,
 			category_status
 		FROM
-			` + module.DBSchemaCategory + `.categories
+			` + module.UnitCategoryDBSchema + `.categories
 		WHERE
 			category_id = $1 AND category_status <> $2
 		LIMIT 1;`
@@ -154,17 +155,17 @@ func (re *Category) LoadOne(ctx context.Context, row *entity.Category) error {
 		&row.CreatedAt,
 		&row.UpdatedAt,
 		&row.Caption,
-		&row.ImagePath,
+		&row.ImageMeta,
 		&row.Status,
 	)
 }
 
-func (re *Category) FetchStatus(ctx context.Context, row *entity.Category) (mrenum.ItemStatus, error) {
+func (re *CategoryPostgres) FetchStatus(ctx context.Context, row *entity.Category) (mrenum.ItemStatus, error) {
 	sql := `
 		SELECT
 			category_status
 		FROM
-			` + module.DBSchemaCategory + `.categories
+			` + module.UnitCategoryDBSchema + `.categories
 		WHERE
 			category_id = $1 AND category_status <> $2
 		LIMIT 1;`
@@ -185,29 +186,13 @@ func (re *Category) FetchStatus(ctx context.Context, row *entity.Category) (mren
 
 // IsExists
 // result: nil - exists, ErrStorageNoRowFound - not exists, error - query error
-func (re *Category) IsExists(ctx context.Context, id mrtype.KeyInt32) error {
-	sql := `
-		SELECT
-			1
-		FROM
-			` + module.DBSchemaCategory + `.categories
-		WHERE
-			category_id = $1 AND category_status <> $2
-		LIMIT 1;`
-
-	return re.client.QueryRow(
-		ctx,
-		sql,
-		id,
-		mrenum.ItemStatusRemoved,
-	).Scan(
-		&id,
-	)
+func (re *CategoryPostgres) IsExists(ctx context.Context, id mrtype.KeyInt32) error {
+	return repository_shared.CategoryIsExistsPostgres(ctx, re.client, id)
 }
 
-func (re *Category) Insert(ctx context.Context, row *entity.Category) error {
+func (re *CategoryPostgres) Insert(ctx context.Context, row *entity.Category) error {
 	sql := `
-		INSERT INTO ` + module.DBSchemaCategory + `.categories
+		INSERT INTO ` + module.UnitCategoryDBSchema + `.categories
 			(
 				category_caption,
 				category_status
@@ -227,10 +212,10 @@ func (re *Category) Insert(ctx context.Context, row *entity.Category) error {
 	)
 }
 
-func (re *Category) Update(ctx context.Context, row *entity.Category) (int32, error) {
+func (re *CategoryPostgres) Update(ctx context.Context, row *entity.Category) (int32, error) {
 	sql := `
 		UPDATE
-			` + module.DBSchemaCategory + `.categories
+			` + module.UnitCategoryDBSchema + `.categories
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),
@@ -256,10 +241,10 @@ func (re *Category) Update(ctx context.Context, row *entity.Category) (int32, er
 	return tagVersion, err
 }
 
-func (re *Category) UpdateStatus(ctx context.Context, row *entity.Category) (int32, error) {
+func (re *CategoryPostgres) UpdateStatus(ctx context.Context, row *entity.Category) (int32, error) {
 	sql := `
 		UPDATE
-			` + module.DBSchemaCategory + `.categories
+			` + module.UnitCategoryDBSchema + `.categories
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),
@@ -285,10 +270,10 @@ func (re *Category) UpdateStatus(ctx context.Context, row *entity.Category) (int
 	return tagVersion, err
 }
 
-func (re *Category) Delete(ctx context.Context, id mrtype.KeyInt32) error {
+func (re *CategoryPostgres) Delete(ctx context.Context, id mrtype.KeyInt32) error {
 	sql := `
 		UPDATE
-			` + module.DBSchemaCategory + `.categories
+			` + module.UnitCategoryDBSchema + `.categories
 		SET
 			tag_version = tag_version + 1,
 			datetime_updated = NOW(),

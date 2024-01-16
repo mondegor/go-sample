@@ -1,29 +1,22 @@
 package factory
 
 import (
-	"go-sample/internal/modules"
 	module "go-sample/internal/modules/catalog"
 	http_v1 "go-sample/internal/modules/catalog/controller/http_v1/admin-api"
 	entity "go-sample/internal/modules/catalog/entity/admin-api"
+	"go-sample/internal/modules/catalog/factory"
 	repository "go-sample/internal/modules/catalog/infrastructure/repository/admin-api"
 	usecase "go-sample/internal/modules/catalog/usecase/admin-api"
-	usecase_shared "go-sample/internal/modules/catalog/usecase/shared"
 
 	"github.com/mondegor/go-storage/mrpostgres"
 	"github.com/mondegor/go-storage/mrsql"
 	"github.com/mondegor/go-webcore/mrcore"
 )
 
-const (
-	unitNameProduct = moduleName + ".Product"
-)
-
 func newUnitProduct(
 	c *[]mrcore.HttpController,
-	opts *modules.Options,
+	opts *factory.Options,
 	section mrcore.ClientSection,
-	categoryAPI usecase_shared.CategoryServiceAPI,
-	trademarkAPI usecase_shared.TrademarkServiceAPI,
 ) error {
 	metaOrderBy, err := mrsql.NewEntityMetaOrderBy(entity.Product{})
 
@@ -37,7 +30,7 @@ func newUnitProduct(
 		return err
 	}
 
-	storage := repository.NewProduct(
+	storage := repository.NewProductPostgres(
 		opts.PostgresAdapter,
 		mrsql.NewBuilderSelect(
 			mrpostgres.NewSqlBuilderWhere(),
@@ -49,7 +42,14 @@ func newUnitProduct(
 			mrpostgres.NewSqlBuilderSet(),
 		),
 	)
-	service := usecase.NewProduct(opts.OrdererComponent, storage, categoryAPI, trademarkAPI, opts.EventBox, opts.ServiceHelper)
+	service := usecase.NewProduct(
+		storage,
+		opts.CategoryAPI,
+		opts.TrademarkAPI,
+		opts.OrdererAPI,
+		opts.EventBox,
+		opts.ServiceHelper,
+	)
 	*c = append(*c, http_v1.NewProduct(section, service, metaOrderBy))
 
 	return nil

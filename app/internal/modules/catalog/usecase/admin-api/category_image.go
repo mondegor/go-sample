@@ -3,10 +3,12 @@ package usecase
 import (
 	"context"
 	"fmt"
+	module "go-sample/internal/modules/catalog"
 	"go-sample/internal/modules/catalog/entity/admin-api"
-	"path/filepath"
+	"path"
 	"time"
 
+	"github.com/mondegor/go-storage/mrentity"
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-sysmess/mrmsg"
 	"github.com/mondegor/go-webcore/mrcore"
@@ -41,48 +43,38 @@ func NewCategoryImage(
 	}
 }
 
-// Get - WARNING you don't forget to call item.File.Body.Close()
-func (uc *CategoryImage) Get(ctx context.Context, categoryID mrtype.KeyInt32) (*mrtype.File, error) {
+// GetFile - WARNING you don't forget to call item.File.Body.Close()
+func (uc *CategoryImage) GetFile(ctx context.Context, categoryID mrtype.KeyInt32) (mrtype.File, error) {
 	if categoryID < 1 {
-		return nil, mrcore.FactoryErrServiceEntityNotFound.New()
+		return mrtype.File{}, mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
-	imagePath, err := uc.storage.FetchPath(ctx, categoryID)
+	imageMeta, err := uc.storage.FetchMeta(ctx, categoryID)
 
 	if err != nil {
-		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategoryImage, categoryID)
+		return mrtype.File{}, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategoryImage, categoryID)
 	}
 
-	if imagePath == "" {
-		return nil, mrcore.FactoryErrServiceEntityNotFound.New()
+	if imageMeta.Path == "" {
+		return mrtype.File{}, mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
-	file, err := uc.fileAPI.Download(ctx, imagePath)
+	file, err := uc.fileAPI.Download(ctx, imageMeta.Path)
 
 	if err != nil {
-		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, "FileProviderAPI", imagePath)
+		return mrtype.File{}, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, "FileProviderAPI", imageMeta)
 	}
 
 	return file, nil
 }
 
-func (uc *CategoryImage) GetInfoByPath(ctx context.Context, imagePath string) (*mrtype.FileInfo, error) {
-	if imagePath == "" {
-		return nil, mrcore.FactoryErrServiceEntityNotFound.New()
-	}
-
-	info, err := uc.fileAPI.Info(ctx, imagePath)
-
-	if err != nil {
-		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, "FileProviderAPI", imagePath)
-	}
-
-	return &info, nil
-}
-
-func (uc *CategoryImage) Store(ctx context.Context, categoryID mrtype.KeyInt32, file *mrtype.File) error {
+func (uc *CategoryImage) StoreFile(ctx context.Context, categoryID mrtype.KeyInt32, file mrtype.File) error {
 	if categoryID < 1 {
 		return mrcore.FactoryErrServiceEntityNotFound.New()
+	}
+
+	if file.OriginalName == "" || file.Size == 0 {
+		return mrcore.FactoryErrServiceInvalidFile.New()
 	}
 
 	newImagePath, err := uc.getImagePath(categoryID, file.OriginalName)
@@ -99,7 +91,7 @@ func (uc *CategoryImage) Store(ctx context.Context, categoryID mrtype.KeyInt32, 
 
 	defer unlock()
 
-	oldImagePath, err := uc.storage.FetchPath(ctx, categoryID)
+	oldImageMeta, err := uc.storage.FetchMeta(ctx, categoryID)
 
 	if err != nil {
 		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategoryImage, categoryID)
@@ -111,19 +103,27 @@ func (uc *CategoryImage) Store(ctx context.Context, categoryID mrtype.KeyInt32, 
 		return uc.serviceHelper.WrapErrorEntityFailed(err, "FileProviderAPI", file.Path)
 	}
 
-	if err = uc.storage.Update(ctx, categoryID, newImagePath); err != nil {
-		uc.removeImageFile(ctx, newImagePath)
+	// :TODO: store width + height
+	imageMeta := mrentity.ImageMeta{
+		Path:         file.Path,
+		ContentType:  file.ContentType,
+		OriginalName: file.OriginalName,
+		Size:         file.Size,
+		UpdatedAt:    mrtype.TimePointer(time.Now().UTC()),
+	}
+
+	if err = uc.storage.UpdateMeta(ctx, categoryID, imageMeta); err != nil {
+		uc.removeImageFile(ctx, newImagePath, oldImageMeta.Path)
 		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategoryImage, categoryID)
 	}
 
-	uc.eventBoxEmitEntity(ctx, "Store", mrmsg.Data{"categoryId": categoryID, "path": newImagePath, "old-path": oldImagePath})
-
-	uc.removeImageFile(ctx, oldImagePath)
+	uc.eventBoxEmitEntity(ctx, "StoreFile", mrmsg.Data{"categoryId": categoryID, "path": newImagePath, "old-path": oldImageMeta.Path})
+	uc.removeImageFile(ctx, oldImageMeta.Path, newImagePath)
 
 	return nil
 }
 
-func (uc *CategoryImage) Remove(ctx context.Context, categoryID mrtype.KeyInt32) error {
+func (uc *CategoryImage) RemoveFile(ctx context.Context, categoryID mrtype.KeyInt32) error {
 	if categoryID < 1 {
 		return mrcore.FactoryErrServiceEntityNotFound.New()
 	}
@@ -136,19 +136,18 @@ func (uc *CategoryImage) Remove(ctx context.Context, categoryID mrtype.KeyInt32)
 
 	defer unlock()
 
-	oldImagePath, err := uc.storage.FetchPath(ctx, categoryID)
+	imageMeta, err := uc.storage.FetchMeta(ctx, categoryID)
 
 	if err != nil {
 		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategoryImage, categoryID)
 	}
 
-	if err = uc.storage.Delete(ctx, categoryID); err != nil {
+	if err = uc.storage.DeleteMeta(ctx, categoryID); err != nil {
 		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategoryImage, categoryID)
 	}
 
-	uc.eventBoxEmitEntity(ctx, "Remove", mrmsg.Data{"categoryId": categoryID, "old-path": oldImagePath})
-
-	uc.removeImageFile(ctx, oldImagePath)
+	uc.eventBoxEmitEntity(ctx, "RemoveFile", mrmsg.Data{"categoryId": categoryID, "meta": imageMeta})
+	uc.removeImageFile(ctx, imageMeta.Path, "")
 
 	return nil
 }
@@ -157,23 +156,22 @@ func (uc *CategoryImage) getLockKey(categoryID mrtype.KeyInt32) string {
 	return fmt.Sprintf("%s:%d", entity.ModelNameCategoryImage, categoryID)
 }
 
-func (uc *CategoryImage) getImagePath(categoryID mrtype.KeyInt32, path string) (string, error) {
-	ext := filepath.Ext(path)
-
-	if ext == "" {
-		return "", fmt.Errorf("file %s: ext is empty", path)
+func (uc *CategoryImage) getImagePath(categoryID mrtype.KeyInt32, filePath string) (string, error) {
+	if ext := path.Ext(filePath); ext != "" {
+		return fmt.Sprintf(
+			"%s/%03x-%x%s",
+			module.UnitCategoryImageDir,
+			categoryID,
+			time.Now().UTC().UnixNano()&0xffff,
+			ext,
+		), nil
 	}
 
-	return fmt.Sprintf(
-		"%03x-%x%s",
-		categoryID,
-		time.Now().UnixNano()&0xffff,
-		ext,
-	), nil
+	return "", fmt.Errorf("file %s: ext is empty", filePath)
 }
 
-func (uc *CategoryImage) removeImageFile(ctx context.Context, filePath string) {
-	if filePath == "" {
+func (uc *CategoryImage) removeImageFile(ctx context.Context, filePath string, prevFilePath string) {
+	if filePath == "" || filePath == prevFilePath {
 		return
 	}
 

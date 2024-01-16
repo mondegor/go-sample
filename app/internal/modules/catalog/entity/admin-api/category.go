@@ -3,12 +3,13 @@ package entity
 import (
 	"time"
 
+	"github.com/mondegor/go-storage/mrentity"
 	"github.com/mondegor/go-webcore/mrenum"
 	"github.com/mondegor/go-webcore/mrtype"
 )
 
 const (
-	ModelNameCategory = "admin-api.CatalogCategory"
+	ModelNameCategory = "admin-api.Catalog.Category"
 )
 
 type (
@@ -18,9 +19,9 @@ type (
 		CreatedAt  time.Time       `json:"createdAt" sort:"createdAt"`           // datetime_created
 		UpdatedAt  *time.Time      `json:"updatedAt,omitempty" sort:"updatedAt"` // datetime_updated
 
-		Caption   string           `json:"caption" sort:"caption,default"` // category_caption
-		ImagePath string           `json:"-"`                              // image_path
-		ImageInfo *mrtype.FileInfo `json:"imageInfo,omitempty"`
+		Caption   string              `json:"caption" sort:"caption,default"` // category_caption
+		ImageInfo *mrtype.ImageInfo   `json:"imageInfo,omitempty"`
+		ImageMeta *mrentity.ImageMeta `json:"-"` // image_meta
 
 		Status mrenum.ItemStatus `json:"status"` // category_status
 	}

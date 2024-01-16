@@ -1,6 +1,4 @@
 ---
-app_path:
-
 debugging:
   debug: true
   caller:
@@ -12,14 +10,14 @@ logger:
   # prefix: go-sample
   level: debug # debug, info, warn, error
   caller:
-    deep: 1
+    deep: 3
     # use_short_path: true
     # root_path:
 
 server:
-  read_timeout: 30
-  write_timeout: 30
-  shutdown_timeout: 30
+  read_timeout: 30s
+  write_timeout: 30s
+  shutdown_timeout: 30s
 
 listen:
   type: port
@@ -35,12 +33,13 @@ storage:
   password: 123456
   database: db_pg
   max_pool_size: 2
-  timeout: 30
+  timeout: 30s
 
 redis:
   host: 127.0.0.1
   port: 6379
   password: 123456
+  timeout: 30s
 
 file_system:
   dir_mode: 0775
@@ -83,18 +82,25 @@ cors:
 
 translation:
   dir_path: "./translate"
-  file_type: yaml
   lang_codes: # the first language is default
-    - en
-    - ru
+    - en_EN
+    - ru_RU
+  dictionaries:
+    dir_path: "./translate/dict"
+    list:
+      - catalog/category
 
 client_sections:
   admin_api:
-    caption: Admin API
     privilege: apiAdm
+    auth:
+      secret: "The secret for symmetric security key"
+      audience: "127.0.0.1:80"
   public_api:
-    caption: Public API
     privilege: apiPublic
+    auth:
+      secret: "The secret for symmetric security key"
+      audience: "127.0.0.1:80"
 
 modules_access:
   roles:
@@ -115,10 +121,9 @@ modules_access:
 modules_settings:
   catalog_category:
     image:
-      base_dir: "catalog/categories" # key prefix
       file_provider: imageStorage # file_providers.image_storage or image_storage2
   file_station:
     image_proxy:
-      host: http://127.0.0.1/
-      base_url: /images
+      host: http://127.0.0.1:8080/
+      base_url: /img
       file_provider: imageStorage # file_providers.image_storage or image_storage2

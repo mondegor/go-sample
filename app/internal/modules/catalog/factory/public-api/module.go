@@ -1,17 +1,14 @@
 package factory
 
 import (
-	"go-sample/internal/modules"
+	module "go-sample/internal/modules/catalog"
+	"go-sample/internal/modules/catalog/factory"
 
 	"github.com/mondegor/go-webcore/mrcore"
 )
 
-const (
-	moduleName = "Catalog"
-)
-
-func NewModule(opts *modules.Options, section mrcore.ClientSection) ([]mrcore.HttpController, error) {
-	opts.Logger.Info("Init module %s in section %s", moduleName, section.Caption())
+func NewModule(opts *factory.Options, section mrcore.ClientSection) ([]mrcore.HttpController, error) {
+	opts.Logger.Info("Init module %s in section %s", module.Name, section.Caption())
 
 	var c []mrcore.HttpController
 
@@ -22,8 +19,8 @@ func NewModule(opts *modules.Options, section mrcore.ClientSection) ([]mrcore.Ht
 	return c, nil
 }
 
-func newModule(c *[]mrcore.HttpController, opts *modules.Options, section mrcore.ClientSection) error {
-	opts.Logger.Info("Init unit %s.%s in %s section", moduleName, unitNameCategory, section.Caption())
+func newModule(c *[]mrcore.HttpController, opts *factory.Options, section mrcore.ClientSection) error {
+	opts.Logger.Info("Init unit %s.%s in %s section", module.Name, module.UnitCategoryName, section.Caption())
 
 	return newUnitCategory(c, opts, section)
 }

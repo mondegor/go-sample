@@ -2,7 +2,7 @@ App.Response.Model.FileInfo:
   description: DTO - информация о файле
   type: object
   required:
-    - originalName
+    - name
     - size
   properties:
     contentType:
@@ -14,8 +14,30 @@ App.Response.Model.FileInfo:
       description: Оригинальное название файла
       type: string
       maxLength: 128
-      example: "Название"
+      example: "file-original-name.jpg"
+    name:
+      description: Название файла
+      type: string
+      maxLength: 128
+      example: "file-name.jpg"
+    url:
+      description: URL файла
+      type: string
+      maxLength: 128
+      example: "http://localhost/path/file-name.jpg"
     size:
       description: Размер файла в байтах
       type: integer
       example: 7
+    created:
+      description: Дата и время создания файла (UTC)
+      type: string
+      format: date-time
+      nullable: true
+      example: "2023-01-01T12:00:00.000+02:00"
+    lastModified:
+      description: Дата и время последней модификации файла (UTC)
+      type: string
+      format: date-time
+      nullable: true
+      example: "2023-01-01T12:00:00.000+02:00"

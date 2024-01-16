@@ -20,17 +20,14 @@ func NewPostgres(cfg *config.Config, logger mrcore.Logger) (*mrpostgres.ConnAdap
 		Database:     cfg.Storage.Database,
 		MaxPoolSize:  cfg.Storage.MaxPoolSize,
 		ConnAttempts: 1,
-		ConnTimeout:  time.Duration(cfg.Storage.Timeout) * time.Second,
+		ConnTimeout:  cfg.Storage.Timeout * time.Second,
 	}
 
 	conn := mrpostgres.New()
-	err := conn.Connect(opt)
 
-	if err != nil {
+	if err := conn.Connect(opt); err != nil {
 		return nil, err
 	}
 
-	err = conn.Ping(context.Background())
-
-	return conn, err
+	return conn, conn.Ping(context.Background())
 }

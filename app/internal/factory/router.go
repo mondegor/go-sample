@@ -2,19 +2,13 @@ package factory
 
 import (
 	"go-sample/config"
-	"net/http"
 
+	"github.com/mondegor/go-sysmess/mrlang"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrserver"
 )
 
-func NewHttpRouter(cfg *config.Config, logger mrcore.Logger) (mrcore.HttpRouter, error) {
-	responseTranslator, err := NewTranslator(cfg, logger)
-
-	if err != nil {
-		return nil, err
-	}
-
+func NewHttpRouter(cfg *config.Config, logger mrcore.Logger, translator *mrlang.Translator) (mrcore.HttpRouter, error) {
 	requestValidator, err := NewValidator(cfg, logger)
 
 	if err != nil {
@@ -35,10 +29,8 @@ func NewHttpRouter(cfg *config.Config, logger mrcore.Logger) (mrcore.HttpRouter,
 	router := mrserver.NewRouter(logger, mrserver.HandlerAdapter(nil))
 	router.RegisterMiddleware(
 		mrserver.NewCors(corsOptions),
-		mrserver.MiddlewareFirst(logger, responseTranslator, requestValidator),
+		mrserver.MiddlewareFirst(logger, translator, requestValidator),
 	)
-
-	router.HandlerFunc(http.MethodGet, "/", mrserver.MainPage)
 
 	return router, nil
 }

@@ -20,20 +20,20 @@ CREATE TABLE gs_catalog.categories (
     datetime_created timestamp NOT NULL DEFAULT now(),
     datetime_updated timestamp NULL,
     category_caption character varying(128) NOT NULL,
-    image_path character varying(128) NOT NULL DEFAULT '',
+    image_meta jsonb DEFAULT NULL,
     category_status gs_catalog.item_status NOT NULL
 );
 
-INSERT INTO gs_catalog.categories (category_id, tag_version, datetime_created, datetime_updated, category_caption, image_path, category_status)
+INSERT INTO gs_catalog.categories (category_id, tag_version, datetime_created, datetime_updated, category_caption, image_meta, category_status)
 VALUES
-    (1, 1, '2023-01-01 12:15:59.981966', NULL, 'Электроника', '', 'ENABLED'),
-    (2, 1, '2023-02-01 13:15:08.678538', NULL, 'Бытовая техника', '', 'ENABLED'),
-    (3, 1, '2023-03-01 14:15:16.078388', NULL, 'Компьютерная техника', '', 'DRAFT'),
-    (4, 1, '2023-04-01 15:15:12.319733', NULL, 'Строительство и ремонт', '', 'ENABLED'),
-    (5, 1, '2023-05-01 16:15:14.319733', NULL, 'Кондитерские изделия', '', 'ENABLED'),
-    (6, 1, '2023-06-01 17:15:32.319733', NULL, 'Увлажнители воздуха', '', 'DISABLED'),
-    (7, 1, '2023-07-01 18:15:23.319733', NULL, 'Тостеры и ростеры', '', 'DRAFT'),
-    (8, 1, '2023-08-01 19:15:19.319733', NULL, 'Сварочные аппараты', '', 'ENABLED');
+    (1, 1, '2023-01-01 12:15:59.981966', NULL, 'Электроника', NULL, 'ENABLED'),
+    (2, 1, '2023-02-01 13:15:08.678538', NULL, 'Бытовая техника', NULL, 'ENABLED'),
+    (3, 1, '2023-03-01 14:15:16.078388', NULL, 'Компьютерная техника', NULL, 'DRAFT'),
+    (4, 1, '2023-04-01 15:15:12.319733', NULL, 'Строительство и ремонт', NULL, 'ENABLED'),
+    (5, 1, '2023-05-01 16:15:14.319733', NULL, 'Кондитерские изделия', NULL, 'ENABLED'),
+    (6, 1, '2023-06-01 17:15:32.319733', NULL, 'Увлажнители воздуха', NULL, 'DISABLED'),
+    (7, 1, '2023-07-01 18:15:23.319733', NULL, 'Тостеры и ростеры', NULL, 'DRAFT'),
+    (8, 1, '2023-08-01 19:15:19.319733', NULL, 'Сварочные аппараты', NULL, 'ENABLED');
 
 ALTER SEQUENCE gs_catalog.categories_category_id_seq RESTART WITH 9;
 
@@ -69,9 +69,9 @@ CREATE TABLE gs_catalog.products (
     datetime_created timestamp NOT NULL DEFAULT now(),
     datetime_updated timestamp NULL,
     category_id int4 NOT NULL CONSTRAINT FK_products_category_id REFERENCES gs_catalog.categories (category_id),
-    trademark_id int4 NOT NULL CONSTRAINT FK_products_trademark_id REFERENCES gs_catalog.trademarks (trademark_id),
     product_article character varying(32) NULL CONSTRAINT UK_products_product_article UNIQUE,
     product_caption character varying(128) NOT NULL,
+    trademark_id int4 NOT NULL CONSTRAINT FK_products_trademark_id REFERENCES gs_catalog.trademarks (trademark_id),
     product_price int8 NOT NULL, -- coins * 100
     product_status gs_catalog.item_status NOT NULL,
     prev_field_id int4 NULL CHECK(prev_field_id IS NULL OR prev_field_id > 0),
@@ -79,16 +79,16 @@ CREATE TABLE gs_catalog.products (
     order_field int8 NULL CHECK(order_field IS NULL OR order_field > 0)
 );
 
-INSERT INTO gs_catalog.products (product_id, tag_version, datetime_created, datetime_updated, category_id, trademark_id, product_article, product_caption, product_price, product_status, prev_field_id, next_field_id, order_field)
+INSERT INTO gs_catalog.products (product_id, tag_version, datetime_created, datetime_updated, category_id, product_article, product_caption, trademark_id, product_price, product_status, prev_field_id, next_field_id, order_field)
 VALUES
-    (1, 1, '2023-01-01 12:30:59.981966', NULL, 5, 1, 'candy-001', 'Алёнка', 9050, 'ENABLED', NULL, 2, 1000),
-    (2, 1, '2023-02-01 13:30:08.678538', NULL, 8, 2, 'masha-002', 'Маша и Медведь', 5380000, 'ENABLED', NULL, NULL, NULL),
-    (3, 1, '2023-03-01 14:30:16.078388', NULL, 5, 3, 'cookie-003', 'Юбилейное', 4300, 'ENABLED', 1, 4, 2000),
-    (4, 1, '2023-04-01 15:30:23.319733', NULL, 5, 4, 'candy-004', 'Бабаевский', 12570, 'ENABLED', 3, 5, 3000),
-    (5, 1, '2023-05-01 16:30:23.319733', NULL, 5, 5, 'candy-005', 'Кара-Кум', 5000, 'DRAFT', 4, 6, 4000),
-    (6, 1, '2023-06-01 17:30:14.319733', NULL, 5, 6, 'candy-006', 'Мишка на Севере', 21450, 'ENABLED', 5, NULL, 5000),
-    (7, 1, '2023-07-01 18:30:23.319733', NULL, 1, 7, 'tv-007', 'Радуга ТВ', 2000000, 'ENABLED', NULL, 8, 1000),
-    (8, 1, '2023-08-01 19:30:45.319733', NULL, 1, 8, 'rocket-008', 'Ракета', 1530000, 'DRAFT', 8, NULL, 2000);
+    (1, 1, '2023-01-01 12:30:59.981966', NULL, 5, 'candy-001', 'Алёнка', 1, 9050, 'ENABLED', NULL, 2, 1000),
+    (2, 1, '2023-02-01 13:30:08.678538', NULL, 8, 'masha-002', 'Маша и Медведь', 2, 5380000, 'ENABLED', NULL, NULL, NULL),
+    (3, 1, '2023-03-01 14:30:16.078388', NULL, 5, 'cookie-003', 'Юбилейное', 3, 4300, 'ENABLED', 1, 4, 2000),
+    (4, 1, '2023-04-01 15:30:23.319733', NULL, 5, 'candy-004', 'Бабаевский', 4, 12570, 'ENABLED', 3, 5, 3000),
+    (5, 1, '2023-05-01 16:30:23.319733', NULL, 5, 'candy-005', 'Кара-Кум', 5, 5000, 'DRAFT', 4, 6, 4000),
+    (6, 1, '2023-06-01 17:30:14.319733', NULL, 5, 'candy-006', 'Мишка на Севере', 6, 21450, 'ENABLED', 5, NULL, 5000),
+    (7, 1, '2023-07-01 18:30:23.319733', NULL, 1, 'tv-007', 'Радуга ТВ', 7, 2000000, 'ENABLED', NULL, 8, 1000),
+    (8, 1, '2023-08-01 19:30:45.319733', NULL, 1, 'rocket-008', 'Ракета', 8, 1530000, 'DRAFT', 8, NULL, 2000);
 
 CREATE INDEX IX_products_category_id_order_field ON gs_catalog.products (category_id, order_field);
 

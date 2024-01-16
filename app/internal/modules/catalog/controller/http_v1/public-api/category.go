@@ -19,27 +19,24 @@ const (
 
 type (
 	Category struct {
-		section   mrcore.ClientSection
-		service   usecase.CategoryService
-		imagesURL mrcore.BuilderPath
+		section mrcore.ClientSection
+		service usecase.CategoryService
 	}
 )
 
 func NewCategory(
 	section mrcore.ClientSection,
 	service usecase.CategoryService,
-	imagesURL mrcore.BuilderPath,
 ) *Category {
 	return &Category{
-		section:   section,
-		service:   service,
-		imagesURL: imagesURL,
+		section: section,
+		service: service,
 	}
 }
 
 func (ht *Category) AddHandlers(router mrcore.HttpRouter) {
 	moduleAccessFunc := func(next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
-		return ht.section.MiddlewareWithPermission(module.PermissionCatalogCategory, next)
+		return ht.section.MiddlewareWithPermission(module.UnitCategoryPermission, next)
 	}
 
 	router.HttpHandlerFunc(http.MethodGet, ht.section.Path(categoryURL), moduleAccessFunc(ht.GetList()))
@@ -52,10 +49,6 @@ func (ht *Category) GetList() mrcore.HttpHandlerFunc {
 
 		if err != nil {
 			return err
-		}
-
-		for i := range items {
-			items[i].ImagePath = ht.imagesURL.FullPath(items[i].ImagePath)
 		}
 
 		return c.SendResponse(
@@ -84,12 +77,10 @@ func (ht *Category) Get() mrcore.HttpHandlerFunc {
 			return err
 		}
 
-		item.ImagePath = ht.imagesURL.FullPath(item.ImagePath)
-
 		return c.SendResponse(http.StatusOK, item)
 	}
 }
 
 func (ht *Category) getItemID(c mrcore.ClientContext) mrtype.KeyInt32 {
-	return view_shared.ParseIDFromPath(c, "id")
+	return view_shared.ParseKeyInt32FromPath(c, "id")
 }

@@ -11,10 +11,8 @@ func NewLogger(cfg *config.Config) (*mrcore.LoggerAdapter, error) {
 	mrcore.SetDebug(cfg.Debugging.Debug)
 
 	mrerr.SetCallerOptions(
-		mrerr.CallerOptions{
-			Deep:         cfg.Debugging.ErrorCaller.Deep,
-			UseShortPath: cfg.Debugging.ErrorCaller.UseShortPath,
-		},
+		mrerr.CallerDeep(cfg.Debugging.ErrorCaller.Deep),
+		mrerr.CallerUseShortPath(cfg.Debugging.ErrorCaller.UseShortPath),
 	)
 
 	prefix := cfg.Log.Prefix
@@ -27,9 +25,9 @@ func NewLogger(cfg *config.Config) (*mrcore.LoggerAdapter, error) {
 		mrcore.LoggerOptions{
 			Prefix: prefix,
 			Level:  cfg.Log.Level,
-			Caller: mrerr.CallerOptions{
-				Deep:         cfg.Log.LogCaller.Deep,
-				UseShortPath: cfg.Log.LogCaller.UseShortPath,
+			CallerOptions: []mrerr.CallerOption{
+				mrerr.CallerDeep(cfg.Log.LogCaller.Deep),
+				mrerr.CallerUseShortPath(cfg.Log.LogCaller.UseShortPath),
 			},
 			CallerEnabledFunc: func(err error) bool {
 				if appErr, ok := err.(*mrerr.AppError); ok {

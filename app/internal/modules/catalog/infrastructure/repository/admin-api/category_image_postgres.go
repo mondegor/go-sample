@@ -4,36 +4,37 @@ import (
 	"context"
 	module "go-sample/internal/modules/catalog"
 
+	"github.com/mondegor/go-storage/mrentity"
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-webcore/mrenum"
 	"github.com/mondegor/go-webcore/mrtype"
 )
 
 type (
-	CategoryImage struct {
+	CategoryImagePostgres struct {
 		client mrstorage.DBConn
 	}
 )
 
-func NewCategoryImage(
+func NewCategoryImagePostgres(
 	client mrstorage.DBConn,
-) *CategoryImage {
-	return &CategoryImage{
+) *CategoryImagePostgres {
+	return &CategoryImagePostgres{
 		client: client,
 	}
 }
 
-func (re *CategoryImage) FetchPath(ctx context.Context, categoryID mrtype.KeyInt32) (string, error) {
+func (re *CategoryImagePostgres) FetchMeta(ctx context.Context, categoryID mrtype.KeyInt32) (mrentity.ImageMeta, error) {
 	sql := `
 		SELECT
-			image_path
+			image_meta
 		FROM
-			` + module.DBSchemaCategory + `.categories
+			` + module.UnitCategoryDBSchema + `.categories
 		WHERE
 			category_id = $1 AND category_status <> $2
 		LIMIT 1;`
 
-	var imagePath string
+	var imageMeta mrentity.ImageMeta
 
 	err := re.client.QueryRow(
 		ctx,
@@ -41,19 +42,19 @@ func (re *CategoryImage) FetchPath(ctx context.Context, categoryID mrtype.KeyInt
 		categoryID,
 		mrenum.ItemStatusRemoved,
 	).Scan(
-		&imagePath,
+		&imageMeta,
 	)
 
-	return imagePath, err
+	return imageMeta, err
 }
 
-func (re *CategoryImage) Update(ctx context.Context, categoryID mrtype.KeyInt32, imagePath string) error {
+func (re *CategoryImagePostgres) UpdateMeta(ctx context.Context, categoryID mrtype.KeyInt32, meta mrentity.ImageMeta) error {
 	sql := `
 		UPDATE
-			` + module.DBSchemaCategory + `.categories
+			` + module.UnitCategoryDBSchema + `.categories
 		SET
 			datetime_updated = NOW(),
-			image_path = $3
+			image_meta = $3
 		WHERE
 			category_id = $1 AND category_status <> $2;`
 
@@ -62,10 +63,10 @@ func (re *CategoryImage) Update(ctx context.Context, categoryID mrtype.KeyInt32,
 		sql,
 		categoryID,
 		mrenum.ItemStatusRemoved,
-		imagePath,
+		meta,
 	)
 }
 
-func (re *CategoryImage) Delete(ctx context.Context, categoryID mrtype.KeyInt32) error {
-	return re.Update(ctx, categoryID, "")
+func (re *CategoryImagePostgres) DeleteMeta(ctx context.Context, categoryID mrtype.KeyInt32) error {
+	return re.UpdateMeta(ctx, categoryID, mrentity.ImageMeta{})
 }

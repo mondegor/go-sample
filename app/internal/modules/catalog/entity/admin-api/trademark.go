@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	ModelNameTrademark = "admin-api.CatalogTrademark"
+	ModelNameTrademark = "admin-api.Catalog.Trademark"
 )
 
 type (

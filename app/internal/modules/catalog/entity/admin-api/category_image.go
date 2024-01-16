@@ -1,5 +1,5 @@
 package entity
 
 const (
-	ModelNameCategoryImage = "admin-api.CatalogCategoryImage"
+	ModelNameCategoryImage = "admin-api.Catalog.CategoryImage"
 )

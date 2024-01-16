@@ -10,7 +10,6 @@ import (
 	factory_catalog_pub "go-sample/internal/modules/catalog/factory/public-api"
 	factory_filestation_pub "go-sample/internal/modules/file-station/factory/public-api"
 	"log"
-	"net/http"
 
 	"github.com/mondegor/go-storage/mrredislock"
 	"github.com/mondegor/go-webcore/mrtool"
@@ -65,29 +64,55 @@ func main() {
 	appHelper.ExitOnError(err)
 
 	sharedOptions.Locker = mrredislock.NewLockerAdapter(sharedOptions.RedisAdapter.Cli())
-	sharedOptions.OrdererComponent = factory.NewOrdererComponent(cfg, sharedOptions.PostgresAdapter, logger, logger)
+	sharedOptions.OrdererAPI = factory.NewOrdererAPI(cfg, sharedOptions.PostgresAdapter, logger, logger)
 
-	// access + sections + router
+	sharedOptions.Translator, err = factory.NewTranslator(cfg, logger)
+	appHelper.ExitOnError(err)
+
+	sharedOptions.CatalogCategoryAPI, err = factory.NewCatalogCategoryAPI(sharedOptions)
+	appHelper.ExitOnError(err)
+
+	sharedOptions.CatalogTrademarkAPI, err = factory.NewCatalogTrademarkAPI(sharedOptions)
+	appHelper.ExitOnError(err)
+
+	// module's access
 	modulesAccess, err := factory.NewModulesAccess(cfg, logger)
 	appHelper.ExitOnError(err)
 
-	sectionAdminAPI := factory.NewClientSectionAdminAPI(cfg, modulesAccess)
-	sectionPublicAPI := factory.NewClientSectionPublicAPI(cfg, modulesAccess)
+	// module's options
+	catalogOptions, err := factory.NewCatalogOptions(sharedOptions)
+	appHelper.ExitOnError(err)
 
-	router, err := factory.NewHttpRouter(cfg, logger)
+	fileStationOptions, err := factory.NewFileStationOptions(sharedOptions)
+	appHelper.ExitOnError(err)
+
+	// http router
+	router, err := factory.NewHttpRouter(cfg, logger, sharedOptions.Translator)
 	appHelper.ExitOnError(err)
 
 	// section: admin-api
-	controllers, err := factory_catalog_adm.NewModule(sharedOptions, sectionAdminAPI)
+	sectionAdminAPI := factory.NewClientSectionAdminAPI(cfg, logger, modulesAccess)
+
+	appHelper.ExitOnError(
+		factory.RegisterSystemHandlers(cfg, logger, router, sectionAdminAPI),
+	)
+
+	controllers, err := factory_catalog_adm.NewModule(catalogOptions, sectionAdminAPI)
 	appHelper.ExitOnError(err)
 	router.Register(controllers...)
 
 	// section: public
-	controllers, err = factory_catalog_pub.NewModule(sharedOptions, sectionPublicAPI)
+	sectionPublicAPI := factory.NewClientSectionPublicAPI(cfg, logger, modulesAccess)
+
+	appHelper.ExitOnError(
+		factory.RegisterSystemHandlers(cfg, logger, router, sectionPublicAPI),
+	)
+
+	controllers, err = factory_catalog_pub.NewModule(catalogOptions, sectionPublicAPI)
 	appHelper.ExitOnError(err)
 	router.Register(controllers...)
 
-	controllers, err = factory_filestation_pub.NewModule(sharedOptions, sectionPublicAPI)
+	controllers, err = factory_filestation_pub.NewModule(fileStationOptions, sectionPublicAPI)
 	appHelper.ExitOnError(err)
 	router.Register(controllers...)
 
@@ -105,13 +130,10 @@ func main() {
 
 	select {
 	case <-ctx.Done():
-		err = serverAdapter.Close()
 		logger.Info("Application stopped")
 	case err = <-serverAdapter.Notify():
 		logger.Info("Application stopped with error")
 	}
 
-	if err != nil && err != http.ErrServerClosed {
-		logger.Err(err)
-	}
+	logger.Err(err)
 }

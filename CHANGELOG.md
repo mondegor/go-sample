@@ -1,6 +1,19 @@
 # Go Sample Changelog
 Все изменения сервиса Go Sample будут документироваться на этой странице.
 
+## 2024-01-16
+### Added
+- Добавлены новые `OpenAPI` компоненты: `App.Measure*`, `App.Response.Model.FileInfo`,
+  `App.Response.Model.ImageInfo`;
+- Для каждой секции добавлены настройки `AuthSecret` и `AuthAudience`;
+- Добавлены системные обработчики (`RegisterSystemHandlers`);
+- Добавлена фильтрация поля цены товара (`Custom.Request.Query.Filter.Price*`);
+
+### Changed
+- Поле `categories.image_path` заменено на `categories.image_meta` типа `jsonb`,
+  в котором теперь хранится мета информация о файле;
+- В каждом модуле теперь собственные Options, которые отделены от общего конфига;
+  AppStartedAt
 ## 2023-12-10
 ### Changed
 - Внедрено использование `CallStack` в `mrerr.AppError` и `mrcore.Logger`, а также функция `CallerEnabledFunc` для отключения избыточной информации;

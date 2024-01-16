@@ -1,5 +1,5 @@
 Catalog.Categories.AdminAPI.Request.Model.CreateCategory:
-  description: DTO создания категории каталога
+  description: DTO добавления новой категории каталога
   type: object
   required:
     - caption
@@ -55,6 +55,6 @@ Catalog.Categories.AdminAPI.Response.Model.Category:
     caption:
       $ref: "#/components/schemas/App.Field.Caption"
     imageInfo:
-      $ref: "#/components/schemas/App.Response.Model.FileInfo"
+      $ref: "#/components/schemas/App.Response.Model.ImageInfo"
     status:
       $ref: "#/components/schemas/App.Enum.Status"

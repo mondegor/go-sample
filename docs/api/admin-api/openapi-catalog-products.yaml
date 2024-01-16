@@ -50,9 +50,11 @@ paths:
       parameters:
         - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
         - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
-        - $ref: "#/components/parameters/App.Request.Query.Filter.SearchText"
         - $ref: "#/components/parameters/Catalog.Products.AdminAPI.Request.Query.Filter.CategoryID"
+        - $ref: "#/components/parameters/App.Request.Query.Filter.SearchText"
         - $ref: "#/components/parameters/Catalog.Products.AdminAPI.Request.Query.Filter.TrademarkIDs"
+        - $ref: "#/components/parameters/Custom.Request.Query.Filter.PriceMin"
+        - $ref: "#/components/parameters/Custom.Request.Query.Filter.PriceMax"
         - $ref: "#/components/parameters/App.Request.Query.Filter.Statuses"
         - $ref: "#/components/parameters/App.Request.Query.ListSorter.SortField"
         - $ref: "#/components/parameters/App.Request.Query.ListSorter.SortDirection"
@@ -80,9 +82,9 @@ paths:
 
         **Ограничения и ошибки полей:**
         - categoryId: required,gte=1
-        - trademarkId: required,gte=1
         - article: required,min=4,max=32,pattern=article
         - caption: required,max=128
+        - trademarkId: required,gte=1
         - price: gte=0
       operationId: createProduct
       tags:
@@ -157,9 +159,9 @@ paths:
 
         **Ограничения и ошибки полей:**
         - version: required,gte=1 | ErrVersionInvalid
-        - trademarkId: omitempty,gte=1
         - article: omitempty,min=4,max=32,pattern=article
         - caption: omitempty,max=128
+        - trademarkId: omitempty,gte=1
         - price: omitempty,gte=0
       operationId: storeProduct
       tags:
@@ -292,7 +294,7 @@ paths:
 
       responses:
         "204":
-          description: Статус поля формы успешно изменён
+          description: Товар был успешно перемещён
         "400":
           $ref: "#/components/responses/App.ResponseJson.Error400"
         "401":
@@ -397,6 +399,26 @@ components:
         default: "ASC"
       example: "DESC"
 
+    Custom.Request.Query.Filter.PriceMin:
+      description: Минимальная цена (10^2)
+      name: price-min
+      in: query
+      required: false
+      schema:
+        type: integer
+        maxLength: 10
+      example: 100000 # 100g/m2
+
+    Custom.Request.Query.Filter.PriceMax:
+      description: Максимальная цена (10^2)
+      name: price-max
+      in: query
+      required: false
+      schema:
+        type: integer
+        maxLength: 10
+      example: 100000 # 100g/m2
+
     Catalog.Products.AdminAPI.Request.Path.ProductID:
       description: Идентификатор товара
       name: productId
@@ -488,6 +510,7 @@ components:
     App.Measure.Price:
       description: Цена изделия (10^2)
       type: integer # Money
+      maxLength: 12
       minimum: 0
       example: 8234500 # 82345 coins
 
@@ -591,22 +614,22 @@ components:
           example: "Запись была успешно создана"
 
     Catalog.Products.AdminAPI.Request.Model.CreateProduct:
-      description: DTO создания товара каталога
+      description: DTO добавления нового товара каталога
       type: object
       required:
         - categoryId
-        - trademarkId
         - article
         - caption
+        - trademarkId
       properties:
         categoryId:
-          $ref: "#/components/schemas/App.Field.IntegerID"
-        trademarkId:
           $ref: "#/components/schemas/App.Field.IntegerID"
         article:
           $ref: "#/components/schemas/App.Field.Article"
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
+        trademarkId:
+          $ref: "#/components/schemas/App.Field.IntegerID"
         price:
           $ref: "#/components/schemas/App.Measure.Price"
 
@@ -618,12 +641,12 @@ components:
       properties:
         version:
           $ref: "#/components/schemas/App.Field.TagVersion"
-        trademarkId:
-          $ref: "#/components/schemas/App.Field.IntegerID"
         article:
           $ref: "#/components/schemas/App.Field.Article"
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
+        trademarkId:
+          $ref: "#/components/schemas/App.Field.IntegerID"
         price:
           $ref: "#/components/schemas/App.Measure.Price"
 
@@ -650,9 +673,9 @@ components:
         - version
         - createdAt
         - categoryId
-        - trademarkId
         - article
         - caption
+        - trademarkId
         - price
         - status
       properties:
@@ -666,12 +689,12 @@ components:
           $ref: "#/components/schemas/App.Field.Date.UpdatedAt"
         categoryId:
           $ref: "#/components/schemas/App.Field.IntegerID"
-        trademarkId:
-          $ref: "#/components/schemas/App.Field.IntegerID"
         article:
           $ref: "#/components/schemas/App.Field.Article"
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
+        trademarkId:
+          $ref: "#/components/schemas/App.Field.IntegerID"
         price:
           $ref: "#/components/schemas/App.Measure.Price"
         status:

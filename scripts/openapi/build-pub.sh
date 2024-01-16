@@ -41,6 +41,8 @@ mrcmd_func_openapi_build_pub() {
     "${sharedDir}/components/parameters/App.Request.Query.ListPager.yaml"
     "${sharedDir}/components/parameters/App.Request.Query.ListSorter.yaml"
 
+    # "${sharedDir}/custom/parameters/Custom.Request.Query.Filter.PriceRange.yaml"
+
     "${catalogCategoriesDir}/components-parameters.yaml"
     "${fileStationDir}/components-parameters.yaml"
   )
@@ -81,6 +83,7 @@ mrcmd_func_openapi_build_pub() {
     "${sharedDir}/components/schemas/App.Response.Model.BinaryFile.yaml"
     "${sharedDir}/components/schemas/App.Response.Model.Error.yaml"
     # "${sharedDir}/components/schemas/App.Response.Model.FileInfo.yaml"
+    # "${sharedDir}/components/schemas/App.Response.Model.ImageInfo.yaml"
     # "${sharedDir}/components/schemas/App.Response.Model.Success.yaml"
     # "${sharedDir}/components/schemas/App.Response.Model.SuccessCreatedItem.yaml"
 

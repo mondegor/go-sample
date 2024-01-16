@@ -7,6 +7,7 @@ import (
 	entity "go-sample/internal/modules/catalog/entity/admin-api"
 	usecase "go-sample/internal/modules/catalog/usecase/admin-api"
 	usecase_shared "go-sample/internal/modules/catalog/usecase/shared"
+	"go-sample/pkg/modules/catalog"
 	"net/http"
 	"strconv"
 
@@ -47,7 +48,7 @@ func NewProduct(
 
 func (ht *Product) AddHandlers(router mrcore.HttpRouter) {
 	moduleAccessFunc := func(next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
-		return ht.section.MiddlewareWithPermission(module.PermissionCatalogProduct, next)
+		return ht.section.MiddlewareWithPermission(module.UnitProductPermission, next)
 	}
 
 	router.HttpHandlerFunc(http.MethodGet, ht.section.Path(productURL), moduleAccessFunc(ht.GetList()))
@@ -82,11 +83,11 @@ func (ht *Product) GetList() mrcore.HttpHandlerFunc {
 func (ht *Product) listParams(c mrcore.ClientContext) entity.ProductParams {
 	return entity.ProductParams{
 		Filter: entity.ProductListFilter{
-			CategoryID: view_shared.ParseFilterCategoryID(c, module.ParamNameFilterCategoryID),
-			Trademarks: view_shared.ParseFilterTrademarkList(c, module.ParamNameFilterCatalogTrademarks),
-			SearchText: view_shared.ParseFilterString(c, module.ParamNameFilterSearchText),
-			Price:      view_shared.ParseFilterRangeInt64(c, module.ParamNameFilterPriceRange),
-			Statuses:   view_shared.ParseFilterStatusList(c, module.ParamNameFilterStatuses),
+			CategoryID:   view_shared.ParseFilterKeyInt32(c, module.ParamNameFilterCatalogCategoryID),
+			SearchText:   view_shared.ParseFilterString(c, module.ParamNameFilterSearchText),
+			TrademarkIDs: view_shared.ParseFilterKeyInt32List(c, module.ParamNameFilterCatalogTrademarkIDs),
+			Price:        view_shared.ParseFilterRangeInt64(c, module.ParamNameFilterPriceRange),
+			Statuses:     view_shared.ParseFilterStatusList(c, module.ParamNameFilterStatuses),
 		},
 		Sorter: view_shared.ParseSortParams(c, ht.listSorter),
 		Pager:  view_shared.ParsePageParams(c),
@@ -98,7 +99,7 @@ func (ht *Product) Get() mrcore.HttpHandlerFunc {
 		item, err := ht.service.GetItem(c.Context(), ht.getItemID(c))
 
 		if err != nil {
-			return ht.wrapError(err, ht.getRawItemID(c))
+			return ht.wrapError(err, c)
 		}
 
 		return c.SendResponse(http.StatusOK, item)
@@ -115,14 +116,14 @@ func (ht *Product) Create() mrcore.HttpHandlerFunc {
 
 		item := entity.Product{
 			CategoryID:  request.CategoryID,
-			TrademarkID: request.TrademarkID,
 			Article:     request.Article,
+			TrademarkID: request.TrademarkID,
 			Caption:     request.Caption,
 			Price:       request.Price,
 		}
 
 		if err := ht.service.Create(c.Context(), &item); err != nil {
-			return ht.wrapError(err, ht.getRawItemID(c))
+			return ht.wrapError(err, c)
 		}
 
 		return c.SendResponse(
@@ -130,7 +131,7 @@ func (ht *Product) Create() mrcore.HttpHandlerFunc {
 			view.SuccessCreatedItemResponse{
 				ItemID: strconv.Itoa(int(item.ID)),
 				Message: mrctx.Locale(c.Context()).TranslateMessage(
-					"msgProductSuccessCreated",
+					"msgCatalogProductSuccessCreated",
 					"entity has been success created",
 				),
 			},
@@ -149,14 +150,14 @@ func (ht *Product) Store() mrcore.HttpHandlerFunc {
 		item := entity.Product{
 			ID:          ht.getItemID(c),
 			TagVersion:  request.Version,
-			TrademarkID: request.TrademarkID,
 			Article:     request.Article,
 			Caption:     request.Caption,
+			TrademarkID: request.TrademarkID,
 			Price:       request.Price,
 		}
 
 		if err := ht.service.Store(c.Context(), &item); err != nil {
-			return ht.wrapError(err, ht.getRawItemID(c))
+			return ht.wrapError(err, c)
 		}
 
 		return c.SendResponseNoContent()
@@ -178,7 +179,7 @@ func (ht *Product) ChangeStatus() mrcore.HttpHandlerFunc {
 		}
 
 		if err := ht.service.ChangeStatus(c.Context(), &item); err != nil {
-			return ht.wrapError(err, ht.getRawItemID(c))
+			return ht.wrapError(err, c)
 		}
 
 		return c.SendResponseNoContent()
@@ -188,7 +189,7 @@ func (ht *Product) ChangeStatus() mrcore.HttpHandlerFunc {
 func (ht *Product) Remove() mrcore.HttpHandlerFunc {
 	return func(c mrcore.ClientContext) error {
 		if err := ht.service.Remove(c.Context(), ht.getItemID(c)); err != nil {
-			return ht.wrapError(err, ht.getRawItemID(c))
+			return ht.wrapError(err, c)
 		}
 
 		return c.SendResponseNoContent()
@@ -203,13 +204,7 @@ func (ht *Product) Move() mrcore.HttpHandlerFunc {
 			return err
 		}
 
-		err := ht.service.MoveAfterID(
-			c.Context(),
-			ht.getItemID(c),
-			request.AfterNodeID,
-		)
-
-		if err != nil {
+		if err := ht.service.MoveAfterID(c.Context(), ht.getItemID(c), request.AfterNodeID); err != nil {
 			return ht.wrapErrorNode(err, ht.getRawItemID(c))
 		}
 
@@ -218,16 +213,16 @@ func (ht *Product) Move() mrcore.HttpHandlerFunc {
 }
 
 func (ht *Product) getItemID(c mrcore.ClientContext) mrtype.KeyInt32 {
-	return view_shared.ParseIDFromPath(c, "id")
+	return view_shared.ParseKeyInt32FromPath(c, "id")
 }
 
 func (ht *Product) getRawItemID(c mrcore.ClientContext) string {
 	return c.ParamFromPath("id")
 }
 
-func (ht *Product) wrapError(err error, rawItemID string) error {
+func (ht *Product) wrapError(err error, c mrcore.ClientContext) error {
 	if mrcore.FactoryErrServiceEntityNotFound.Is(err) {
-		return usecase_shared.FactoryErrProductNotFound.Wrap(err, rawItemID)
+		return usecase_shared.FactoryErrProductNotFound.Wrap(err, ht.getRawItemID(c))
 	}
 
 	if mrcore.FactoryErrServiceEntityVersionInvalid.Is(err) {
@@ -242,11 +237,11 @@ func (ht *Product) wrapError(err error, rawItemID string) error {
 		return mrerr.NewFieldError("article", err)
 	}
 
-	if usecase_shared.FactoryErrCategoryNotFound.Is(err) {
+	if catalog.FactoryErrCategoryNotFound.Is(err) {
 		return mrerr.NewFieldError("categoryId", err)
 	}
 
-	if usecase_shared.FactoryErrTrademarkNotFound.Is(err) {
+	if catalog.FactoryErrTrademarkNotFound.Is(err) {
 		return mrerr.NewFieldError("trademarkId", err)
 	}
 

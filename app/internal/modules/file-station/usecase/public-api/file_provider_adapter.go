@@ -28,17 +28,17 @@ func NewFileProviderAdapter(
 }
 
 // Get - WARNING you don't forget to call item.File.Body.Close()
-func (uc *FileProviderAdapter) Get(ctx context.Context, path string) (*mrtype.File, error) {
-	path = strings.TrimLeft(path, "/")
+func (uc *FileProviderAdapter) Get(ctx context.Context, filePath string) (mrtype.File, error) {
+	filePath = strings.TrimLeft(filePath, "/")
 
-	if path == "" {
-		return nil, mrcore.FactoryErrServiceEntityNotFound.New()
+	if filePath == "" {
+		return mrtype.File{}, mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
-	file, err := uc.fileAPI.Download(ctx, path)
+	file, err := uc.fileAPI.Download(ctx, filePath)
 
 	if err != nil {
-		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, "FileProviderAPI", path)
+		return mrtype.File{}, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, "FileProviderAPI", filePath)
 	}
 
 	return file, nil

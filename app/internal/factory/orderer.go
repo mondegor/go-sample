@@ -8,7 +8,7 @@ import (
 	"github.com/mondegor/go-webcore/mrcore"
 )
 
-func NewOrdererComponent(cfg *config.Config, client mrstorage.DBConn, logger mrcore.Logger, eventBox mrcore.EventBox) mrorderer.Component {
+func NewOrdererAPI(cfg *config.Config, client mrstorage.DBConn, logger mrcore.Logger, eventBox mrcore.EventBox) mrorderer.API {
 	logger.Info("Create and init orderer component")
 
 	itemOrdererStorage := mrorderer.NewRepository(client)

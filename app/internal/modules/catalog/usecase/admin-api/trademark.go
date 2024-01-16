@@ -68,8 +68,6 @@ func (uc *Trademark) GetItem(ctx context.Context, id mrtype.KeyInt32) (*entity.T
 	return item, nil
 }
 
-// Create
-// modifies: item{ID}
 func (uc *Trademark) Create(ctx context.Context, item *entity.Trademark) error {
 	item.Status = mrenum.ItemStatusDraft
 
@@ -98,12 +96,11 @@ func (uc *Trademark) Store(ctx context.Context, item *entity.Trademark) error {
 	version, err := uc.storage.Update(ctx, item)
 
 	if err != nil {
-		return uc.serviceHelper.WrapErrorEntity(
-			mrcore.FactoryErrServiceEntityVersionInvalid,
-			err,
-			entity.ModelNameTrademark,
-			mrmsg.Data{"id": item.ID, "ver": item.TagVersion},
-		)
+		if uc.serviceHelper.IsNotFoundError(err) {
+			return mrcore.FactoryErrServiceEntityVersionInvalid.Wrap(err)
+		}
+
+		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameTrademark)
 	}
 
 	uc.eventBoxEmitEntity(ctx, "Store", mrmsg.Data{"id": item.ID, "ver": version})
@@ -137,12 +134,11 @@ func (uc *Trademark) ChangeStatus(ctx context.Context, item *entity.Trademark) e
 	version, err := uc.storage.UpdateStatus(ctx, item)
 
 	if err != nil {
-		return uc.serviceHelper.WrapErrorEntity(
-			mrcore.FactoryErrServiceEntityVersionInvalid,
-			err,
-			entity.ModelNameTrademark,
-			mrmsg.Data{"id": item.ID, "ver": item.TagVersion},
-		)
+		if uc.serviceHelper.IsNotFoundError(err) {
+			return mrcore.FactoryErrServiceEntityVersionInvalid.Wrap(err)
+		}
+
+		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameTrademark)
 	}
 
 	uc.eventBoxEmitEntity(ctx, "ChangeStatus", mrmsg.Data{"id": item.ID, "ver": version, "status": item.Status})
