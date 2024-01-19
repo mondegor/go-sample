@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	ModelNameCategory = "admin-api.Catalog.Category"
+	ModelNameCategory      = "admin-api.Catalog.Category"
+	ModelNameCategoryImage = "admin-api.Catalog.CategoryImage"
 )
 
 type (

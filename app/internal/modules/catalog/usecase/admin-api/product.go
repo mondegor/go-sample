@@ -72,7 +72,9 @@ func (uc *Product) GetItem(ctx context.Context, id mrtype.KeyInt32) (*entity.Pro
 		return nil, mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
-	item := &entity.Product{ID: id}
+	item := &entity.Product{
+		ID: id,
+	}
 
 	if err := uc.storage.LoadOne(ctx, item); err != nil {
 		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, id)
@@ -82,7 +84,7 @@ func (uc *Product) GetItem(ctx context.Context, id mrtype.KeyInt32) (*entity.Pro
 }
 
 func (uc *Product) Create(ctx context.Context, item *entity.Product) error {
-	if err := uc.checkProduct(ctx, item); err != nil {
+	if err := uc.checkItem(ctx, item); err != nil {
 		return err
 	}
 
@@ -117,7 +119,7 @@ func (uc *Product) Store(ctx context.Context, item *entity.Product) error {
 		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, item.ID)
 	}
 
-	if err := uc.checkProduct(ctx, item); err != nil {
+	if err := uc.checkItem(ctx, item); err != nil {
 		return err
 	}
 
@@ -217,7 +219,7 @@ func (uc *Product) MoveAfterID(ctx context.Context, id mrtype.KeyInt32, afterID 
 	return nil
 }
 
-func (uc *Product) checkProduct(ctx context.Context, item *entity.Product) error {
+func (uc *Product) checkItem(ctx context.Context, item *entity.Product) error {
 	if err := uc.checkArticle(ctx, item); err != nil {
 		return err
 	}

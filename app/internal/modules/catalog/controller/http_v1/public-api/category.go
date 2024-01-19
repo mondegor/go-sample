@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/mondegor/go-webcore/mrcore"
+	"github.com/mondegor/go-webcore/mrctx"
 	"github.com/mondegor/go-webcore/mrtype"
 )
 
@@ -71,7 +72,11 @@ func (ht *Category) listParams(c mrcore.ClientContext) entity.CategoryParams {
 
 func (ht *Category) Get() mrcore.HttpHandlerFunc {
 	return func(c mrcore.ClientContext) error {
-		item, err := ht.service.GetItem(c.Context(), ht.getItemID(c))
+		item, err := ht.service.GetItem(
+			c.Context(),
+			ht.getItemID(c),
+			mrctx.Locale(c.Context()).LangID(),
+		)
 
 		if err != nil {
 			return err

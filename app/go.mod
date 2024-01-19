@@ -4,10 +4,10 @@ go 1.20
 
 require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
-	github.com/mondegor/go-components v0.3.11
-	github.com/mondegor/go-storage v0.6.14
-	github.com/mondegor/go-sysmess v0.6.0
-	github.com/mondegor/go-webcore v0.9.6
+	github.com/mondegor/go-components v0.3.12
+	github.com/mondegor/go-storage v0.6.16
+	github.com/mondegor/go-sysmess v0.6.1
+	github.com/mondegor/go-webcore v0.9.8
 )
 
 require (
@@ -31,7 +31,6 @@ require (
 	github.com/klauspost/compress v1.17.4 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.6 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
-	github.com/lib/pq v1.10.9 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
 	github.com/minio/minio-go/v7 v7.0.66 // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect

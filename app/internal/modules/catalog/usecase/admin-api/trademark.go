@@ -59,7 +59,9 @@ func (uc *Trademark) GetItem(ctx context.Context, id mrtype.KeyInt32) (*entity.T
 		return nil, mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
-	item := &entity.Trademark{ID: id}
+	item := &entity.Trademark{
+		ID: id,
+	}
 
 	if err := uc.storage.LoadOne(ctx, item); err != nil {
 		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameTrademark, id)

@@ -54,12 +54,14 @@ func (uc *Category) GetList(ctx context.Context, params entity.CategoryParams) (
 	return items, total, nil
 }
 
-func (uc *Category) GetItem(ctx context.Context, id mrtype.KeyInt32) (*entity.Category, error) {
+func (uc *Category) GetItem(ctx context.Context, id mrtype.KeyInt32, languageID uint16) (*entity.Category, error) {
 	if id < 1 {
 		return nil, mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
-	item := &entity.Category{ID: id}
+	item := &entity.Category{
+		ID: id,
+	}
 
 	if err := uc.storage.LoadOne(ctx, item); err != nil {
 		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategory, id)

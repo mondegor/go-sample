@@ -8,8 +8,7 @@ import (
 	"net/http"
 
 	"github.com/mondegor/go-webcore/mrcore"
-	"github.com/mondegor/go-webcore/mrctx"
-	"github.com/mondegor/go-webcore/mrdebug"
+	"github.com/mondegor/go-webcore/mrreq"
 	"github.com/mondegor/go-webcore/mrtype"
 )
 
@@ -60,29 +59,15 @@ func (ht *CategoryImage) GetImage() mrcore.HttpHandlerFunc {
 
 func (ht *CategoryImage) UploadImage() mrcore.HttpHandlerFunc {
 	return func(c mrcore.ClientContext) error {
-		logger := mrctx.Logger(c.Context())
-
-		file, hdr, err := c.Request().FormFile(module.ParamNameFileCatalogCategoryImage)
+		file, err := mrreq.File(c.Request(), module.ParamNameFileCatalogCategoryImage)
 
 		if err != nil {
-			mrdebug.MultipartForm(logger, c.Request().MultipartForm)
-			return mrcore.FactoryErrHttpMultipartFormFile.Wrap(err, module.ParamNameFileCatalogCategoryImage)
+			return err
 		}
 
-		defer file.Close()
+		defer file.Body.Close()
 
-		mrdebug.MultipartFileHeader(logger, hdr)
-
-		item := mrtype.File{
-			FileInfo: mrtype.FileInfo{
-				ContentType:  hdr.Header.Get("Content-Type"),
-				OriginalName: hdr.Filename,
-				Size:         hdr.Size,
-			},
-			Body: file,
-		}
-
-		if err = ht.service.StoreFile(c.Context(), ht.getParentID(c), item); err != nil {
+		if err = ht.service.StoreFile(c.Context(), ht.getParentID(c), file); err != nil {
 			return ht.wrapError(err, c)
 		}
 

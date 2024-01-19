@@ -16,7 +16,8 @@ type (
 	}
 
 	CategoryParams struct {
-		Filter CategoryListFilter
+		LanguageID uint16
+		Filter     CategoryListFilter
 	}
 
 	CategoryListFilter struct {

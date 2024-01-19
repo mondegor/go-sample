@@ -1,6 +1,14 @@
 # Go Sample Changelog
 Все изменения сервиса Go Sample будут документироваться на этой странице.
 
+## 2024-01-19
+### Changed
+- Enum тип БД gs_catalog.item_status заменён на int2 и удалён;
+- Код получения файла в обработчике заменён на `mrreq.File`;
+- Переименован метод `checkProduct` в `usecase` на более абстрактный `checkItem`
+  (проверяет возможность добавления, сохранения записи);
+- Добавлен метод `prepareItem` в `usecase` для подготовки записи перед её отправкой в ответе;
+
 ## 2024-01-16
 ### Added
 - Добавлены новые `OpenAPI` компоненты: `App.Measure*`, `App.Response.Model.FileInfo`,
@@ -8,12 +16,13 @@
 - Для каждой секции добавлены настройки `AuthSecret` и `AuthAudience`;
 - Добавлены системные обработчики (`RegisterSystemHandlers`);
 - Добавлена фильтрация поля цены товара (`Custom.Request.Query.Filter.Price*`);
+- Добавлено поле `Config.AppStartedAt` для отслеживания времени запуска сервиса;
 
 ### Changed
 - Поле `categories.image_path` заменено на `categories.image_meta` типа `jsonb`,
   в котором теперь хранится мета информация о файле;
 - В каждом модуле теперь собственные Options, которые отделены от общего конфига;
-  AppStartedAt
+
 ## 2023-12-10
 ### Changed
 - Внедрено использование `CallStack` в `mrerr.AppError` и `mrcore.Logger`, а также функция `CallerEnabledFunc` для отключения избыточной информации;

@@ -56,7 +56,7 @@ func (uc *Category) GetList(ctx context.Context, params entity.CategoryParams) (
 	}
 
 	for i := range items {
-		items[i].ImageInfo = uc.getImageInfo(items[i].ImageMeta)
+		uc.prepareItem(&items[i])
 	}
 
 	return items, total, nil
@@ -67,13 +67,15 @@ func (uc *Category) GetItem(ctx context.Context, id mrtype.KeyInt32) (*entity.Ca
 		return nil, mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
-	item := &entity.Category{ID: id}
+	item := &entity.Category{
+		ID: id,
+	}
 
 	if err := uc.storage.LoadOne(ctx, item); err != nil {
 		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategory, id)
 	}
 
-	item.ImageInfo = uc.getImageInfo(item.ImageMeta)
+	uc.prepareItem(item)
 
 	return item, nil
 }
@@ -170,13 +172,11 @@ func (uc *Category) Remove(ctx context.Context, id mrtype.KeyInt32) error {
 	return nil
 }
 
-func (uc *Category) getImageInfo(meta *mrentity.ImageMeta) *mrtype.ImageInfo {
-	if imageInfo := mrentity.ConvertImageMetaToInfo(meta); imageInfo != nil {
+func (uc *Category) prepareItem(item *entity.Category) {
+	if imageInfo := mrentity.ConvertImageMetaToInfo(item.ImageMeta); imageInfo != nil {
 		imageInfo.URL = uc.imgBaseURL.FullPath(imageInfo.Path)
-		return imageInfo
+		item.ImageInfo = imageInfo
 	}
-
-	return nil
 }
 
 func (uc *Category) eventBoxEmitEntity(ctx context.Context, eventName string, data mrmsg.Data) {

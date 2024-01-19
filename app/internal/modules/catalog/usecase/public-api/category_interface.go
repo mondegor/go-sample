@@ -11,7 +11,7 @@ import (
 type (
 	CategoryService interface {
 		GetList(ctx context.Context, params entity.CategoryParams) ([]entity.Category, int64, error)
-		GetItem(ctx context.Context, id mrtype.KeyInt32) (*entity.Category, error)
+		GetItem(ctx context.Context, id mrtype.KeyInt32, languageID uint16) (*entity.Category, error)
 	}
 
 	CategoryStorage interface {
