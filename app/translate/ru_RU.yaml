@@ -36,17 +36,17 @@ errors:
   #   {{ .value }} - текущее значение поля;
   #   {{ .param }} - параметр валидатора (например: max=16 -> param=16);
 
-  validator_err_required:
+  custom_err_required:
     reason: "Поле обязательно для заполнения"
 
-  validator_err_min:
+  custom_err_min:
     reason: "Значение поля должно быть не менее {{ .param }} символов (текущее значение: {{ .value }})"
 
-  validator_err_max:
+  custom_err_max:
     reason: "Значение поля должно быть не более {{ .param }} символов (текущее значение: {{ .value }})"
 
-  validator_err_gte:
+  custom_err_gte:
     reason: "Значение поля должно быть больше или равно {{ .param }} (текущее значение: {{ .value }})"
 
-  validator_err_lte:
+  custom_err_lte:
     reason: "Значение поля должно быть меньше или равно {{ .param }} (текущее значение: {{ .value }})"

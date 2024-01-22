@@ -4,11 +4,10 @@ import (
 	"go-sample/config"
 	"strings"
 
-	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrlib"
 )
 
-func NewBuilderImagesURL(cfg *config.Config) mrcore.BuilderPath {
+func NewBuilderImagesURL(cfg *config.Config) *mrlib.BuilderPath {
 	return mrlib.NewBuilderPath(
 		strings.TrimRight(cfg.ModulesSettings.FileStation.ImageProxy.Host, "/") +
 			"/" +

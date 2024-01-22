@@ -4,39 +4,37 @@ import (
 	module "go-sample/internal/modules/catalog"
 	"go-sample/internal/modules/catalog/factory"
 
-	"github.com/mondegor/go-webcore/mrcore"
+	"github.com/mondegor/go-webcore/mrfactory"
+	"github.com/mondegor/go-webcore/mrserver"
 )
 
-func NewModule(opts *factory.Options, section mrcore.ClientSection) ([]mrcore.HttpController, error) {
-	opts.Logger.Info("Init module %s in section %s", module.Name, section.Caption())
+func CreateModule(opts *factory.Options) ([]mrserver.HttpController, error) {
+	var list []mrserver.HttpController
 
-	var c []mrcore.HttpController
+	mrfactory.InfoCreateModule(opts.Logger, module.Name)
+	mrfactory.InfoCreateUnit(opts.Logger, module.UnitCategoryName)
 
-	if err := newModule(&c, opts, section); err != nil {
+	if l, err := createUnitCategory(opts); err != nil {
 		return nil, err
+	} else {
+		list = append(list, mrfactory.WithPermission(l, module.UnitCategoryPermission)...)
 	}
 
-	return c, nil
-}
+	mrfactory.InfoCreateUnit(opts.Logger, module.UnitProductName)
 
-func newModule(c *[]mrcore.HttpController, opts *factory.Options, section mrcore.ClientSection) error {
-	opts.Logger.Info("Init unit %s in %s section", module.UnitCategoryName, section.Caption())
-
-	if err := newUnitCategory(c, opts, section); err != nil {
-		return err
+	if l, err := createUnitProduct(opts); err != nil {
+		return nil, err
+	} else {
+		list = append(list, mrfactory.WithPermission(l, module.UnitProductPermission)...)
 	}
 
-	opts.Logger.Info("Init unit %s in %s section", module.UnitTrademarkName, section.Caption())
+	mrfactory.InfoCreateUnit(opts.Logger, module.UnitTrademarkName)
 
-	if err := newUnitTrademark(c, opts, section); err != nil {
-		return err
+	if l, err := createUnitTrademark(opts); err != nil {
+		return nil, err
+	} else {
+		list = append(list, mrfactory.WithPermission(l, module.UnitTrademarkPermission)...)
 	}
 
-	opts.Logger.Info("Init unit %s in %s section", module.UnitProductName, section.Caption())
-
-	if err := newUnitProduct(c, opts, section); err != nil {
-		return err
-	}
-
-	return nil
+	return list, nil
 }

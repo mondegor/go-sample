@@ -10,30 +10,33 @@ import (
 
 	"github.com/mondegor/go-storage/mrpostgres"
 	"github.com/mondegor/go-storage/mrsql"
-	"github.com/mondegor/go-webcore/mrcore"
+	"github.com/mondegor/go-webcore/mrserver"
+	"github.com/mondegor/go-webcore/mrserver/mrresponse"
 )
 
-func newUnitCategory(
-	c *[]mrcore.HttpController,
-	opts *factory.Options,
-	section mrcore.ClientSection,
-) error {
-	if err := newUnitCategoryImage(c, opts, section); err != nil {
-		return err
+func createUnitCategory(opts *factory.Options) ([]mrserver.HttpController, error) {
+	var list []mrserver.HttpController
+
+	if c, err := newUnitCategory(opts); err != nil {
+		return nil, err
+	} else {
+		list = append(list, c)
 	}
 
-	return newUnitCategoryMain(c, opts, section)
+	if c, err := newUnitCategoryImage(opts); err != nil {
+		return nil, err
+	} else {
+		list = append(list, c)
+	}
+
+	return list, nil
 }
 
-func newUnitCategoryMain(
-	c *[]mrcore.HttpController,
-	opts *factory.Options,
-	section mrcore.ClientSection,
-) error {
+func newUnitCategory(opts *factory.Options) (*http_v1.Category, error) {
 	metaOrderBy, err := mrsql.NewEntityMetaOrderBy(entity.Category{})
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	storage := repository.NewCategoryPostgres(
@@ -45,16 +48,17 @@ func newUnitCategoryMain(
 		),
 	)
 	service := usecase.NewCategory(storage, opts.EventBox, opts.ServiceHelper, opts.UnitCategory.ImageURLBuilder)
-	*c = append(*c, http_v1.NewCategory(section, service, metaOrderBy))
+	controller := http_v1.NewCategory(
+		opts.RequestParser,
+		opts.ResponseSender,
+		service,
+		metaOrderBy,
+	)
 
-	return nil
+	return controller, nil
 }
 
-func newUnitCategoryImage(
-	c *[]mrcore.HttpController,
-	opts *factory.Options,
-	section mrcore.ClientSection,
-) error {
+func newUnitCategoryImage(opts *factory.Options) (*http_v1.CategoryImage, error) {
 	storage := repository.NewCategoryImagePostgres(opts.PostgresAdapter)
 	service := usecase.NewCategoryImage(
 		storage,
@@ -63,7 +67,11 @@ func newUnitCategoryImage(
 		opts.EventBox,
 		opts.ServiceHelper,
 	)
-	*c = append(*c, http_v1.NewCategoryImage(section, service))
+	controller := http_v1.NewCategoryImage(
+		opts.RequestParser,
+		mrresponse.NewFileSender(opts.ResponseSender),
+		service,
+	)
 
-	return nil
+	return controller, nil
 }

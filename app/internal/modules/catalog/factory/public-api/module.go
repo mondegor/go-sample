@@ -4,23 +4,21 @@ import (
 	module "go-sample/internal/modules/catalog"
 	"go-sample/internal/modules/catalog/factory"
 
-	"github.com/mondegor/go-webcore/mrcore"
+	"github.com/mondegor/go-webcore/mrfactory"
+	"github.com/mondegor/go-webcore/mrserver"
 )
 
-func NewModule(opts *factory.Options, section mrcore.ClientSection) ([]mrcore.HttpController, error) {
-	opts.Logger.Info("Init module %s in section %s", module.Name, section.Caption())
+func CreateModule(opts *factory.Options) ([]mrserver.HttpController, error) {
+	var list []mrserver.HttpController
 
-	var c []mrcore.HttpController
+	mrfactory.InfoCreateModule(opts.Logger, module.Name)
+	mrfactory.InfoCreateUnit(opts.Logger, module.UnitCategoryName)
 
-	if err := newModule(&c, opts, section); err != nil {
+	if l, err := createUnitCategory(opts); err != nil {
 		return nil, err
+	} else {
+		list = append(list, mrfactory.WithPermission(l, module.UnitCategoryPermission)...)
 	}
 
-	return c, nil
-}
-
-func newModule(c *[]mrcore.HttpController, opts *factory.Options, section mrcore.ClientSection) error {
-	opts.Logger.Info("Init unit %s.%s in %s section", module.Name, module.UnitCategoryName, section.Caption())
-
-	return newUnitCategory(c, opts, section)
+	return list, nil
 }

@@ -204,7 +204,7 @@ func (uc *Product) MoveAfterID(ctx context.Context, id mrtype.KeyInt32, afterID 
 	}
 
 	if item.CategoryID < 1 {
-		return mrcore.FactoryErrInternalWithData.New(entity.ModelNameProduct, mrmsg.Data{"categoryId": item.CategoryID})
+		return mrcore.FactoryErrInternal.WithAttr(entity.ModelNameProduct, mrmsg.Data{"categoryId": item.CategoryID}).New()
 	}
 
 	meta := uc.storage.GetMetaData(item.CategoryID)

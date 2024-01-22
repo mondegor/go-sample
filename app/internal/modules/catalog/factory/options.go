@@ -1,6 +1,7 @@
 package factory
 
 import (
+	view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared"
 	"go-sample/pkg/modules/catalog"
 
 	"github.com/mondegor/go-components/mrorderer"
@@ -8,6 +9,7 @@ import (
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-sysmess/mrlang"
 	"github.com/mondegor/go-webcore/mrcore"
+	"github.com/mondegor/go-webcore/mrserver/mrresponse"
 	"github.com/mondegor/go-webcore/mrtool"
 )
 
@@ -18,10 +20,12 @@ type (
 		ServiceHelper   *mrtool.ServiceHelper
 		PostgresAdapter *mrpostgres.ConnAdapter
 		Locker          mrcore.Locker
-		OrdererAPI      mrorderer.API
+		RequestParser   *view_shared.Parser
+		ResponseSender  *mrresponse.Sender
 
 		CategoryAPI  catalog.CategoryAPI
 		TrademarkAPI catalog.TrademarkAPI
+		OrdererAPI   mrorderer.API
 
 		UnitCategory *UnitCategoryOptions
 	}

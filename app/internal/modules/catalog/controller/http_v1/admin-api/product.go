@@ -3,7 +3,7 @@ package http_v1
 import (
 	module "go-sample/internal/modules/catalog"
 	"go-sample/internal/modules/catalog/controller/http_v1/admin-api/view"
-	view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared/view"
+	view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared"
 	entity "go-sample/internal/modules/catalog/entity/admin-api"
 	usecase "go-sample/internal/modules/catalog/usecase/admin-api"
 	usecase_shared "go-sample/internal/modules/catalog/usecase/shared"
@@ -15,6 +15,7 @@ import (
 	"github.com/mondegor/go-sysmess/mrerr"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrctx"
+	"github.com/mondegor/go-webcore/mrserver"
 	"github.com/mondegor/go-webcore/mrtype"
 	"github.com/mondegor/go-webcore/mrview"
 )
@@ -28,221 +29,210 @@ const (
 
 type (
 	Product struct {
-		section    mrcore.ClientSection
+		parser     view_shared.RequestParser
+		sender     mrserver.ResponseSender
 		service    usecase.ProductService
 		listSorter mrview.ListSorter
 	}
 )
 
 func NewProduct(
-	section mrcore.ClientSection,
+	parser view_shared.RequestParser,
+	sender mrserver.ResponseSender,
 	service usecase.ProductService,
 	listSorter mrview.ListSorter,
 ) *Product {
 	return &Product{
-		section:    section,
+		parser:     parser,
+		sender:     sender,
 		service:    service,
 		listSorter: listSorter,
 	}
 }
 
-func (ht *Product) AddHandlers(router mrcore.HttpRouter) {
-	moduleAccessFunc := func(next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
-		return ht.section.MiddlewareWithPermission(module.UnitProductPermission, next)
-	}
+func (ht *Product) Handlers() []mrserver.HttpHandler {
+	return []mrserver.HttpHandler{
+		{http.MethodGet, productURL, "", ht.GetList},
+		{http.MethodPost, productURL, "", ht.Create},
 
-	router.HttpHandlerFunc(http.MethodGet, ht.section.Path(productURL), moduleAccessFunc(ht.GetList()))
-	router.HttpHandlerFunc(http.MethodPost, ht.section.Path(productURL), moduleAccessFunc(ht.Create()))
+		{http.MethodGet, productItemURL, "", ht.Get},
+		{http.MethodPut, productItemURL, "", ht.Store},
+		{http.MethodDelete, productItemURL, "", ht.Remove},
 
-	router.HttpHandlerFunc(http.MethodGet, ht.section.Path(productItemURL), moduleAccessFunc(ht.Get()))
-	router.HttpHandlerFunc(http.MethodPut, ht.section.Path(productItemURL), moduleAccessFunc(ht.Store()))
-	router.HttpHandlerFunc(http.MethodDelete, ht.section.Path(productItemURL), moduleAccessFunc(ht.Remove()))
-
-	router.HttpHandlerFunc(http.MethodPut, ht.section.Path(productChangeStatusURL), moduleAccessFunc(ht.ChangeStatus()))
-	router.HttpHandlerFunc(http.MethodPatch, ht.section.Path(productMoveURL), moduleAccessFunc(ht.Move()))
-}
-
-func (ht *Product) GetList() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientContext) error {
-		items, totalItems, err := ht.service.GetList(c.Context(), ht.listParams(c))
-
-		if err != nil {
-			return err
-		}
-
-		return c.SendResponse(
-			http.StatusOK,
-			view.ProductListResponse{
-				Items: items,
-				Total: totalItems,
-			},
-		)
+		{http.MethodPut, productChangeStatusURL, "", ht.ChangeStatus},
+		{http.MethodPatch, productMoveURL, "", ht.Move},
 	}
 }
 
-func (ht *Product) listParams(c mrcore.ClientContext) entity.ProductParams {
+func (ht *Product) GetList(w http.ResponseWriter, r *http.Request) error {
+	items, totalItems, err := ht.service.GetList(r.Context(), ht.listParams(r))
+
+	if err != nil {
+		return err
+	}
+
+	return ht.sender.Send(
+		w,
+		http.StatusOK,
+		view.ProductListResponse{
+			Items: items,
+			Total: totalItems,
+		},
+	)
+}
+
+func (ht *Product) listParams(r *http.Request) entity.ProductParams {
 	return entity.ProductParams{
 		Filter: entity.ProductListFilter{
-			CategoryID:   view_shared.ParseFilterKeyInt32(c, module.ParamNameFilterCatalogCategoryID),
-			SearchText:   view_shared.ParseFilterString(c, module.ParamNameFilterSearchText),
-			TrademarkIDs: view_shared.ParseFilterKeyInt32List(c, module.ParamNameFilterCatalogTrademarkIDs),
-			Price:        view_shared.ParseFilterRangeInt64(c, module.ParamNameFilterPriceRange),
-			Statuses:     view_shared.ParseFilterStatusList(c, module.ParamNameFilterStatuses),
+			CategoryID:   ht.parser.FilterKeyInt32(r, module.ParamNameFilterCatalogCategoryID),
+			SearchText:   ht.parser.FilterString(r, module.ParamNameFilterSearchText),
+			TrademarkIDs: ht.parser.FilterKeyInt32List(r, module.ParamNameFilterCatalogTrademarkIDs),
+			Price:        ht.parser.FilterRangeInt64(r, module.ParamNameFilterPriceRange),
+			Statuses:     ht.parser.FilterStatusList(r, module.ParamNameFilterStatuses),
 		},
-		Sorter: view_shared.ParseSortParams(c, ht.listSorter),
-		Pager:  view_shared.ParsePageParams(c),
+		Sorter: ht.parser.SortParams(r, ht.listSorter),
+		Pager:  ht.parser.PageParams(r),
 	}
 }
 
-func (ht *Product) Get() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientContext) error {
-		item, err := ht.service.GetItem(c.Context(), ht.getItemID(c))
+func (ht *Product) Get(w http.ResponseWriter, r *http.Request) error {
+	item, err := ht.service.GetItem(r.Context(), ht.getItemID(r))
 
-		if err != nil {
-			return ht.wrapError(err, c)
-		}
-
-		return c.SendResponse(http.StatusOK, item)
+	if err != nil {
+		return ht.wrapError(err, r)
 	}
+
+	return ht.sender.Send(w, http.StatusOK, item)
 }
 
-func (ht *Product) Create() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientContext) error {
-		request := view.CreateProductRequest{}
+func (ht *Product) Create(w http.ResponseWriter, r *http.Request) error {
+	request := view.CreateProductRequest{}
 
-		if err := c.Validate(&request); err != nil {
-			return err
-		}
-
-		item := entity.Product{
-			CategoryID:  request.CategoryID,
-			Article:     request.Article,
-			TrademarkID: request.TrademarkID,
-			Caption:     request.Caption,
-			Price:       request.Price,
-		}
-
-		if err := ht.service.Create(c.Context(), &item); err != nil {
-			return ht.wrapError(err, c)
-		}
-
-		return c.SendResponse(
-			http.StatusCreated,
-			view.SuccessCreatedItemResponse{
-				ItemID: strconv.Itoa(int(item.ID)),
-				Message: mrctx.Locale(c.Context()).TranslateMessage(
-					"msgCatalogProductSuccessCreated",
-					"entity has been success created",
-				),
-			},
-		)
+	if err := ht.parser.Validate(r, &request); err != nil {
+		return err
 	}
-}
 
-func (ht *Product) Store() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientContext) error {
-		request := view.StoreProductRequest{}
-
-		if err := c.Validate(&request); err != nil {
-			return err
-		}
-
-		item := entity.Product{
-			ID:          ht.getItemID(c),
-			TagVersion:  request.Version,
-			Article:     request.Article,
-			Caption:     request.Caption,
-			TrademarkID: request.TrademarkID,
-			Price:       request.Price,
-		}
-
-		if err := ht.service.Store(c.Context(), &item); err != nil {
-			return ht.wrapError(err, c)
-		}
-
-		return c.SendResponseNoContent()
+	item := entity.Product{
+		CategoryID:  request.CategoryID,
+		Article:     request.Article,
+		TrademarkID: request.TrademarkID,
+		Caption:     request.Caption,
+		Price:       request.Price,
 	}
-}
 
-func (ht *Product) ChangeStatus() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientContext) error {
-		request := view.ChangeItemStatusRequest{}
-
-		if err := c.Validate(&request); err != nil {
-			return err
-		}
-
-		item := entity.Product{
-			ID:         ht.getItemID(c),
-			TagVersion: request.TagVersion,
-			Status:     request.Status,
-		}
-
-		if err := ht.service.ChangeStatus(c.Context(), &item); err != nil {
-			return ht.wrapError(err, c)
-		}
-
-		return c.SendResponseNoContent()
+	if err := ht.service.Create(r.Context(), &item); err != nil {
+		return ht.wrapError(err, r)
 	}
+
+	return ht.sender.Send(
+		w,
+		http.StatusCreated,
+		view.SuccessCreatedItemResponse{
+			ItemID: strconv.Itoa(int(item.ID)),
+			Message: mrctx.Locale(r.Context()).TranslateMessage(
+				"msgCatalogProductSuccessCreated",
+				"entity has been success created",
+			),
+		},
+	)
 }
 
-func (ht *Product) Remove() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientContext) error {
-		if err := ht.service.Remove(c.Context(), ht.getItemID(c)); err != nil {
-			return ht.wrapError(err, c)
-		}
+func (ht *Product) Store(w http.ResponseWriter, r *http.Request) error {
+	request := view.StoreProductRequest{}
 
-		return c.SendResponseNoContent()
+	if err := ht.parser.Validate(r, &request); err != nil {
+		return err
 	}
-}
 
-func (ht *Product) Move() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientContext) error {
-		request := view.MoveItemRequest{}
-
-		if err := c.Validate(&request); err != nil {
-			return err
-		}
-
-		if err := ht.service.MoveAfterID(c.Context(), ht.getItemID(c), request.AfterNodeID); err != nil {
-			return ht.wrapErrorNode(err, ht.getRawItemID(c))
-		}
-
-		return c.SendResponseNoContent()
+	item := entity.Product{
+		ID:          ht.getItemID(r),
+		TagVersion:  request.Version,
+		Article:     request.Article,
+		Caption:     request.Caption,
+		TrademarkID: request.TrademarkID,
+		Price:       request.Price,
 	}
+
+	if err := ht.service.Store(r.Context(), &item); err != nil {
+		return ht.wrapError(err, r)
+	}
+
+	return ht.sender.SendNoContent(w)
 }
 
-func (ht *Product) getItemID(c mrcore.ClientContext) mrtype.KeyInt32 {
-	return view_shared.ParseKeyInt32FromPath(c, "id")
+func (ht *Product) ChangeStatus(w http.ResponseWriter, r *http.Request) error {
+	request := view.ChangeItemStatusRequest{}
+
+	if err := ht.parser.Validate(r, &request); err != nil {
+		return err
+	}
+
+	item := entity.Product{
+		ID:         ht.getItemID(r),
+		TagVersion: request.TagVersion,
+		Status:     request.Status,
+	}
+
+	if err := ht.service.ChangeStatus(r.Context(), &item); err != nil {
+		return ht.wrapError(err, r)
+	}
+
+	return ht.sender.SendNoContent(w)
 }
 
-func (ht *Product) getRawItemID(c mrcore.ClientContext) string {
-	return c.ParamFromPath("id")
+func (ht *Product) Remove(w http.ResponseWriter, r *http.Request) error {
+	if err := ht.service.Remove(r.Context(), ht.getItemID(r)); err != nil {
+		return ht.wrapError(err, r)
+	}
+
+	return ht.sender.SendNoContent(w)
 }
 
-func (ht *Product) wrapError(err error, c mrcore.ClientContext) error {
+func (ht *Product) Move(w http.ResponseWriter, r *http.Request) error {
+	request := view.MoveItemRequest{}
+
+	if err := ht.parser.Validate(r, &request); err != nil {
+		return err
+	}
+
+	if err := ht.service.MoveAfterID(r.Context(), ht.getItemID(r), request.AfterNodeID); err != nil {
+		return ht.wrapErrorNode(err, ht.getRawItemID(r))
+	}
+
+	return ht.sender.SendNoContent(w)
+}
+
+func (ht *Product) getItemID(r *http.Request) mrtype.KeyInt32 {
+	return ht.parser.PathKeyInt32(r, "id")
+}
+
+func (ht *Product) getRawItemID(r *http.Request) string {
+	return ht.parser.PathParamString(r, "id")
+}
+
+func (ht *Product) wrapError(err error, r *http.Request) error {
 	if mrcore.FactoryErrServiceEntityNotFound.Is(err) {
-		return usecase_shared.FactoryErrProductNotFound.Wrap(err, ht.getRawItemID(c))
+		return usecase_shared.FactoryErrProductNotFound.Wrap(err, ht.getRawItemID(r))
 	}
 
 	if mrcore.FactoryErrServiceEntityVersionInvalid.Is(err) {
-		return mrerr.NewFieldError("version", err)
+		return mrerr.NewCustomError("version", err)
 	}
 
 	if mrcore.FactoryErrServiceSwitchStatusRejected.Is(err) {
-		return mrerr.NewFieldError("status", err)
+		return mrerr.NewCustomError("status", err)
 	}
 
 	if usecase_shared.FactoryErrProductArticleAlreadyExists.Is(err) {
-		return mrerr.NewFieldError("article", err)
+		return mrerr.NewCustomError("article", err)
 	}
 
 	if catalog.FactoryErrCategoryNotFound.Is(err) {
-		return mrerr.NewFieldError("categoryId", err)
+		return mrerr.NewCustomError("categoryId", err)
 	}
 
 	if catalog.FactoryErrTrademarkNotFound.Is(err) {
-		return mrerr.NewFieldError("trademarkId", err)
+		return mrerr.NewCustomError("trademarkId", err)
 	}
 
 	return err
@@ -254,7 +244,7 @@ func (ht *Product) wrapErrorNode(err error, rawItemID string) error {
 	}
 
 	if mrorderer.FactoryErrAfterNodeNotFound.Is(err) {
-		return mrerr.NewFieldError("afterNodeId", err)
+		return mrerr.NewCustomError("afterNodeId", err)
 	}
 
 	return err

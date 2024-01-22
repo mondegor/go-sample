@@ -2,13 +2,14 @@ package http_v1
 
 import (
 	module "go-sample/internal/modules/catalog"
-	view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared/view"
+	view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared"
 	usecase "go-sample/internal/modules/catalog/usecase/admin-api"
 	usecase_shared "go-sample/internal/modules/catalog/usecase/shared"
 	"net/http"
 
 	"github.com/mondegor/go-webcore/mrcore"
-	"github.com/mondegor/go-webcore/mrreq"
+	"github.com/mondegor/go-webcore/mrserver"
+	"github.com/mondegor/go-webcore/mrserver/mrreq"
 	"github.com/mondegor/go-webcore/mrtype"
 )
 
@@ -18,84 +19,79 @@ const (
 
 type (
 	CategoryImage struct {
-		section mrcore.ClientSection
+		parser  view_shared.RequestParser
+		sender  mrserver.FileResponseSender
 		service usecase.CategoryImageService
 	}
 )
 
 func NewCategoryImage(
-	section mrcore.ClientSection,
+	parser view_shared.RequestParser,
+	sender mrserver.FileResponseSender,
 	service usecase.CategoryImageService,
 ) *CategoryImage {
 	return &CategoryImage{
-		section: section,
+		parser:  parser,
+		sender:  sender,
 		service: service,
 	}
 }
 
-func (ht *CategoryImage) AddHandlers(router mrcore.HttpRouter) {
-	moduleAccessFunc := func(next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
-		return ht.section.MiddlewareWithPermission(module.UnitCategoryPermission, next)
-	}
-
-	router.HttpHandlerFunc(http.MethodGet, ht.section.Path(categoryItemImageURL), moduleAccessFunc(ht.GetImage()))
-	router.HttpHandlerFunc(http.MethodPut, ht.section.Path(categoryItemImageURL), moduleAccessFunc(ht.UploadImage()))
-	router.HttpHandlerFunc(http.MethodDelete, ht.section.Path(categoryItemImageURL), moduleAccessFunc(ht.RemoveImage()))
-}
-
-func (ht *CategoryImage) GetImage() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientContext) error {
-		item, err := ht.service.GetFile(c.Context(), ht.getParentID(c))
-
-		if err != nil {
-			return ht.wrapError(err, c)
-		}
-
-		defer item.Body.Close()
-
-		return c.SendFile(item.FileInfo, "", item.Body)
+func (ht *CategoryImage) Handlers() []mrserver.HttpHandler {
+	return []mrserver.HttpHandler{
+		{http.MethodGet, categoryItemImageURL, "", ht.GetImage},
+		{http.MethodPut, categoryItemImageURL, "", ht.UploadImage},
+		{http.MethodDelete, categoryItemImageURL, "", ht.RemoveImage},
 	}
 }
 
-func (ht *CategoryImage) UploadImage() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientContext) error {
-		file, err := mrreq.File(c.Request(), module.ParamNameFileCatalogCategoryImage)
+func (ht *CategoryImage) GetImage(w http.ResponseWriter, r *http.Request) error {
+	item, err := ht.service.GetFile(r.Context(), ht.getParentID(r))
 
-		if err != nil {
-			return err
-		}
-
-		defer file.Body.Close()
-
-		if err = ht.service.StoreFile(c.Context(), ht.getParentID(c), file); err != nil {
-			return ht.wrapError(err, c)
-		}
-
-		return c.SendResponseNoContent()
+	if err != nil {
+		return ht.wrapError(err, r)
 	}
+
+	defer item.Body.Close()
+
+	return ht.sender.SendFile(w, item.FileInfo, "", item.Body)
 }
 
-func (ht *CategoryImage) RemoveImage() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientContext) error {
-		if err := ht.service.RemoveFile(c.Context(), ht.getParentID(c)); err != nil {
-			return ht.wrapError(err, c)
-		}
+func (ht *CategoryImage) UploadImage(w http.ResponseWriter, r *http.Request) error {
+	file, err := mrreq.File(r, module.ParamNameFileCatalogCategoryImage)
 
-		return c.SendResponseNoContent()
+	if err != nil {
+		return err
 	}
+
+	defer file.Body.Close()
+
+	if err = ht.service.StoreFile(r.Context(), ht.getParentID(r), file); err != nil {
+		return ht.wrapError(err, r)
+	}
+
+	return ht.sender.SendNoContent(w)
 }
 
-func (ht *CategoryImage) getParentID(c mrcore.ClientContext) mrtype.KeyInt32 {
-	return view_shared.ParseKeyInt32FromPath(c, "id")
+func (ht *CategoryImage) RemoveImage(w http.ResponseWriter, r *http.Request) error {
+	if err := ht.service.RemoveFile(r.Context(), ht.getParentID(r)); err != nil {
+		return ht.wrapError(err, r)
+	}
+
+	return ht.sender.SendNoContent(w)
 }
 
-func (ht *CategoryImage) getRawParentID(c mrcore.ClientContext) string {
-	return c.ParamFromPath("id")
+func (ht *CategoryImage) getParentID(r *http.Request) mrtype.KeyInt32 {
+	return ht.parser.PathKeyInt32(r, "id")
 }
 
-func (ht *CategoryImage) wrapError(err error, c mrcore.ClientContext) error {
+func (ht *CategoryImage) getRawParentID(r *http.Request) string {
+	return ht.parser.PathParamString(r, "id")
+}
+
+func (ht *CategoryImage) wrapError(err error, r *http.Request) error {
 	if mrcore.FactoryErrServiceEntityNotFound.Is(err) {
-		return usecase_shared.FactoryErrCategoryImageNotFound.Wrap(err, ht.getRawParentID(c))
+		return usecase_shared.FactoryErrCategoryImageNotFound.Wrap(err, ht.getRawParentID(r))
 	}
 
 	return err

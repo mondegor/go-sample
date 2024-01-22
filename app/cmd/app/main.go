@@ -12,6 +12,7 @@ import (
 	"log"
 
 	"github.com/mondegor/go-storage/mrredislock"
+	"github.com/mondegor/go-webcore/mrfactory"
 	"github.com/mondegor/go-webcore/mrtool"
 )
 
@@ -28,7 +29,6 @@ func init() {
 func main() {
 	flag.Parse()
 
-	sharedOptions := &modules.Options{}
 	cfg, err := config.New(configPath)
 
 	if err != nil {
@@ -45,11 +45,13 @@ func main() {
 		log.Fatal(err)
 	}
 
+	sharedOptions := &modules.Options{}
 	sharedOptions.Cfg = cfg
 	sharedOptions.Logger = logger
 	sharedOptions.EventBox = logger
 
 	appHelper := mrtool.NewAppHelper(logger)
+
 	sharedOptions.ServiceHelper = mrtool.NewServiceHelper()
 
 	sharedOptions.PostgresAdapter, err = factory.NewPostgres(cfg, logger)
@@ -64,20 +66,27 @@ func main() {
 	appHelper.ExitOnError(err)
 
 	sharedOptions.Locker = mrredislock.NewLockerAdapter(sharedOptions.RedisAdapter.Cli())
-	sharedOptions.OrdererAPI = factory.NewOrdererAPI(cfg, sharedOptions.PostgresAdapter, logger, logger)
 
 	sharedOptions.Translator, err = factory.NewTranslator(cfg, logger)
 	appHelper.ExitOnError(err)
 
+	sharedOptions.RequestParsers, err = factory.NewRequestParsers(cfg, logger)
+	appHelper.ExitOnError(err)
+
+	sharedOptions.ResponseSender, err = factory.NewResponseSender(cfg, logger)
+	appHelper.ExitOnError(err)
+
+	sharedOptions.AccessControl, err = factory.NewAccessControl(cfg, logger)
+	appHelper.ExitOnError(err)
+
+	// API
 	sharedOptions.CatalogCategoryAPI, err = factory.NewCatalogCategoryAPI(sharedOptions)
 	appHelper.ExitOnError(err)
 
 	sharedOptions.CatalogTrademarkAPI, err = factory.NewCatalogTrademarkAPI(sharedOptions)
 	appHelper.ExitOnError(err)
 
-	// module's access
-	modulesAccess, err := factory.NewModulesAccess(cfg, logger)
-	appHelper.ExitOnError(err)
+	sharedOptions.OrdererAPI = factory.NewOrdererAPI(sharedOptions)
 
 	// module's options
 	catalogOptions, err := factory.NewCatalogOptions(sharedOptions)
@@ -91,30 +100,36 @@ func main() {
 	appHelper.ExitOnError(err)
 
 	// section: admin-api
-	sectionAdminAPI := factory.NewClientSectionAdminAPI(cfg, logger, modulesAccess)
+	sectionAdminAPI := factory.NewAppSectionAdminAPI(sharedOptions)
 
 	appHelper.ExitOnError(
 		factory.RegisterSystemHandlers(cfg, logger, router, sectionAdminAPI),
 	)
 
-	controllers, err := factory_catalog_adm.NewModule(catalogOptions, sectionAdminAPI)
+	controllers, err := factory_catalog_adm.CreateModule(catalogOptions)
 	appHelper.ExitOnError(err)
-	router.Register(controllers...)
+	router.Register(
+		mrfactory.WithMiddlewareCheckAccess(controllers, sectionAdminAPI, sharedOptions.AccessControl)...,
+	)
 
 	// section: public
-	sectionPublicAPI := factory.NewClientSectionPublicAPI(cfg, logger, modulesAccess)
+	sectionPublicAPI := factory.NewAppSectionPublicAPI(sharedOptions)
 
 	appHelper.ExitOnError(
 		factory.RegisterSystemHandlers(cfg, logger, router, sectionPublicAPI),
 	)
 
-	controllers, err = factory_catalog_pub.NewModule(catalogOptions, sectionPublicAPI)
+	controllers, err = factory_catalog_pub.CreateModule(catalogOptions)
 	appHelper.ExitOnError(err)
-	router.Register(controllers...)
+	router.Register(
+		mrfactory.WithMiddlewareCheckAccess(controllers, sectionPublicAPI, sharedOptions.AccessControl)...,
+	)
 
-	controllers, err = factory_filestation_pub.NewModule(fileStationOptions, sectionPublicAPI)
+	controllers, err = factory_filestation_pub.CreateModule(fileStationOptions)
 	appHelper.ExitOnError(err)
-	router.Register(controllers...)
+	router.Register(
+		mrfactory.WithMiddlewareCheckAccess(controllers, sectionPublicAPI, sharedOptions.AccessControl)...,
+	)
 
 	// http server
 	serverAdapter, err := factory.NewHttpServer(cfg, logger, router)

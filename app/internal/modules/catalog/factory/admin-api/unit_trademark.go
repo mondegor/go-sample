@@ -10,18 +10,26 @@ import (
 
 	"github.com/mondegor/go-storage/mrpostgres"
 	"github.com/mondegor/go-storage/mrsql"
-	"github.com/mondegor/go-webcore/mrcore"
+	"github.com/mondegor/go-webcore/mrserver"
 )
 
-func newUnitTrademark(
-	c *[]mrcore.HttpController,
-	opts *factory.Options,
-	section mrcore.ClientSection,
-) error {
+func createUnitTrademark(opts *factory.Options) ([]mrserver.HttpController, error) {
+	var list []mrserver.HttpController
+
+	if c, err := newUnitTrademark(opts); err != nil {
+		return nil, err
+	} else {
+		list = append(list, c)
+	}
+
+	return list, nil
+}
+
+func newUnitTrademark(opts *factory.Options) (*http_v1.Trademark, error) {
 	metaOrderBy, err := mrsql.NewEntityMetaOrderBy(entity.Trademark{})
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	storage := repository.NewTrademarkPostgres(
@@ -33,7 +41,12 @@ func newUnitTrademark(
 		),
 	)
 	service := usecase.NewTrademark(storage, opts.EventBox, opts.ServiceHelper)
-	*c = append(*c, http_v1.NewTrademark(section, service, metaOrderBy))
+	controller := http_v1.NewTrademark(
+		opts.RequestParser,
+		opts.ResponseSender,
+		service,
+		metaOrderBy,
+	)
 
-	return nil
+	return controller, nil
 }

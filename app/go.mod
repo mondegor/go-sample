@@ -4,10 +4,10 @@ go 1.20
 
 require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
-	github.com/mondegor/go-components v0.3.12
-	github.com/mondegor/go-storage v0.6.16
-	github.com/mondegor/go-sysmess v0.6.1
-	github.com/mondegor/go-webcore v0.9.8
+	github.com/mondegor/go-components v0.3.13
+	github.com/mondegor/go-storage v0.6.17
+	github.com/mondegor/go-sysmess v0.7.0
+	github.com/mondegor/go-webcore v0.11.0
 )
 
 require (

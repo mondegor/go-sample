@@ -3,13 +3,13 @@ package http_v1
 import (
 	module "go-sample/internal/modules/catalog"
 	"go-sample/internal/modules/catalog/controller/http_v1/public-api/view"
-	view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared/view"
+	view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared"
 	"go-sample/internal/modules/catalog/entity/public-api"
 	usecase "go-sample/internal/modules/catalog/usecase/public-api"
 	"net/http"
 
-	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrctx"
+	"github.com/mondegor/go-webcore/mrserver"
 	"github.com/mondegor/go-webcore/mrtype"
 )
 
@@ -20,72 +20,70 @@ const (
 
 type (
 	Category struct {
-		section mrcore.ClientSection
+		parser  view_shared.RequestParser
+		sender  mrserver.ResponseSender
 		service usecase.CategoryService
 	}
 )
 
 func NewCategory(
-	section mrcore.ClientSection,
+	parser view_shared.RequestParser,
+	sender mrserver.ResponseSender,
 	service usecase.CategoryService,
 ) *Category {
 	return &Category{
-		section: section,
+		parser:  parser,
+		sender:  sender,
 		service: service,
 	}
 }
 
-func (ht *Category) AddHandlers(router mrcore.HttpRouter) {
-	moduleAccessFunc := func(next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
-		return ht.section.MiddlewareWithPermission(module.UnitCategoryPermission, next)
-	}
-
-	router.HttpHandlerFunc(http.MethodGet, ht.section.Path(categoryURL), moduleAccessFunc(ht.GetList()))
-	router.HttpHandlerFunc(http.MethodGet, ht.section.Path(categoryItemURL), moduleAccessFunc(ht.Get()))
-}
-
-func (ht *Category) GetList() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientContext) error {
-		items, totalItems, err := ht.service.GetList(c.Context(), ht.listParams(c))
-
-		if err != nil {
-			return err
-		}
-
-		return c.SendResponse(
-			http.StatusOK,
-			view.CategoryListResponse{
-				Items: items,
-				Total: totalItems,
-			},
-		)
+func (ht *Category) Handlers() []mrserver.HttpHandler {
+	return []mrserver.HttpHandler{
+		{http.MethodGet, categoryURL, "", ht.GetList},
+		{http.MethodGet, categoryItemURL, "", ht.Get},
 	}
 }
 
-func (ht *Category) listParams(c mrcore.ClientContext) entity.CategoryParams {
+func (ht *Category) GetList(w http.ResponseWriter, r *http.Request) error {
+	items, totalItems, err := ht.service.GetList(r.Context(), ht.listParams(r))
+
+	if err != nil {
+		return err
+	}
+
+	return ht.sender.Send(
+		w,
+		http.StatusOK,
+		view.CategoryListResponse{
+			Items: items,
+			Total: totalItems,
+		},
+	)
+}
+
+func (ht *Category) listParams(r *http.Request) entity.CategoryParams {
 	return entity.CategoryParams{
 		Filter: entity.CategoryListFilter{
-			SearchText: view_shared.ParseFilterString(c, module.ParamNameFilterSearchText),
+			SearchText: ht.parser.FilterString(r, module.ParamNameFilterSearchText),
 		},
 	}
 }
 
-func (ht *Category) Get() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientContext) error {
-		item, err := ht.service.GetItem(
-			c.Context(),
-			ht.getItemID(c),
-			mrctx.Locale(c.Context()).LangID(),
-		)
+func (ht *Category) Get(w http.ResponseWriter, r *http.Request) error {
+	item, err := ht.service.GetItem(
+		r.Context(),
+		ht.getItemID(r),
+		mrctx.Locale(r.Context()).LangID(),
+	)
 
-		if err != nil {
-			return err
-		}
-
-		return c.SendResponse(http.StatusOK, item)
+	if err != nil {
+		return err
 	}
+
+	return ht.sender.Send(w, http.StatusOK, item)
 }
 
-func (ht *Category) getItemID(c mrcore.ClientContext) mrtype.KeyInt32 {
-	return view_shared.ParseKeyInt32FromPath(c, "id")
+func (ht *Category) getItemID(r *http.Request) mrtype.KeyInt32 {
+	return ht.parser.FilterKeyInt32(r, "id")
 }

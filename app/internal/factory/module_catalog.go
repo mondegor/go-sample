@@ -2,6 +2,7 @@ package factory
 
 import (
 	"go-sample/internal/modules"
+	view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared"
 	"go-sample/internal/modules/catalog/factory"
 	factory_api "go-sample/internal/modules/catalog/factory/api"
 	usecase_api "go-sample/internal/modules/catalog/usecase/api"
@@ -28,8 +29,17 @@ func NewCatalogOptions(opts *modules.Options) (*factory.Options, error) {
 		ServiceHelper:   opts.ServiceHelper,
 		PostgresAdapter: opts.PostgresAdapter,
 		Locker:          opts.Locker,
+		RequestParser: view_shared.NewParser(
+			opts.RequestParsers.Base,
+			opts.RequestParsers.ItemStatus,
+			opts.RequestParsers.KeyInt32,
+			opts.RequestParsers.SortPage,
+			opts.RequestParsers.Validator,
+		),
+		ResponseSender: opts.ResponseSender,
 
 		CategoryAPI:  opts.CatalogCategoryAPI,
+		OrdererAPI:   opts.OrdererAPI,
 		TrademarkAPI: opts.CatalogTrademarkAPI,
 
 		UnitCategory: &factory.UnitCategoryOptions{

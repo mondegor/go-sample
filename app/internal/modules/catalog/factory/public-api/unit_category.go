@@ -9,14 +9,22 @@ import (
 
 	"github.com/mondegor/go-storage/mrpostgres"
 	"github.com/mondegor/go-storage/mrsql"
-	"github.com/mondegor/go-webcore/mrcore"
+	"github.com/mondegor/go-webcore/mrserver"
 )
 
-func newUnitCategory(
-	c *[]mrcore.HttpController,
-	opts *factory.Options,
-	section mrcore.ClientSection,
-) error {
+func createUnitCategory(opts *factory.Options) ([]mrserver.HttpController, error) {
+	var list []mrserver.HttpController
+
+	if c, err := newUnitCategory(opts); err != nil {
+		return nil, err
+	} else {
+		list = append(list, c)
+	}
+
+	return list, nil
+}
+
+func newUnitCategory(opts *factory.Options) (*http_v1.Category, error) {
 	storage := repository.NewCategoryPostgres(
 		opts.PostgresAdapter,
 		mrsql.NewBuilderSelect(
@@ -29,7 +37,11 @@ func newUnitCategory(
 		usecase.NewCategory(storage, opts.ServiceHelper, opts.UnitCategory.ImageURLBuilder),
 		opts.UnitCategory.Dictionary,
 	)
-	*c = append(*c, http_v1.NewCategory(section, service))
+	controller := http_v1.NewCategory(
+		opts.RequestParser,
+		opts.ResponseSender,
+		service,
+	)
 
-	return nil
+	return controller, nil
 }

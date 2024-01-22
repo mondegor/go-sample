@@ -3,7 +3,7 @@ package http_v1
 import (
 	module "go-sample/internal/modules/catalog"
 	"go-sample/internal/modules/catalog/controller/http_v1/admin-api/view"
-	view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared/view"
+	view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared"
 	entity "go-sample/internal/modules/catalog/entity/admin-api"
 	usecase "go-sample/internal/modules/catalog/usecase/admin-api"
 	"go-sample/pkg/modules/catalog"
@@ -13,6 +13,7 @@ import (
 	"github.com/mondegor/go-sysmess/mrerr"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrctx"
+	"github.com/mondegor/go-webcore/mrserver"
 	"github.com/mondegor/go-webcore/mrtype"
 	"github.com/mondegor/go-webcore/mrview"
 )
@@ -25,182 +26,173 @@ const (
 
 type (
 	Trademark struct {
-		section    mrcore.ClientSection
+		parser     view_shared.RequestParser
+		sender     mrserver.ResponseSender
 		service    usecase.TrademarkService
 		listSorter mrview.ListSorter
 	}
 )
 
 func NewTrademark(
-	section mrcore.ClientSection,
+	parser view_shared.RequestParser,
+	sender mrserver.ResponseSender,
 	service usecase.TrademarkService,
 	listSorter mrview.ListSorter,
 ) *Trademark {
 	return &Trademark{
-		section:    section,
+		parser:     parser,
+		sender:     sender,
 		service:    service,
 		listSorter: listSorter,
 	}
 }
 
-func (ht *Trademark) AddHandlers(router mrcore.HttpRouter) {
-	moduleAccessFunc := func(next mrcore.HttpHandlerFunc) mrcore.HttpHandlerFunc {
-		return ht.section.MiddlewareWithPermission(module.UnitTrademarkPermission, next)
-	}
+func (ht *Trademark) Handlers() []mrserver.HttpHandler {
+	return []mrserver.HttpHandler{
+		{http.MethodGet, trademarkURL, "", ht.GetList},
+		{http.MethodPost, trademarkURL, "", ht.Create},
 
-	router.HttpHandlerFunc(http.MethodGet, ht.section.Path(trademarkURL), moduleAccessFunc(ht.GetList()))
-	router.HttpHandlerFunc(http.MethodPost, ht.section.Path(trademarkURL), moduleAccessFunc(ht.Create()))
+		{http.MethodGet, trademarkItemURL, "", ht.Get},
+		{http.MethodPut, trademarkItemURL, "", ht.Store},
+		{http.MethodDelete, trademarkItemURL, "", ht.Remove},
 
-	router.HttpHandlerFunc(http.MethodGet, ht.section.Path(trademarkItemURL), moduleAccessFunc(ht.Get()))
-	router.HttpHandlerFunc(http.MethodPut, ht.section.Path(trademarkItemURL), moduleAccessFunc(ht.Store()))
-	router.HttpHandlerFunc(http.MethodDelete, ht.section.Path(trademarkItemURL), moduleAccessFunc(ht.Remove()))
-
-	router.HttpHandlerFunc(http.MethodPut, ht.section.Path(trademarkChangeStatusURL), moduleAccessFunc(ht.ChangeStatus()))
-}
-
-func (ht *Trademark) GetList() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientContext) error {
-		items, totalItems, err := ht.service.GetList(c.Context(), ht.listParams(c))
-
-		if err != nil {
-			return err
-		}
-
-		return c.SendResponse(
-			http.StatusOK,
-			view.TrademarkListResponse{
-				Items: items,
-				Total: totalItems,
-			},
-		)
+		{http.MethodPut, trademarkChangeStatusURL, "", ht.ChangeStatus},
 	}
 }
 
-func (ht *Trademark) listParams(c mrcore.ClientContext) entity.TrademarkParams {
+func (ht *Trademark) GetList(w http.ResponseWriter, r *http.Request) error {
+	items, totalItems, err := ht.service.GetList(r.Context(), ht.listParams(r))
+
+	if err != nil {
+		return err
+	}
+
+	return ht.sender.Send(
+		w,
+		http.StatusOK,
+		view.TrademarkListResponse{
+			Items: items,
+			Total: totalItems,
+		},
+	)
+}
+
+func (ht *Trademark) listParams(r *http.Request) entity.TrademarkParams {
 	return entity.TrademarkParams{
 		Filter: entity.TrademarkListFilter{
-			SearchText: view_shared.ParseFilterString(c, module.ParamNameFilterSearchText),
-			Statuses:   view_shared.ParseFilterStatusList(c, module.ParamNameFilterStatuses),
+			SearchText: ht.parser.FilterString(r, module.ParamNameFilterSearchText),
+			Statuses:   ht.parser.FilterStatusList(r, module.ParamNameFilterStatuses),
 		},
-		Sorter: view_shared.ParseSortParams(c, ht.listSorter),
-		Pager:  view_shared.ParsePageParams(c),
+		Sorter: ht.parser.SortParams(r, ht.listSorter),
+		Pager:  ht.parser.PageParams(r),
 	}
 }
 
-func (ht *Trademark) Get() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientContext) error {
-		item, err := ht.service.GetItem(c.Context(), ht.getItemID(c))
+func (ht *Trademark) Get(w http.ResponseWriter, r *http.Request) error {
+	item, err := ht.service.GetItem(r.Context(), ht.getItemID(r))
 
-		if err != nil {
-			return ht.wrapError(err, c)
-		}
-
-		return c.SendResponse(http.StatusOK, item)
+	if err != nil {
+		return ht.wrapError(err, r)
 	}
+
+	return ht.sender.Send(w, http.StatusOK, item)
 }
 
-func (ht *Trademark) Create() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientContext) error {
-		request := view.CreateTrademarkRequest{}
+func (ht *Trademark) Create(w http.ResponseWriter, r *http.Request) error {
+	request := view.CreateTrademarkRequest{}
 
-		if err := c.Validate(&request); err != nil {
-			return err
-		}
-
-		item := entity.Trademark{
-			Caption: request.Caption,
-		}
-
-		if err := ht.service.Create(c.Context(), &item); err != nil {
-			return ht.wrapError(err, c)
-		}
-
-		return c.SendResponse(
-			http.StatusCreated,
-			view.SuccessCreatedItemResponse{
-				ItemID: strconv.Itoa(int(item.ID)),
-				Message: mrctx.Locale(c.Context()).TranslateMessage(
-					"msgCatalogTrademarkSuccessCreated",
-					"entity has been success created",
-				),
-			},
-		)
+	if err := ht.parser.Validate(r, &request); err != nil {
+		return err
 	}
-}
 
-func (ht *Trademark) Store() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientContext) error {
-		request := view.StoreTrademarkRequest{}
-
-		if err := c.Validate(&request); err != nil {
-			return err
-		}
-
-		item := entity.Trademark{
-			ID:         ht.getItemID(c),
-			TagVersion: request.Version,
-			Caption:    request.Caption,
-		}
-
-		if err := ht.service.Store(c.Context(), &item); err != nil {
-			return ht.wrapError(err, c)
-		}
-
-		return c.SendResponseNoContent()
+	item := entity.Trademark{
+		Caption: request.Caption,
 	}
-}
 
-func (ht *Trademark) ChangeStatus() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientContext) error {
-		request := view.ChangeItemStatusRequest{}
-
-		if err := c.Validate(&request); err != nil {
-			return err
-		}
-
-		item := entity.Trademark{
-			ID:         ht.getItemID(c),
-			TagVersion: request.TagVersion,
-			Status:     request.Status,
-		}
-
-		if err := ht.service.ChangeStatus(c.Context(), &item); err != nil {
-			return ht.wrapError(err, c)
-		}
-
-		return c.SendResponseNoContent()
+	if err := ht.service.Create(r.Context(), &item); err != nil {
+		return ht.wrapError(err, r)
 	}
+
+	return ht.sender.Send(
+		w,
+		http.StatusCreated,
+		view.SuccessCreatedItemResponse{
+			ItemID: strconv.Itoa(int(item.ID)),
+			Message: mrctx.Locale(r.Context()).TranslateMessage(
+				"msgCatalogTrademarkSuccessCreated",
+				"entity has been success created",
+			),
+		},
+	)
 }
 
-func (ht *Trademark) Remove() mrcore.HttpHandlerFunc {
-	return func(c mrcore.ClientContext) error {
-		if err := ht.service.Remove(c.Context(), ht.getItemID(c)); err != nil {
-			return ht.wrapError(err, c)
-		}
+func (ht *Trademark) Store(w http.ResponseWriter, r *http.Request) error {
+	request := view.StoreTrademarkRequest{}
 
-		return c.SendResponseNoContent()
+	if err := ht.parser.Validate(r, &request); err != nil {
+		return err
 	}
+
+	item := entity.Trademark{
+		ID:         ht.getItemID(r),
+		TagVersion: request.Version,
+		Caption:    request.Caption,
+	}
+
+	if err := ht.service.Store(r.Context(), &item); err != nil {
+		return ht.wrapError(err, r)
+	}
+
+	return ht.sender.SendNoContent(w)
 }
 
-func (ht *Trademark) getItemID(c mrcore.ClientContext) mrtype.KeyInt32 {
-	return view_shared.ParseKeyInt32FromPath(c, "id")
+func (ht *Trademark) ChangeStatus(w http.ResponseWriter, r *http.Request) error {
+	request := view.ChangeItemStatusRequest{}
+
+	if err := ht.parser.Validate(r, &request); err != nil {
+		return err
+	}
+
+	item := entity.Trademark{
+		ID:         ht.getItemID(r),
+		TagVersion: request.TagVersion,
+		Status:     request.Status,
+	}
+
+	if err := ht.service.ChangeStatus(r.Context(), &item); err != nil {
+		return ht.wrapError(err, r)
+	}
+
+	return ht.sender.SendNoContent(w)
 }
 
-func (ht *Trademark) getRawItemID(c mrcore.ClientContext) string {
-	return c.ParamFromPath("id")
+func (ht *Trademark) Remove(w http.ResponseWriter, r *http.Request) error {
+	if err := ht.service.Remove(r.Context(), ht.getItemID(r)); err != nil {
+		return ht.wrapError(err, r)
+	}
+
+	return ht.sender.SendNoContent(w)
 }
 
-func (ht *Trademark) wrapError(err error, c mrcore.ClientContext) error {
+func (ht *Trademark) getItemID(r *http.Request) mrtype.KeyInt32 {
+	return ht.parser.PathKeyInt32(r, "id")
+}
+
+func (ht *Trademark) getRawItemID(r *http.Request) string {
+	return ht.parser.PathParamString(r, "id")
+}
+
+func (ht *Trademark) wrapError(err error, r *http.Request) error {
 	if mrcore.FactoryErrServiceEntityNotFound.Is(err) {
-		return catalog.FactoryErrTrademarkNotFound.Wrap(err, ht.getRawItemID(c))
+		return catalog.FactoryErrTrademarkNotFound.Wrap(err, ht.getRawItemID(r))
 	}
 
 	if mrcore.FactoryErrServiceEntityVersionInvalid.Is(err) {
-		return mrerr.NewFieldError("version", err)
+		return mrerr.NewCustomError("version", err)
 	}
 
 	if mrcore.FactoryErrServiceSwitchStatusRejected.Is(err) {
-		return mrerr.NewFieldError("status", err)
+		return mrerr.NewCustomError("status", err)
 	}
 
 	return err
