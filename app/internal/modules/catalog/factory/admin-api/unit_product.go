@@ -59,7 +59,7 @@ func newUnitProduct(opts *factory.Options) (*http_v1.Product, error) {
 		opts.ServiceHelper,
 	)
 	controller := http_v1.NewProduct(
-		opts.RequestParser,
+		opts.RequestParsers.Parser,
 		opts.ResponseSender,
 		service,
 		metaOrderBy,

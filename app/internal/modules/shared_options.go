@@ -10,7 +10,6 @@ import (
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-sysmess/mrlang"
 	"github.com/mondegor/go-webcore/mrcore"
-	"github.com/mondegor/go-webcore/mrserver"
 	"github.com/mondegor/go-webcore/mrserver/mrparser"
 	"github.com/mondegor/go-webcore/mrserver/mrresponse"
 	"github.com/mondegor/go-webcore/mrtool"
@@ -37,11 +36,16 @@ type (
 	}
 
 	RequestParsers struct {
-		Path       mrserver.RequestParserPath
-		Base       *mrparser.Base
+		// Bool       *mrparser.Bool
+		// DateTime   *mrparser.DateTime
+		Int64      *mrparser.Int64
 		ItemStatus *mrparser.ItemStatus
 		KeyInt32   *mrparser.KeyInt32
 		SortPage   *mrparser.SortPage
-		Validator  *mrparser.Validator
+		String     *mrparser.String
+		// UUID       *mrparser.UUID
+		Validator *mrparser.Validator
+		// File       *mrparser.Image
+		Image *mrparser.Image
 	}
 )

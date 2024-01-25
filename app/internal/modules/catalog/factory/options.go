@@ -1,7 +1,7 @@
 package factory
 
 import (
-	view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared"
+	view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared/view"
 	"go-sample/pkg/modules/catalog"
 
 	"github.com/mondegor/go-components/mrorderer"
@@ -9,6 +9,7 @@ import (
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-sysmess/mrlang"
 	"github.com/mondegor/go-webcore/mrcore"
+	"github.com/mondegor/go-webcore/mrserver/mrparser"
 	"github.com/mondegor/go-webcore/mrserver/mrresponse"
 	"github.com/mondegor/go-webcore/mrtool"
 )
@@ -20,7 +21,7 @@ type (
 		ServiceHelper   *mrtool.ServiceHelper
 		PostgresAdapter *mrpostgres.ConnAdapter
 		Locker          mrcore.Locker
-		RequestParser   *view_shared.Parser
+		RequestParsers  *RequestParsers
 		ResponseSender  *mrresponse.Sender
 
 		CategoryAPI  catalog.CategoryAPI
@@ -34,5 +35,11 @@ type (
 		Dictionary      *mrlang.MultiLangDictionary
 		ImageFileAPI    mrstorage.FileProviderAPI
 		ImageURLBuilder mrcore.BuilderPath
+	}
+
+	RequestParsers struct {
+		String *mrparser.String
+		Image  *view_shared.ParserImage
+		Parser *view_shared.Parser
 	}
 )

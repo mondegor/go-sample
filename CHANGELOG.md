@@ -1,6 +1,20 @@
 # Go Sample Changelog
 Все изменения сервиса Go Sample будут документироваться на этой странице.
 
+## 2024-01-25
+### Added
+- Внедрены парсеры на основе интерфейсов `mrserver.RequestParserFile` и
+  `mrserver.RequestParserImage` для получения файлов и изображений из `multipart` формы.
+  - заменено `mrreq.File` -> `ht.parser.FormImage`;
+  - в `CategoryImageService` изменён тип `mrtype.File` -> `mrtype.Image`;
+
+### Changed
+- Переименовано `ConvertImageMetaToInfo` -> `ImageMetaToInfoPointer`;
+
+### Removed
+- `mrserver.RequestParserPath` удалён вместо него используется
+  `mrserver.RequestParserString` и `mrserver.RequestParserParamFunc`;
+
 ## 2024-01-22
 ### Changed
 - Расформирован объект `ClientContext` и его одноименный интерфейс, в результате:

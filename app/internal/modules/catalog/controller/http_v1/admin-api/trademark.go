@@ -3,7 +3,7 @@ package http_v1
 import (
 	module "go-sample/internal/modules/catalog"
 	"go-sample/internal/modules/catalog/controller/http_v1/admin-api/view"
-	view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared"
+	view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared/view"
 	entity "go-sample/internal/modules/catalog/entity/admin-api"
 	usecase "go-sample/internal/modules/catalog/usecase/admin-api"
 	"go-sample/pkg/modules/catalog"

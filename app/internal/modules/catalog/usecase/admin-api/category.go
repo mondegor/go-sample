@@ -173,7 +173,7 @@ func (uc *Category) Remove(ctx context.Context, id mrtype.KeyInt32) error {
 }
 
 func (uc *Category) prepareItem(item *entity.Category) {
-	if imageInfo := mrentity.ConvertImageMetaToInfo(item.ImageMeta); imageInfo != nil {
+	if imageInfo := mrentity.ImageMetaToInfoPointer(item.ImageMeta); imageInfo != nil {
 		imageInfo.URL = uc.imgBaseURL.FullPath(imageInfo.Path)
 		item.ImageInfo = imageInfo
 	}

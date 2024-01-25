@@ -38,7 +38,7 @@ func newUnitCategory(opts *factory.Options) (*http_v1.Category, error) {
 		opts.UnitCategory.Dictionary,
 	)
 	controller := http_v1.NewCategory(
-		opts.RequestParser,
+		opts.RequestParsers.Parser,
 		opts.ResponseSender,
 		service,
 	)

@@ -2,7 +2,7 @@ package factory
 
 import (
 	"go-sample/internal/modules"
-	view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared"
+	view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared/view"
 	"go-sample/internal/modules/catalog/factory"
 	factory_api "go-sample/internal/modules/catalog/factory/api"
 	usecase_api "go-sample/internal/modules/catalog/usecase/api"
@@ -29,13 +29,22 @@ func NewCatalogOptions(opts *modules.Options) (*factory.Options, error) {
 		ServiceHelper:   opts.ServiceHelper,
 		PostgresAdapter: opts.PostgresAdapter,
 		Locker:          opts.Locker,
-		RequestParser: view_shared.NewParser(
-			opts.RequestParsers.Base,
-			opts.RequestParsers.ItemStatus,
-			opts.RequestParsers.KeyInt32,
-			opts.RequestParsers.SortPage,
-			opts.RequestParsers.Validator,
-		),
+		RequestParsers: &factory.RequestParsers{
+			String: opts.RequestParsers.String,
+			Image: view_shared.NewParserImage(
+				opts.RequestParsers.KeyInt32,
+				opts.RequestParsers.String,
+				opts.RequestParsers.Image,
+			),
+			Parser: view_shared.NewParser(
+				opts.RequestParsers.Int64,
+				opts.RequestParsers.ItemStatus,
+				opts.RequestParsers.KeyInt32,
+				opts.RequestParsers.SortPage,
+				opts.RequestParsers.String,
+				opts.RequestParsers.Validator,
+			),
+		},
 		ResponseSender: opts.ResponseSender,
 
 		CategoryAPI:  opts.CatalogCategoryAPI,

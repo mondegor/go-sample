@@ -2,14 +2,14 @@ package http_v1
 
 import (
 	module "go-sample/internal/modules/catalog"
-	view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared"
+	view_shared "go-sample/internal/modules/catalog/controller/http_v1/shared/view"
 	usecase "go-sample/internal/modules/catalog/usecase/admin-api"
 	usecase_shared "go-sample/internal/modules/catalog/usecase/shared"
 	"net/http"
 
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrserver"
-	"github.com/mondegor/go-webcore/mrserver/mrreq"
+	"github.com/mondegor/go-webcore/mrserver/mrparser"
 	"github.com/mondegor/go-webcore/mrtype"
 )
 
@@ -19,14 +19,14 @@ const (
 
 type (
 	CategoryImage struct {
-		parser  view_shared.RequestParser
+		parser  view_shared.RequestParserImage
 		sender  mrserver.FileResponseSender
 		service usecase.CategoryImageService
 	}
 )
 
 func NewCategoryImage(
-	parser view_shared.RequestParser,
+	parser view_shared.RequestParserImage,
 	sender mrserver.FileResponseSender,
 	service usecase.CategoryImageService,
 ) *CategoryImage {
@@ -54,19 +54,19 @@ func (ht *CategoryImage) GetImage(w http.ResponseWriter, r *http.Request) error 
 
 	defer item.Body.Close()
 
-	return ht.sender.SendFile(w, item.FileInfo, "", item.Body)
+	return ht.sender.SendFile(w, item.ImageInfo.ToFile(), "", item.Body)
 }
 
 func (ht *CategoryImage) UploadImage(w http.ResponseWriter, r *http.Request) error {
-	file, err := mrreq.File(r, module.ParamNameFileCatalogCategoryImage)
+	image, err := ht.parser.FormImage(r, module.ParamNameFileCatalogCategoryImage)
 
 	if err != nil {
-		return err
+		return mrparser.WrapImageError(err, module.ParamNameFileCatalogCategoryImage)
 	}
 
-	defer file.Body.Close()
+	defer image.Body.Close()
 
-	if err = ht.service.StoreFile(r.Context(), ht.getParentID(r), file); err != nil {
+	if err = ht.service.StoreFile(r.Context(), ht.getParentID(r), image); err != nil {
 		return ht.wrapError(err, r)
 	}
 

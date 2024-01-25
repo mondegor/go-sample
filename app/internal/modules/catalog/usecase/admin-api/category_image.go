@@ -44,40 +44,43 @@ func NewCategoryImage(
 }
 
 // GetFile - WARNING you don't forget to call item.File.Body.Close()
-func (uc *CategoryImage) GetFile(ctx context.Context, categoryID mrtype.KeyInt32) (mrtype.File, error) {
+func (uc *CategoryImage) GetFile(ctx context.Context, categoryID mrtype.KeyInt32) (mrtype.Image, error) {
 	if categoryID < 1 {
-		return mrtype.File{}, mrcore.FactoryErrServiceEntityNotFound.New()
+		return mrtype.Image{}, mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
 	imageMeta, err := uc.storage.FetchMeta(ctx, categoryID)
 
 	if err != nil {
-		return mrtype.File{}, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategoryImage, categoryID)
+		return mrtype.Image{}, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategoryImage, categoryID)
 	}
 
 	if imageMeta.Path == "" {
-		return mrtype.File{}, mrcore.FactoryErrServiceEntityNotFound.New()
+		return mrtype.Image{}, mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
-	file, err := uc.fileAPI.Download(ctx, imageMeta.Path)
+	image, err := uc.fileAPI.DownloadFile(ctx, imageMeta.Path)
 
 	if err != nil {
-		return mrtype.File{}, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, "FileProviderAPI", imageMeta)
+		return mrtype.Image{}, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, "FileProviderAPI", imageMeta)
 	}
 
-	return file, nil
+	return mrtype.Image{
+		ImageInfo: mrentity.ImageMetaToInfo(imageMeta),
+		Body:      image,
+	}, nil
 }
 
-func (uc *CategoryImage) StoreFile(ctx context.Context, categoryID mrtype.KeyInt32, file mrtype.File) error {
+func (uc *CategoryImage) StoreFile(ctx context.Context, categoryID mrtype.KeyInt32, image mrtype.Image) error {
 	if categoryID < 1 {
 		return mrcore.FactoryErrServiceEntityNotFound.New()
 	}
 
-	if file.OriginalName == "" || file.Size == 0 {
+	if image.OriginalName == "" || image.Size == 0 {
 		return mrcore.FactoryErrServiceInvalidFile.New()
 	}
 
-	newImagePath, err := uc.getImagePath(categoryID, file.OriginalName)
+	newImagePath, err := uc.getImagePath(categoryID, image.OriginalName)
 
 	if err != nil {
 		return err
@@ -97,18 +100,19 @@ func (uc *CategoryImage) StoreFile(ctx context.Context, categoryID mrtype.KeyInt
 		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategoryImage, categoryID)
 	}
 
-	file.Path = newImagePath
+	image.Path = newImagePath
 
-	if err = uc.fileAPI.Upload(ctx, file); err != nil {
-		return uc.serviceHelper.WrapErrorEntityFailed(err, "FileProviderAPI", file.Path)
+	if err = uc.fileAPI.Upload(ctx, image.ToFile()); err != nil {
+		return uc.serviceHelper.WrapErrorEntityFailed(err, "FileProviderAPI", image.Path)
 	}
 
-	// :TODO: store width + height
 	imageMeta := mrentity.ImageMeta{
-		Path:         file.Path,
-		ContentType:  file.ContentType,
-		OriginalName: file.OriginalName,
-		Size:         file.Size,
+		Path:         image.Path,
+		ContentType:  image.ContentType,
+		OriginalName: image.OriginalName,
+		Width:        image.Width,
+		Height:       image.Height,
+		Size:         image.Size,
 		UpdatedAt:    mrtype.TimePointer(time.Now().UTC()),
 	}
 

@@ -42,7 +42,7 @@ func newUnitTrademark(opts *factory.Options) (*http_v1.Trademark, error) {
 	)
 	service := usecase.NewTrademark(storage, opts.EventBox, opts.ServiceHelper)
 	controller := http_v1.NewTrademark(
-		opts.RequestParser,
+		opts.RequestParsers.Parser,
 		opts.ResponseSender,
 		service,
 		metaOrderBy,

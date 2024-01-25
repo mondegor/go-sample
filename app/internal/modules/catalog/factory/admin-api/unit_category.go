@@ -49,7 +49,7 @@ func newUnitCategory(opts *factory.Options) (*http_v1.Category, error) {
 	)
 	service := usecase.NewCategory(storage, opts.EventBox, opts.ServiceHelper, opts.UnitCategory.ImageURLBuilder)
 	controller := http_v1.NewCategory(
-		opts.RequestParser,
+		opts.RequestParsers.Parser,
 		opts.ResponseSender,
 		service,
 		metaOrderBy,
@@ -68,7 +68,7 @@ func newUnitCategoryImage(opts *factory.Options) (*http_v1.CategoryImage, error)
 		opts.ServiceHelper,
 	)
 	controller := http_v1.NewCategoryImage(
-		opts.RequestParser,
+		opts.RequestParsers.Image,
 		mrresponse.NewFileSender(opts.ResponseSender),
 		service,
 	)
