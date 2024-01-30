@@ -4,10 +4,11 @@ go 1.20
 
 require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
-	github.com/mondegor/go-components v0.3.13
-	github.com/mondegor/go-storage v0.7.0
-	github.com/mondegor/go-sysmess v0.7.0
-	github.com/mondegor/go-webcore v0.12.0
+	github.com/mondegor/go-components v0.4.0
+	github.com/mondegor/go-storage v0.8.0
+	github.com/mondegor/go-sysmess v0.7.1
+	github.com/mondegor/go-webcore v0.13.1
+	github.com/oklog/run v1.1.0
 )
 
 require (
@@ -28,9 +29,11 @@ require (
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/julienschmidt/httprouter v1.3.0 // indirect
-	github.com/klauspost/compress v1.17.4 // indirect
+	github.com/klauspost/compress v1.17.5 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.6 // indirect
-	github.com/leodido/go-urn v1.2.4 // indirect
+	github.com/leodido/go-urn v1.3.0 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
 	github.com/minio/minio-go/v7 v7.0.66 // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
@@ -39,6 +42,7 @@ require (
 	github.com/redis/go-redis/v9 v9.4.0 // indirect
 	github.com/rs/cors v1.10.1 // indirect
 	github.com/rs/xid v1.5.0 // indirect
+	github.com/rs/zerolog v1.31.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	golang.org/x/crypto v0.18.0 // indirect
 	golang.org/x/net v0.20.0 // indirect

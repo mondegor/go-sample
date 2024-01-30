@@ -5,12 +5,12 @@ import (
 	usecase_api "go-sample/internal/modules/catalog/usecase/api"
 
 	"github.com/mondegor/go-storage/mrpostgres"
-	"github.com/mondegor/go-webcore/mrtool"
+	"github.com/mondegor/go-webcore/mrcore"
 )
 
-func NewCategory(conn *mrpostgres.ConnAdapter, serviceHelper *mrtool.ServiceHelper) *usecase_api.Category {
+func NewCategory(conn *mrpostgres.ConnAdapter, usecaseHelper *mrcore.UsecaseHelper) *usecase_api.Category {
 	return usecase_api.NewCategory(
 		repository_api.NewCategoryPostgres(conn),
-		serviceHelper,
+		usecaseHelper,
 	)
 }

@@ -9,9 +9,9 @@ import (
 	"github.com/mondegor/go-components/mrorderer"
 	"github.com/mondegor/go-sysmess/mrmsg"
 	"github.com/mondegor/go-webcore/mrcore"
-	"github.com/mondegor/go-webcore/mrctx"
 	"github.com/mondegor/go-webcore/mrenum"
-	"github.com/mondegor/go-webcore/mrtool"
+	"github.com/mondegor/go-webcore/mrlog"
+	"github.com/mondegor/go-webcore/mrsender"
 	"github.com/mondegor/go-webcore/mrtype"
 )
 
@@ -21,8 +21,8 @@ type (
 		categoryAPI   catalog.CategoryAPI
 		trademarkAPI  catalog.TrademarkAPI
 		ordererAPI    mrorderer.API
-		eventBox      mrcore.EventBox
-		serviceHelper *mrtool.ServiceHelper
+		eventEmitter  mrsender.EventEmitter
+		usecaseHelper *mrcore.UsecaseHelper
 		statusFlow    mrenum.StatusFlow
 	}
 )
@@ -32,16 +32,16 @@ func NewProduct(
 	categoryAPI catalog.CategoryAPI,
 	trademarkAPI catalog.TrademarkAPI,
 	ordererAPI mrorderer.API,
-	eventBox mrcore.EventBox,
-	serviceHelper *mrtool.ServiceHelper,
+	eventEmitter mrsender.EventEmitter,
+	usecaseHelper *mrcore.UsecaseHelper,
 ) *Product {
 	return &Product{
 		storage:       storage,
 		categoryAPI:   categoryAPI,
 		trademarkAPI:  trademarkAPI,
 		ordererAPI:    ordererAPI,
-		eventBox:      eventBox,
-		serviceHelper: serviceHelper,
+		eventEmitter:  eventEmitter,
+		usecaseHelper: usecaseHelper,
 		statusFlow:    mrenum.ItemStatusFlow,
 	}
 }
@@ -51,7 +51,7 @@ func (uc *Product) GetList(ctx context.Context, params entity.ProductParams) ([]
 	total, err := uc.storage.FetchTotal(ctx, fetchParams.Where)
 
 	if err != nil {
-		return nil, 0, uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameProduct)
+		return nil, 0, uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameProduct)
 	}
 
 	if total < 1 {
@@ -61,7 +61,7 @@ func (uc *Product) GetList(ctx context.Context, params entity.ProductParams) ([]
 	items, err := uc.storage.Fetch(ctx, fetchParams)
 
 	if err != nil {
-		return nil, 0, uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameProduct)
+		return nil, 0, uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameProduct)
 	}
 
 	return items, total, nil
@@ -77,7 +77,7 @@ func (uc *Product) GetItem(ctx context.Context, id mrtype.KeyInt32) (*entity.Pro
 	}
 
 	if err := uc.storage.LoadOne(ctx, item); err != nil {
-		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, id)
+		return nil, uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, id)
 	}
 
 	return item, nil
@@ -91,16 +91,16 @@ func (uc *Product) Create(ctx context.Context, item *entity.Product) error {
 	item.Status = mrenum.ItemStatusDraft
 
 	if err := uc.storage.Insert(ctx, item); err != nil {
-		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameProduct)
+		return uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameProduct)
 	}
 
-	uc.eventBoxEmitEntity(ctx, "Create", mrmsg.Data{"id": item.ID})
+	uc.emitEvent(ctx, "Create", mrmsg.Data{"id": item.ID})
 
 	meta := uc.storage.GetMetaData(item.CategoryID)
 	ordererAPI := uc.ordererAPI.WithMetaData(meta)
 
 	if err := ordererAPI.MoveToLast(ctx, item.ID); err != nil {
-		mrctx.Logger(ctx).Err(err)
+		mrlog.Ctx(ctx).Error().Err(err)
 	}
 
 	return nil
@@ -116,7 +116,7 @@ func (uc *Product) Store(ctx context.Context, item *entity.Product) error {
 	}
 
 	if err := uc.storage.IsExists(ctx, item.ID); err != nil {
-		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, item.ID)
+		return uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, item.ID)
 	}
 
 	if err := uc.checkItem(ctx, item); err != nil {
@@ -126,14 +126,14 @@ func (uc *Product) Store(ctx context.Context, item *entity.Product) error {
 	version, err := uc.storage.Update(ctx, item)
 
 	if err != nil {
-		if uc.serviceHelper.IsNotFoundError(err) {
+		if uc.usecaseHelper.IsNotFoundError(err) {
 			return mrcore.FactoryErrServiceEntityVersionInvalid.Wrap(err)
 		}
 
-		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameProduct)
+		return uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameProduct)
 	}
 
-	uc.eventBoxEmitEntity(ctx, "Store", mrmsg.Data{"id": item.ID, "ver": version})
+	uc.emitEvent(ctx, "Store", mrmsg.Data{"id": item.ID, "ver": version})
 
 	return nil
 }
@@ -150,7 +150,7 @@ func (uc *Product) ChangeStatus(ctx context.Context, item *entity.Product) error
 	currentStatus, err := uc.storage.FetchStatus(ctx, item)
 
 	if err != nil {
-		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, item.ID)
+		return uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, item.ID)
 	}
 
 	if currentStatus == item.Status {
@@ -164,14 +164,14 @@ func (uc *Product) ChangeStatus(ctx context.Context, item *entity.Product) error
 	version, err := uc.storage.UpdateStatus(ctx, item)
 
 	if err != nil {
-		if uc.serviceHelper.IsNotFoundError(err) {
+		if uc.usecaseHelper.IsNotFoundError(err) {
 			return mrcore.FactoryErrServiceEntityVersionInvalid.Wrap(err)
 		}
 
-		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameProduct)
+		return uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameProduct)
 	}
 
-	uc.eventBoxEmitEntity(ctx, "ChangeStatus", mrmsg.Data{"id": item.ID, "ver": version, "status": item.Status})
+	uc.emitEvent(ctx, "ChangeStatus", mrmsg.Data{"id": item.ID, "ver": version, "status": item.Status})
 
 	return nil
 }
@@ -182,10 +182,10 @@ func (uc *Product) Remove(ctx context.Context, id mrtype.KeyInt32) error {
 	}
 
 	if err := uc.storage.Delete(ctx, id); err != nil {
-		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, id)
+		return uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, id)
 	}
 
-	uc.eventBoxEmitEntity(ctx, "Remove", mrmsg.Data{"id": id})
+	uc.emitEvent(ctx, "Remove", mrmsg.Data{"id": id})
 
 	return nil
 }
@@ -200,7 +200,7 @@ func (uc *Product) MoveAfterID(ctx context.Context, id mrtype.KeyInt32, afterID 
 	}
 
 	if err := uc.storage.LoadOne(ctx, &item); err != nil {
-		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, id)
+		return uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, id)
 	}
 
 	if item.CategoryID < 1 {
@@ -214,7 +214,7 @@ func (uc *Product) MoveAfterID(ctx context.Context, id mrtype.KeyInt32, afterID 
 		return err
 	}
 
-	uc.eventBoxEmitEntity(ctx, "Move", mrmsg.Data{"id": id, "afterId": afterID})
+	uc.emitEvent(ctx, "Move", mrmsg.Data{"id": id, "afterId": afterID})
 
 	return nil
 }
@@ -243,11 +243,11 @@ func (uc *Product) checkArticle(ctx context.Context, item *entity.Product) error
 	id, err := uc.storage.FetchIdByArticle(ctx, item.Article)
 
 	if err != nil {
-		if uc.serviceHelper.IsNotFoundError(err) {
+		if uc.usecaseHelper.IsNotFoundError(err) {
 			return nil
 		}
 
-		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameProduct)
+		return uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameProduct)
 	}
 
 	if item.ID != id {
@@ -257,11 +257,11 @@ func (uc *Product) checkArticle(ctx context.Context, item *entity.Product) error
 	return nil
 }
 
-func (uc *Product) eventBoxEmitEntity(ctx context.Context, eventName string, data mrmsg.Data) {
-	uc.eventBox.Emit(
-		"%s::%s: %s",
-		entity.ModelNameProduct,
+func (uc *Product) emitEvent(ctx context.Context, eventName string, data mrmsg.Data) {
+	uc.eventEmitter.EmitWithSource(
+		ctx,
 		eventName,
+		entity.ModelNameProduct,
 		data,
 	)
 }

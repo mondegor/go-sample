@@ -8,7 +8,7 @@ import (
 	usecase "go-sample/internal/modules/catalog/usecase/public-api"
 	"net/http"
 
-	"github.com/mondegor/go-webcore/mrctx"
+	"github.com/mondegor/go-sysmess/mrlang"
 	"github.com/mondegor/go-webcore/mrserver"
 	"github.com/mondegor/go-webcore/mrtype"
 )
@@ -74,7 +74,7 @@ func (ht *Category) Get(w http.ResponseWriter, r *http.Request) error {
 	item, err := ht.service.GetItem(
 		r.Context(),
 		ht.getItemID(r),
-		mrctx.Locale(r.Context()).LangID(),
+		mrlang.Ctx(r.Context()).LangID(),
 	)
 
 	if err != nil {

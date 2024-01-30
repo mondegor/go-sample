@@ -8,30 +8,31 @@ import (
 	"github.com/mondegor/go-sysmess/mrmsg"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrenum"
-	"github.com/mondegor/go-webcore/mrtool"
+	"github.com/mondegor/go-webcore/mrlib"
+	"github.com/mondegor/go-webcore/mrsender"
 	"github.com/mondegor/go-webcore/mrtype"
 )
 
 type (
 	Category struct {
 		storage       CategoryStorage
-		eventBox      mrcore.EventBox
-		serviceHelper *mrtool.ServiceHelper
-		imgBaseURL    mrcore.BuilderPath
+		eventEmitter  mrsender.EventEmitter
+		usecaseHelper *mrcore.UsecaseHelper
+		imgBaseURL    mrlib.BuilderPath
 		statusFlow    mrenum.StatusFlow
 	}
 )
 
 func NewCategory(
 	storage CategoryStorage,
-	eventBox mrcore.EventBox,
-	serviceHelper *mrtool.ServiceHelper,
-	imgBaseURL mrcore.BuilderPath,
+	eventEmitter mrsender.EventEmitter,
+	usecaseHelper *mrcore.UsecaseHelper,
+	imgBaseURL mrlib.BuilderPath,
 ) *Category {
 	return &Category{
 		storage:       storage,
-		eventBox:      eventBox,
-		serviceHelper: serviceHelper,
+		eventEmitter:  eventEmitter,
+		usecaseHelper: usecaseHelper,
 		imgBaseURL:    imgBaseURL,
 		statusFlow:    mrenum.ItemStatusFlow,
 	}
@@ -42,7 +43,7 @@ func (uc *Category) GetList(ctx context.Context, params entity.CategoryParams) (
 	total, err := uc.storage.FetchTotal(ctx, fetchParams.Where)
 
 	if err != nil {
-		return nil, 0, uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCategory)
+		return nil, 0, uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameCategory)
 	}
 
 	if total < 1 {
@@ -52,7 +53,7 @@ func (uc *Category) GetList(ctx context.Context, params entity.CategoryParams) (
 	items, err := uc.storage.Fetch(ctx, fetchParams)
 
 	if err != nil {
-		return nil, 0, uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCategory)
+		return nil, 0, uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameCategory)
 	}
 
 	for i := range items {
@@ -72,7 +73,7 @@ func (uc *Category) GetItem(ctx context.Context, id mrtype.KeyInt32) (*entity.Ca
 	}
 
 	if err := uc.storage.LoadOne(ctx, item); err != nil {
-		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategory, id)
+		return nil, uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategory, id)
 	}
 
 	uc.prepareItem(item)
@@ -84,10 +85,10 @@ func (uc *Category) Create(ctx context.Context, item *entity.Category) error {
 	item.Status = mrenum.ItemStatusDraft
 
 	if err := uc.storage.Insert(ctx, item); err != nil {
-		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCategory)
+		return uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameCategory)
 	}
 
-	uc.eventBoxEmitEntity(ctx, "Create", mrmsg.Data{"id": item.ID})
+	uc.emitEvent(ctx, "Create", mrmsg.Data{"id": item.ID})
 
 	return nil
 }
@@ -102,20 +103,20 @@ func (uc *Category) Store(ctx context.Context, item *entity.Category) error {
 	}
 
 	if err := uc.storage.IsExists(ctx, item.ID); err != nil {
-		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategory, item.ID)
+		return uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategory, item.ID)
 	}
 
 	version, err := uc.storage.Update(ctx, item)
 
 	if err != nil {
-		if uc.serviceHelper.IsNotFoundError(err) {
+		if uc.usecaseHelper.IsNotFoundError(err) {
 			return mrcore.FactoryErrServiceEntityVersionInvalid.Wrap(err)
 		}
 
-		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCategory)
+		return uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameCategory)
 	}
 
-	uc.eventBoxEmitEntity(ctx, "Store", mrmsg.Data{"id": item.ID, "ver": version})
+	uc.emitEvent(ctx, "Store", mrmsg.Data{"id": item.ID, "ver": version})
 
 	return nil
 }
@@ -132,7 +133,7 @@ func (uc *Category) ChangeStatus(ctx context.Context, item *entity.Category) err
 	currentStatus, err := uc.storage.FetchStatus(ctx, item)
 
 	if err != nil {
-		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategory, item.ID)
+		return uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategory, item.ID)
 	}
 
 	if currentStatus == item.Status {
@@ -146,14 +147,14 @@ func (uc *Category) ChangeStatus(ctx context.Context, item *entity.Category) err
 	version, err := uc.storage.UpdateStatus(ctx, item)
 
 	if err != nil {
-		if uc.serviceHelper.IsNotFoundError(err) {
+		if uc.usecaseHelper.IsNotFoundError(err) {
 			return mrcore.FactoryErrServiceEntityVersionInvalid.Wrap(err)
 		}
 
-		return uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCategory)
+		return uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameCategory)
 	}
 
-	uc.eventBoxEmitEntity(ctx, "ChangeStatus", mrmsg.Data{"id": item.ID, "ver": version, "status": item.Status})
+	uc.emitEvent(ctx, "ChangeStatus", mrmsg.Data{"id": item.ID, "ver": version, "status": item.Status})
 
 	return nil
 }
@@ -164,10 +165,10 @@ func (uc *Category) Remove(ctx context.Context, id mrtype.KeyInt32) error {
 	}
 
 	if err := uc.storage.Delete(ctx, id); err != nil {
-		return uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategory, id)
+		return uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategory, id)
 	}
 
-	uc.eventBoxEmitEntity(ctx, "Remove", mrmsg.Data{"id": id})
+	uc.emitEvent(ctx, "Remove", mrmsg.Data{"id": id})
 
 	return nil
 }
@@ -179,11 +180,11 @@ func (uc *Category) prepareItem(item *entity.Category) {
 	}
 }
 
-func (uc *Category) eventBoxEmitEntity(ctx context.Context, eventName string, data mrmsg.Data) {
-	uc.eventBox.Emit(
-		"%s::%s: %s",
-		entity.ModelNameCategory,
+func (uc *Category) emitEvent(ctx context.Context, eventName string, data mrmsg.Data) {
+	uc.eventEmitter.EmitWithSource(
+		ctx,
 		eventName,
+		entity.ModelNameCategory,
 		data,
 	)
 }

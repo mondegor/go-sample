@@ -1,6 +1,7 @@
 package factory
 
 import (
+	"context"
 	module "go-sample/internal/modules/catalog"
 	"go-sample/internal/modules/catalog/factory"
 
@@ -8,16 +9,16 @@ import (
 	"github.com/mondegor/go-webcore/mrserver"
 )
 
-func CreateModule(opts *factory.Options) ([]mrserver.HttpController, error) {
+func CreateModule(ctx context.Context, opts factory.Options) ([]mrserver.HttpController, error) {
 	var list []mrserver.HttpController
 
-	mrfactory.InfoCreateModule(opts.Logger, module.Name)
-	mrfactory.InfoCreateUnit(opts.Logger, module.UnitCategoryName)
+	mrfactory.InfoCreateModule(ctx, module.Name)
+	mrfactory.InfoCreateUnit(ctx, module.UnitCategoryName)
 
-	if l, err := createUnitCategory(opts); err != nil {
+	if l, err := createUnitCategory(ctx, opts); err != nil {
 		return nil, err
 	} else {
-		list = append(list, mrfactory.WithPermission(l, module.UnitCategoryPermission)...)
+		list = append(list, mrfactory.WithPermission(ctx, l, module.UnitCategoryPermission)...)
 	}
 
 	return list, nil

@@ -6,13 +6,13 @@ import (
 
 	"github.com/mondegor/go-storage/mrminio"
 	"github.com/mondegor/go-storage/mrstorage"
-	"github.com/mondegor/go-webcore/mrcore"
+	"github.com/mondegor/go-webcore/mrlog"
 )
 
-func NewS3Minio(cfg *config.Config, logger mrcore.Logger) (*mrminio.ConnAdapter, error) {
-	logger.Info("Create and init S3 minio connection")
+func NewS3Minio(ctx context.Context, cfg config.Config) (*mrminio.ConnAdapter, error) {
+	mrlog.Ctx(ctx).Info().Msg("Create and init S3 minio connection")
 
-	opt := mrminio.Options{
+	opts := mrminio.Options{
 		Host:     cfg.S3.Host,
 		Port:     cfg.S3.Port,
 		UseSSL:   cfg.S3.UseSSL,
@@ -22,7 +22,7 @@ func NewS3Minio(cfg *config.Config, logger mrcore.Logger) (*mrminio.ConnAdapter,
 
 	conn := mrminio.New(cfg.S3.CreateBuckets)
 
-	if err := conn.Connect(opt); err != nil {
+	if err := conn.Connect(ctx, opts); err != nil {
 		return nil, err
 	}
 
@@ -34,15 +34,15 @@ func NewS3Minio(cfg *config.Config, logger mrcore.Logger) (*mrminio.ConnAdapter,
 }
 
 func RegisterS3ImageStorage(
-	cfg *config.Config,
+	ctx context.Context,
+	cfg config.Config,
 	pool *mrstorage.FileProviderPool,
 	conn *mrminio.ConnAdapter,
-	logger mrcore.Logger,
 ) error {
 	storage, err := newS3MinioFileProvider(
+		ctx,
 		conn,
 		cfg.FileProviders.ImageStorage.BucketName,
-		logger,
 	)
 
 	if err != nil {
@@ -53,11 +53,12 @@ func RegisterS3ImageStorage(
 }
 
 func newS3MinioFileProvider(
+	ctx context.Context,
 	conn *mrminio.ConnAdapter,
 	bucketName string,
-	logger mrcore.Logger,
 ) (*mrminio.FileProvider, error) {
-	logger.Info("Create and init file provider with bucket '%s'", bucketName)
+	logger := mrlog.Ctx(ctx)
+	logger.Info().Msgf("Create and init file provider with bucket '%s'", bucketName)
 
 	created, err := conn.InitBucket(context.Background(), bucketName)
 
@@ -66,9 +67,9 @@ func newS3MinioFileProvider(
 	}
 
 	if created {
-		mrcore.LogInfo("Bucket '%s' created", bucketName)
+		logger.Debug().Msgf("Bucket '%s' created", bucketName)
 	} else {
-		mrcore.LogInfo("Bucket '%s' exists, OK", bucketName)
+		logger.Debug().Msgf("Bucket '%s' exists, OK", bucketName)
 	}
 
 	return mrminio.NewFileProvider(conn, bucketName), nil

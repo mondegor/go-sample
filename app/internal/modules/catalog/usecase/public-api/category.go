@@ -5,26 +5,26 @@ import (
 	"go-sample/internal/modules/catalog/entity/public-api"
 
 	"github.com/mondegor/go-webcore/mrcore"
-	"github.com/mondegor/go-webcore/mrtool"
+	"github.com/mondegor/go-webcore/mrlib"
 	"github.com/mondegor/go-webcore/mrtype"
 )
 
 type (
 	Category struct {
 		storage       CategoryStorage
-		serviceHelper *mrtool.ServiceHelper
-		imgBaseURL    mrcore.BuilderPath
+		usecaseHelper *mrcore.UsecaseHelper
+		imgBaseURL    mrlib.BuilderPath
 	}
 )
 
 func NewCategory(
 	storage CategoryStorage,
-	serviceHelper *mrtool.ServiceHelper,
-	imgBaseURL mrcore.BuilderPath,
+	usecaseHelper *mrcore.UsecaseHelper,
+	imgBaseURL mrlib.BuilderPath,
 ) *Category {
 	return &Category{
 		storage:       storage,
-		serviceHelper: serviceHelper,
+		usecaseHelper: usecaseHelper,
 		imgBaseURL:    imgBaseURL,
 	}
 }
@@ -34,7 +34,7 @@ func (uc *Category) GetList(ctx context.Context, params entity.CategoryParams) (
 	total, err := uc.storage.FetchTotal(ctx, fetchParams.Where)
 
 	if err != nil {
-		return nil, 0, uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCategory)
+		return nil, 0, uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameCategory)
 	}
 
 	if total < 1 {
@@ -44,7 +44,7 @@ func (uc *Category) GetList(ctx context.Context, params entity.CategoryParams) (
 	items, err := uc.storage.Fetch(ctx, fetchParams)
 
 	if err != nil {
-		return nil, 0, uc.serviceHelper.WrapErrorFailed(err, entity.ModelNameCategory)
+		return nil, 0, uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameCategory)
 	}
 
 	for i := range items {
@@ -64,7 +64,7 @@ func (uc *Category) GetItem(ctx context.Context, id mrtype.KeyInt32, languageID 
 	}
 
 	if err := uc.storage.LoadOne(ctx, item); err != nil {
-		return nil, uc.serviceHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategory, id)
+		return nil, uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategory, id)
 	}
 
 	item.ImageURL = uc.imgBaseURL.FullPath(item.ImageURL)

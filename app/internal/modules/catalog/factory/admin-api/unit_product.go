@@ -1,6 +1,7 @@
 package factory
 
 import (
+	"context"
 	module "go-sample/internal/modules/catalog"
 	http_v1 "go-sample/internal/modules/catalog/controller/http_v1/admin-api"
 	entity "go-sample/internal/modules/catalog/entity/admin-api"
@@ -13,10 +14,10 @@ import (
 	"github.com/mondegor/go-webcore/mrserver"
 )
 
-func createUnitProduct(opts *factory.Options) ([]mrserver.HttpController, error) {
+func createUnitProduct(ctx context.Context, opts factory.Options) ([]mrserver.HttpController, error) {
 	var list []mrserver.HttpController
 
-	if c, err := newUnitProduct(opts); err != nil {
+	if c, err := newUnitProduct(ctx, opts); err != nil {
 		return nil, err
 	} else {
 		list = append(list, c)
@@ -25,14 +26,14 @@ func createUnitProduct(opts *factory.Options) ([]mrserver.HttpController, error)
 	return list, nil
 }
 
-func newUnitProduct(opts *factory.Options) (*http_v1.Product, error) {
-	metaOrderBy, err := mrsql.NewEntityMetaOrderBy(entity.Product{})
+func newUnitProduct(ctx context.Context, opts factory.Options) (*http_v1.Product, error) {
+	metaOrderBy, err := mrsql.NewEntityMetaOrderBy(ctx, entity.Product{})
 
 	if err != nil {
 		return nil, err
 	}
 
-	entityMetaUpdate, err := mrsql.NewEntityMetaUpdate(entity.Product{})
+	entityMetaUpdate, err := mrsql.NewEntityMetaUpdate(ctx, entity.Product{})
 
 	if err != nil {
 		return nil, err
@@ -42,7 +43,7 @@ func newUnitProduct(opts *factory.Options) (*http_v1.Product, error) {
 		opts.PostgresAdapter,
 		mrsql.NewBuilderSelect(
 			mrpostgres.NewSqlBuilderWhere(),
-			mrpostgres.NewSqlBuilderOrderByWithDefaultSort(metaOrderBy.DefaultSort()),
+			mrpostgres.NewSqlBuilderOrderByWithDefaultSort(ctx, metaOrderBy.DefaultSort()),
 			mrpostgres.NewSqlBuilderPager(module.PageSizeMax),
 		),
 		mrsql.NewBuilderUpdateWithMeta(
@@ -56,7 +57,7 @@ func newUnitProduct(opts *factory.Options) (*http_v1.Product, error) {
 		opts.TrademarkAPI,
 		opts.OrdererAPI,
 		opts.EventBox,
-		opts.ServiceHelper,
+		opts.UsecaseHelper,
 	)
 	controller := http_v1.NewProduct(
 		opts.RequestParsers.Parser,

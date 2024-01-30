@@ -1,6 +1,7 @@
 package factory
 
 import (
+	"context"
 	module "go-sample/internal/modules/catalog"
 	http_v1 "go-sample/internal/modules/catalog/controller/http_v1/public-api"
 	"go-sample/internal/modules/catalog/factory"
@@ -12,10 +13,10 @@ import (
 	"github.com/mondegor/go-webcore/mrserver"
 )
 
-func createUnitCategory(opts *factory.Options) ([]mrserver.HttpController, error) {
+func createUnitCategory(ctx context.Context, opts factory.Options) ([]mrserver.HttpController, error) {
 	var list []mrserver.HttpController
 
-	if c, err := newUnitCategory(opts); err != nil {
+	if c, err := newUnitCategory(ctx, opts); err != nil {
 		return nil, err
 	} else {
 		list = append(list, c)
@@ -24,7 +25,7 @@ func createUnitCategory(opts *factory.Options) ([]mrserver.HttpController, error
 	return list, nil
 }
 
-func newUnitCategory(opts *factory.Options) (*http_v1.Category, error) {
+func newUnitCategory(ctx context.Context, opts factory.Options) (*http_v1.Category, error) {
 	storage := repository.NewCategoryPostgres(
 		opts.PostgresAdapter,
 		mrsql.NewBuilderSelect(
@@ -34,7 +35,7 @@ func newUnitCategory(opts *factory.Options) (*http_v1.Category, error) {
 		),
 	)
 	service := usecase.NewCategoryLangDecorator(
-		usecase.NewCategory(storage, opts.ServiceHelper, opts.UnitCategory.ImageURLBuilder),
+		usecase.NewCategory(storage, opts.UsecaseHelper, opts.UnitCategory.ImageURLBuilder),
 		opts.UnitCategory.Dictionary,
 	)
 	controller := http_v1.NewCategory(

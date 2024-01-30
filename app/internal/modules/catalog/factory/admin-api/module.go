@@ -1,6 +1,7 @@
 package factory
 
 import (
+	"context"
 	module "go-sample/internal/modules/catalog"
 	"go-sample/internal/modules/catalog/factory"
 
@@ -8,32 +9,32 @@ import (
 	"github.com/mondegor/go-webcore/mrserver"
 )
 
-func CreateModule(opts *factory.Options) ([]mrserver.HttpController, error) {
+func CreateModule(ctx context.Context, opts factory.Options) ([]mrserver.HttpController, error) {
 	var list []mrserver.HttpController
 
-	mrfactory.InfoCreateModule(opts.Logger, module.Name)
-	mrfactory.InfoCreateUnit(opts.Logger, module.UnitCategoryName)
+	mrfactory.InfoCreateModule(ctx, module.Name)
+	mrfactory.InfoCreateUnit(ctx, module.UnitCategoryName)
 
-	if l, err := createUnitCategory(opts); err != nil {
+	if l, err := createUnitCategory(ctx, opts); err != nil {
 		return nil, err
 	} else {
-		list = append(list, mrfactory.WithPermission(l, module.UnitCategoryPermission)...)
+		list = append(list, mrfactory.WithPermission(ctx, l, module.UnitCategoryPermission)...)
 	}
 
-	mrfactory.InfoCreateUnit(opts.Logger, module.UnitProductName)
+	mrfactory.InfoCreateUnit(ctx, module.UnitProductName)
 
-	if l, err := createUnitProduct(opts); err != nil {
+	if l, err := createUnitProduct(ctx, opts); err != nil {
 		return nil, err
 	} else {
-		list = append(list, mrfactory.WithPermission(l, module.UnitProductPermission)...)
+		list = append(list, mrfactory.WithPermission(ctx, l, module.UnitProductPermission)...)
 	}
 
-	mrfactory.InfoCreateUnit(opts.Logger, module.UnitTrademarkName)
+	mrfactory.InfoCreateUnit(ctx, module.UnitTrademarkName)
 
-	if l, err := createUnitTrademark(opts); err != nil {
+	if l, err := createUnitTrademark(ctx, opts); err != nil {
 		return nil, err
 	} else {
-		list = append(list, mrfactory.WithPermission(l, module.UnitTrademarkPermission)...)
+		list = append(list, mrfactory.WithPermission(ctx, l, module.UnitTrademarkPermission)...)
 	}
 
 	return list, nil

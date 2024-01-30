@@ -1,6 +1,7 @@
 package factory
 
 import (
+	"context"
 	module "go-sample/internal/modules/catalog"
 	http_v1 "go-sample/internal/modules/catalog/controller/http_v1/admin-api"
 	entity "go-sample/internal/modules/catalog/entity/admin-api"
@@ -13,10 +14,10 @@ import (
 	"github.com/mondegor/go-webcore/mrserver"
 )
 
-func createUnitTrademark(opts *factory.Options) ([]mrserver.HttpController, error) {
+func createUnitTrademark(ctx context.Context, opts factory.Options) ([]mrserver.HttpController, error) {
 	var list []mrserver.HttpController
 
-	if c, err := newUnitTrademark(opts); err != nil {
+	if c, err := newUnitTrademark(ctx, opts); err != nil {
 		return nil, err
 	} else {
 		list = append(list, c)
@@ -25,8 +26,8 @@ func createUnitTrademark(opts *factory.Options) ([]mrserver.HttpController, erro
 	return list, nil
 }
 
-func newUnitTrademark(opts *factory.Options) (*http_v1.Trademark, error) {
-	metaOrderBy, err := mrsql.NewEntityMetaOrderBy(entity.Trademark{})
+func newUnitTrademark(ctx context.Context, opts factory.Options) (*http_v1.Trademark, error) {
+	metaOrderBy, err := mrsql.NewEntityMetaOrderBy(ctx, entity.Trademark{})
 
 	if err != nil {
 		return nil, err
@@ -36,11 +37,11 @@ func newUnitTrademark(opts *factory.Options) (*http_v1.Trademark, error) {
 		opts.PostgresAdapter,
 		mrsql.NewBuilderSelect(
 			mrpostgres.NewSqlBuilderWhere(),
-			mrpostgres.NewSqlBuilderOrderByWithDefaultSort(metaOrderBy.DefaultSort()),
+			mrpostgres.NewSqlBuilderOrderByWithDefaultSort(ctx, metaOrderBy.DefaultSort()),
 			mrpostgres.NewSqlBuilderPager(module.PageSizeMax),
 		),
 	)
-	service := usecase.NewTrademark(storage, opts.EventBox, opts.ServiceHelper)
+	service := usecase.NewTrademark(storage, opts.EventBox, opts.UsecaseHelper)
 	controller := http_v1.NewTrademark(
 		opts.RequestParsers.Parser,
 		opts.ResponseSender,

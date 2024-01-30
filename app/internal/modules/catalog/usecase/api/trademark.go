@@ -5,15 +5,19 @@ import (
 	"go-sample/pkg/modules/catalog"
 
 	"github.com/mondegor/go-sysmess/mrmsg"
-	"github.com/mondegor/go-webcore/mrctx"
-	"github.com/mondegor/go-webcore/mrtool"
+	"github.com/mondegor/go-webcore/mrcore"
+	"github.com/mondegor/go-webcore/mrlog"
 	"github.com/mondegor/go-webcore/mrtype"
+)
+
+const (
+	trademarkAPIName = "Catalog.TrademarkAPI"
 )
 
 type (
 	Trademark struct {
 		storage       TrademarkStorage
-		serviceHelper *mrtool.ServiceHelper
+		usecaseHelper *mrcore.UsecaseHelper
 	}
 
 	TrademarkStorage interface {
@@ -23,11 +27,11 @@ type (
 
 func NewTrademark(
 	storage TrademarkStorage,
-	serviceHelper *mrtool.ServiceHelper,
+	usecaseHelper *mrcore.UsecaseHelper,
 ) *Trademark {
 	return &Trademark{
 		storage:       storage,
-		serviceHelper: serviceHelper,
+		usecaseHelper: usecaseHelper,
 	}
 }
 
@@ -39,20 +43,21 @@ func (uc *Trademark) CheckingAvailability(ctx context.Context, id mrtype.KeyInt3
 	}
 
 	if err := uc.storage.IsExists(ctx, id); err != nil {
-		if uc.serviceHelper.IsNotFoundError(err) {
+		if uc.usecaseHelper.IsNotFoundError(err) {
 			return catalog.FactoryErrTrademarkNotFound.New(id)
 		}
 
-		return uc.serviceHelper.WrapErrorFailed(err, "Catalog.TrademarkAPI")
+		return uc.usecaseHelper.WrapErrorFailed(err, trademarkAPIName)
 	}
 
 	return nil
 }
 
 func (uc *Trademark) debugCmd(ctx context.Context, command string, data mrmsg.Data) {
-	mrctx.Logger(ctx).Debug(
-		"Catalog.TrademarkAPI: cmd=%s, data=%s",
-		command,
-		data,
-	)
+	mrlog.Ctx(ctx).
+		Debug().
+		Str("storage", trademarkAPIName).
+		Str("cmd", command).
+		Any("data", data).
+		Send()
 }

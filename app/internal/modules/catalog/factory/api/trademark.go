@@ -5,12 +5,12 @@ import (
 	usecase_api "go-sample/internal/modules/catalog/usecase/api"
 
 	"github.com/mondegor/go-storage/mrpostgres"
-	"github.com/mondegor/go-webcore/mrtool"
+	"github.com/mondegor/go-webcore/mrcore"
 )
 
-func NewTrademark(conn *mrpostgres.ConnAdapter, serviceHelper *mrtool.ServiceHelper) *usecase_api.Trademark {
+func NewTrademark(conn *mrpostgres.ConnAdapter, usecaseHelper *mrcore.UsecaseHelper) *usecase_api.Trademark {
 	return usecase_api.NewTrademark(
 		repository_api.NewTrademarkPostgres(conn),
-		serviceHelper,
+		usecaseHelper,
 	)
 }

@@ -5,7 +5,7 @@ import (
 	"go-sample/internal/modules/catalog/entity/public-api"
 
 	"github.com/mondegor/go-sysmess/mrlang"
-	"github.com/mondegor/go-webcore/mrctx"
+	"github.com/mondegor/go-webcore/mrlog"
 	"github.com/mondegor/go-webcore/mrtype"
 )
 
@@ -58,7 +58,7 @@ func (uc *CategoryLangDecorator) getDict(ctx context.Context, languageID uint16)
 	dict, err := uc.dict.ByLangID(languageID)
 
 	if err != nil {
-		mrctx.Logger(ctx).Warn(err)
+		mrlog.Ctx(ctx).Warn().Err(err)
 		return nil
 	}
 
