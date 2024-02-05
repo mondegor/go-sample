@@ -3,7 +3,7 @@ package factory
 import (
 	"context"
 	"go-sample/config"
-	"go-sample/internal/modules"
+	"go-sample/internal"
 
 	"github.com/mondegor/go-webcore/mrlog"
 	"github.com/mondegor/go-webcore/mrserver/mrjson"
@@ -14,29 +14,47 @@ import (
 	"github.com/mondegor/go-webcore/mrview"
 )
 
-func CreateRequestParsers(ctx context.Context, cfg config.Config) (modules.RequestParsers, error) {
+func CreateRequestParsers(ctx context.Context, cfg config.Config) (app.RequestParsers, error) {
 	mrlog.Ctx(ctx).Info().Msg("Create and init base request parser")
 
 	validator, err := NewValidator(ctx, cfg)
 
 	if err != nil {
-		return modules.RequestParsers{}, err
+		return app.RequestParsers{}, err
 	}
 
 	pathFunc := mrjulienrouter.PathParam
 
-	return modules.RequestParsers{
-		// Bool:       mrparser.NewBool(),
-		// DateTime:   mrparser.NewDateTime(),
-		Int64:      mrparser.NewInt64(pathFunc),
-		ItemStatus: mrparser.NewItemStatus(),
-		KeyInt32:   mrparser.NewKeyInt32(pathFunc),
-		SortPage:   mrparser.NewSortPage(),
-		String:     mrparser.NewString(pathFunc),
-		// UUID:       mrparser.NewUUID(pathFunc),
+	return app.RequestParsers{
+		// Bool:      mrparser.NewBool(),
+		// DateTime:  mrparser.NewDateTime(),
+		Int64:    mrparser.NewInt64(pathFunc),
+		KeyInt32: mrparser.NewKeyInt32(pathFunc),
+		SortPage: mrparser.NewSortPage(),
+		String:   mrparser.NewString(pathFunc),
+		// UUID:      mrparser.NewUUID(pathFunc),
 		Validator: mrparser.NewValidator(mrjson.NewDecoder(), validator),
-		// File:       mrparser.NewFile(),
-		Image: mrparser.NewImage(mrparser.ImageOptions{}),
+		//File: mrparser.NewFile(
+		//	mrparser.FileOptions{
+		//		AllowedExts:             []string{".pdf", ".zip"},
+		//		MinSize:                 512,
+		//		MaxSize:                 10 * 1024 * 1024,
+		//		CheckRequestContentType: true,
+		//	},
+		//),
+		Image: mrparser.NewImage(
+			mrparser.ImageOptions{
+				File: mrparser.FileOptions{
+					AllowedExts:             []string{".jpeg", ".jpg", ".png"},
+					MinSize:                 512,
+					MaxSize:                 256 * 1024,
+					CheckRequestContentType: true,
+				},
+				MaxWidth:  1024,
+				MaxHeight: 1024,
+				CheckBody: true,
+			},
+		),
 	}, nil
 }
 

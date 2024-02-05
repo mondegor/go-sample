@@ -3,7 +3,9 @@ package factory
 import (
 	"context"
 	"go-sample/config"
-	"go-sample/internal/modules"
+	"go-sample/internal"
+	factory_catalog "go-sample/internal/factory/modules/catalog"
+	factory_filestation "go-sample/internal/factory/modules/file-station"
 	"log"
 
 	"github.com/mondegor/go-storage/mrredislock"
@@ -14,7 +16,7 @@ import (
 	"github.com/mondegor/go-webcore/mrlog"
 )
 
-func CreateAppEnvironment(configPath, logLevel string) (context.Context, modules.Options) {
+func CreateAppEnvironment(configPath, logLevel string) (context.Context, app.Options) {
 	cfg, err := config.Create(configPath)
 
 	if err != nil {
@@ -58,7 +60,7 @@ func CreateAppEnvironment(configPath, logLevel string) (context.Context, modules
 	logger.Debug().Msgf("APP PATH: %s", cfg.AppPath)
 
 	ctx := mrlog.WithContext(context.Background(), logger)
-	opts := modules.Options{
+	opts := app.Options{
 		Cfg:          cfg,
 		EventEmitter: logger,
 	}
@@ -66,7 +68,7 @@ func CreateAppEnvironment(configPath, logLevel string) (context.Context, modules
 	return ctx, opts
 }
 
-func InitAppEnvironment(ctx context.Context, opts modules.Options) (modules.Options, error) {
+func InitAppEnvironment(ctx context.Context, opts app.Options) (app.Options, error) {
 	var err error
 
 	// init shared options
@@ -106,23 +108,33 @@ func InitAppEnvironment(ctx context.Context, opts modules.Options) (modules.Opti
 		return opts, err
 	}
 
+	opts.ImageURLBuilder = NewBuilderImagesURL(opts.Cfg)
+
 	// Shared APIs init section (!!! only after init opts)
-	if opts.CatalogCategoryAPI, err = NewCatalogCategoryAPI(ctx, opts); err != nil {
+	if opts.CatalogCategoryAPI, err = factory_catalog.NewCategoryAPI(ctx, opts); err != nil {
 		return opts, err
 	}
 
-	if opts.CatalogTrademarkAPI, err = NewCatalogTrademarkAPI(ctx, opts); err != nil {
+	if opts.CatalogTrademarkAPI, err = factory_catalog.NewTrademarkAPI(ctx, opts); err != nil {
 		return opts, err
 	}
 
 	opts.OrdererAPI = NewOrdererAPI(ctx, opts)
 
 	// Shared module's options (!!! only after init APIs)
-	if opts.CatalogModule, err = NewCatalogModuleOptions(ctx, opts); err != nil {
+	if opts.CatalogCategoryModule, err = factory_catalog.NewCategoryModuleOptions(ctx, opts); err != nil {
 		return opts, err
 	}
 
-	if opts.FileStationModule, err = NewFileStationModuleOptions(ctx, opts); err != nil {
+	if opts.CatalogProductModule, err = factory_catalog.NewProductModuleOptions(ctx, opts); err != nil {
+		return opts, err
+	}
+
+	if opts.CatalogTrademarkModule, err = factory_catalog.NewTrademarkModuleOptions(ctx, opts); err != nil {
+		return opts, err
+	}
+
+	if opts.FileStationModule, err = factory_filestation.NewModuleOptions(ctx, opts); err != nil {
 		return opts, err
 	}
 

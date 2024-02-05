@@ -1,6 +1,15 @@
 # Go Sample Changelog
 Все изменения сервиса Go Sample будут документироваться на этой странице.
 
+## 2024-02-05
+### Changed
+- Переименованы:
+  - `datetime_created` -> `created_at`;
+  - `datetime_updated` -> `updated_at`;
+  - `modules.Options` -> `app.Options`;
+- Создание модулей переехало в `factory/modules/*`;
+- Большинство юнитов было преобразовано в модули, которые объединены доменами;
+
 ## 2024-01-30
 ### Changed
 - Внедрён новый интерфейс логгера, добавлен режим трассировки запросов;
@@ -9,7 +18,7 @@
 - Переименован `ServiceHelper` -> `UsecaseHelper`;
 - Внедрены `mrlib.CallEachFunc`, `CloseFunc` для группового закрытия ресурсов;
 - Переименован `CorrelationID` на `X-Correlation-ID`;
-- Объекты конфигураций/опций теперь передаются по значению (`*Config` -> `Config`, *`Options` -> `Options`);
+- Объекты конфигураций/опций теперь передаются по значению (`*Config` -> `Config`, `*Options` -> `Options`);
 - Внедрён `oklog/run` для управления одновременным запуском нескольких серверов (http, grpc)
 - Добавлены методы для создания и инициализации всех глобальных настроек приложения
   (`CreateAppEnvironment`, `InitAppEnvironment`);

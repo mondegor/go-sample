@@ -90,7 +90,7 @@ translation:
   dictionaries:
     dir_path: "./translate/dict"
     list:
-      - catalog/category
+      - catalog/categories
 
 app_sections:
   admin_api:

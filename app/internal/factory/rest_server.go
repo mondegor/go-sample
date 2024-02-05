@@ -2,9 +2,11 @@ package factory
 
 import (
 	"context"
-	"go-sample/internal/modules"
-	factory_catalog_adm "go-sample/internal/modules/catalog/factory/admin-api"
-	factory_catalog_pub "go-sample/internal/modules/catalog/factory/public-api"
+	"go-sample/internal"
+	factory_catalog_category_adm "go-sample/internal/modules/catalog/category/factory/admin-api"
+	factory_catalog_category_pub "go-sample/internal/modules/catalog/category/factory/public-api"
+	factory_catalog_product_adm "go-sample/internal/modules/catalog/product/factory/admin-api"
+	factory_catalog_trademark_adm "go-sample/internal/modules/catalog/trademark/factory/admin-api"
 	factory_filestation_pub "go-sample/internal/modules/file-station/factory/public-api"
 	"time"
 
@@ -17,7 +19,7 @@ const (
 	restServerCaption = "RestServer"
 )
 
-func NewRestServer(ctx context.Context, opts modules.Options) (*mrserver.ServerAdapter, error) {
+func NewRestServer(ctx context.Context, opts app.Options) (*mrserver.ServerAdapter, error) {
 	mrlog.Ctx(ctx).Info().Msgf("Create and init '%s'", restServerCaption)
 
 	router, err := NewRestRouter(ctx, opts.Cfg, opts.Translator)
@@ -33,7 +35,23 @@ func NewRestServer(ctx context.Context, opts modules.Options) (*mrserver.ServerA
 		return nil, err
 	}
 
-	if controllers, err := factory_catalog_adm.CreateModule(ctx, opts.CatalogModule); err != nil {
+	if controllers, err := factory_catalog_category_adm.CreateModule(ctx, opts.CatalogCategoryModule); err != nil {
+		return nil, err
+	} else {
+		router.Register(
+			mrfactory.WithMiddlewareCheckAccess(ctx, controllers, sectionAdminAPI, opts.AccessControl)...,
+		)
+	}
+
+	if controllers, err := factory_catalog_product_adm.CreateModule(ctx, opts.CatalogProductModule); err != nil {
+		return nil, err
+	} else {
+		router.Register(
+			mrfactory.WithMiddlewareCheckAccess(ctx, controllers, sectionAdminAPI, opts.AccessControl)...,
+		)
+	}
+
+	if controllers, err := factory_catalog_trademark_adm.CreateModule(ctx, opts.CatalogTrademarkModule); err != nil {
 		return nil, err
 	} else {
 		router.Register(
@@ -48,7 +66,7 @@ func NewRestServer(ctx context.Context, opts modules.Options) (*mrserver.ServerA
 		return nil, err
 	}
 
-	if controllers, err := factory_catalog_pub.CreateModule(ctx, opts.CatalogModule); err != nil {
+	if controllers, err := factory_catalog_category_pub.CreateModule(ctx, opts.CatalogCategoryModule); err != nil {
 		return nil, err
 	} else {
 		router.Register(

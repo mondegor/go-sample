@@ -2,7 +2,7 @@ package factory
 
 import (
 	"context"
-	"go-sample/internal/modules"
+	"go-sample/internal"
 
 	"github.com/mondegor/go-webcore/mrfactory"
 	"github.com/mondegor/go-webcore/mrperms"
@@ -16,7 +16,7 @@ const (
 	sectionPublicAPIRootPath = "/"
 )
 
-func NewAppSectionAdminAPI(ctx context.Context, opts modules.Options) mrperms.AppSection {
+func NewAppSectionAdminAPI(ctx context.Context, opts app.Options) mrperms.AppSection {
 	return mrfactory.NewAppSection(
 		ctx,
 		mrperms.AppSectionOptions{
@@ -30,7 +30,7 @@ func NewAppSectionAdminAPI(ctx context.Context, opts modules.Options) mrperms.Ap
 	)
 }
 
-func NewAppSectionPublicAPI(ctx context.Context, opts modules.Options) mrperms.AppSection {
+func NewAppSectionPublicAPI(ctx context.Context, opts app.Options) mrperms.AppSection {
 	return mrfactory.NewAppSection(
 		ctx,
 		mrperms.AppSectionOptions{
