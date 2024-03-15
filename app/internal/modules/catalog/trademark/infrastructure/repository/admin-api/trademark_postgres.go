@@ -128,7 +128,7 @@ func (re *TrademarkPostgres) FetchTotal(ctx context.Context, where mrstorage.Sql
 	return totalRow, err
 }
 
-func (re *TrademarkPostgres) LoadOne(ctx context.Context, row *entity.Trademark) error {
+func (re *TrademarkPostgres) FetchOne(ctx context.Context, rowID mrtype.KeyInt32) (entity.Trademark, error) {
 	sql := `
 		SELECT
 			tag_version,
@@ -142,10 +142,12 @@ func (re *TrademarkPostgres) LoadOne(ctx context.Context, row *entity.Trademark)
 			trademark_id = $1 AND trademark_status <> $2
 		LIMIT 1;`
 
-	return re.client.QueryRow(
+	row := entity.Trademark{ID: rowID}
+
+	err := re.client.QueryRow(
 		ctx,
 		sql,
-		row.ID,
+		rowID,
 		mrenum.ItemStatusRemoved,
 	).Scan(
 		&row.TagVersion,
@@ -154,9 +156,11 @@ func (re *TrademarkPostgres) LoadOne(ctx context.Context, row *entity.Trademark)
 		&row.Caption,
 		&row.Status,
 	)
+
+	return row, err
 }
 
-func (re *TrademarkPostgres) FetchStatus(ctx context.Context, row *entity.Trademark) (mrenum.ItemStatus, error) {
+func (re *TrademarkPostgres) FetchStatus(ctx context.Context, row entity.Trademark) (mrenum.ItemStatus, error) {
 	sql := `
 		SELECT
 			trademark_status
@@ -182,11 +186,11 @@ func (re *TrademarkPostgres) FetchStatus(ctx context.Context, row *entity.Tradem
 
 // IsExists
 // result: nil - exists, ErrStorageNoRowFound - not exists, error - query error
-func (re *TrademarkPostgres) IsExists(ctx context.Context, id mrtype.KeyInt32) error {
-	return repository_shared.TrademarkIsExistsPostgres(ctx, re.client, id)
+func (re *TrademarkPostgres) IsExists(ctx context.Context, rowID mrtype.KeyInt32) error {
+	return repository_shared.TrademarkIsExistsPostgres(ctx, re.client, rowID)
 }
 
-func (re *TrademarkPostgres) Insert(ctx context.Context, row *entity.Trademark) error {
+func (re *TrademarkPostgres) Insert(ctx context.Context, row entity.Trademark) (mrtype.KeyInt32, error) {
 	sql := `
 		INSERT INTO ` + module.DBSchema + `.trademarks
 			(
@@ -198,7 +202,7 @@ func (re *TrademarkPostgres) Insert(ctx context.Context, row *entity.Trademark) 
 		RETURNING
 			trademark_id;`
 
-	return re.client.QueryRow(
+	err := re.client.QueryRow(
 		ctx,
 		sql,
 		row.Caption,
@@ -206,9 +210,11 @@ func (re *TrademarkPostgres) Insert(ctx context.Context, row *entity.Trademark) 
 	).Scan(
 		&row.ID,
 	)
+
+	return row.ID, err
 }
 
-func (re *TrademarkPostgres) Update(ctx context.Context, row *entity.Trademark) (int32, error) {
+func (re *TrademarkPostgres) Update(ctx context.Context, row entity.Trademark) (int32, error) {
 	sql := `
 		UPDATE
 			` + module.DBSchema + `.trademarks
@@ -237,7 +243,7 @@ func (re *TrademarkPostgres) Update(ctx context.Context, row *entity.Trademark) 
 	return tagVersion, err
 }
 
-func (re *TrademarkPostgres) UpdateStatus(ctx context.Context, row *entity.Trademark) (int32, error) {
+func (re *TrademarkPostgres) UpdateStatus(ctx context.Context, row entity.Trademark) (int32, error) {
 	sql := `
 		UPDATE
 			` + module.DBSchema + `.trademarks
@@ -266,7 +272,7 @@ func (re *TrademarkPostgres) UpdateStatus(ctx context.Context, row *entity.Trade
 	return tagVersion, err
 }
 
-func (re *TrademarkPostgres) Delete(ctx context.Context, id mrtype.KeyInt32) error {
+func (re *TrademarkPostgres) Delete(ctx context.Context, rowID mrtype.KeyInt32) error {
 	sql := `
 		UPDATE
 			` + module.DBSchema + `.trademarks
@@ -280,7 +286,7 @@ func (re *TrademarkPostgres) Delete(ctx context.Context, id mrtype.KeyInt32) err
 	return re.client.Exec(
 		ctx,
 		sql,
-		id,
+		rowID,
 		mrenum.ItemStatusRemoved,
 	)
 }

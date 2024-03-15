@@ -1,0 +1,17 @@
+Custom.Request.Query.Filter.CategoryID:
+  description: |-
+    Фильтр категории каталога (модуль - Catalog.Category)
+
+    Возможные значения:
+    - NULL - все записи;
+    - ID категории из списка /v1/catalog/categories;
+
+    Значение по умолчанию: NULL
+  name: categoryId
+  in: query
+  required: false
+  schema:
+    type: integer
+    format: int32
+    nullable: true
+  example: 1

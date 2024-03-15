@@ -2,7 +2,6 @@ package factory
 
 import (
 	"context"
-	module "go-sample/internal/modules/catalog/category"
 	http_v1 "go-sample/internal/modules/catalog/category/controller/http_v1/admin-api"
 	entity "go-sample/internal/modules/catalog/category/entity/admin-api"
 	"go-sample/internal/modules/catalog/category/factory"
@@ -42,17 +41,17 @@ func newUnitCategory(ctx context.Context, opts factory.Options) (*http_v1.Catego
 
 	storage := repository.NewCategoryPostgres(
 		opts.PostgresAdapter,
-		mrsql.NewBuilderSelect(
+		mrpostgres.NewSqlBuilderSelect(
 			mrpostgres.NewSqlBuilderWhere(),
-			mrpostgres.NewSqlBuilderOrderByWithDefaultSort(ctx, metaOrderBy.DefaultSort()),
-			mrpostgres.NewSqlBuilderPager(module.PageSizeMax),
+			mrpostgres.NewSqlBuilderOrderBy(ctx, metaOrderBy.DefaultSort()),
+			mrpostgres.NewSqlBuilderPager(opts.PageSizeMax),
 		),
 	)
-	service := usecase.NewCategory(storage, opts.EventEmitter, opts.UsecaseHelper, opts.UnitCategory.ImageURLBuilder)
+	useCase := usecase.NewCategory(storage, opts.EventEmitter, opts.UsecaseHelper, opts.UnitCategory.ImageURLBuilder)
 	controller := http_v1.NewCategory(
 		opts.RequestParser,
 		opts.ResponseSender,
-		service,
+		useCase,
 		metaOrderBy,
 	)
 
@@ -61,7 +60,7 @@ func newUnitCategory(ctx context.Context, opts factory.Options) (*http_v1.Catego
 
 func newUnitCategoryImage(ctx context.Context, opts factory.Options) (*http_v1.CategoryImage, error) {
 	storage := repository.NewCategoryImagePostgres(opts.PostgresAdapter)
-	service := usecase.NewCategoryImage(
+	useCase := usecase.NewCategoryImage(
 		storage,
 		opts.UnitCategory.ImageFileAPI,
 		opts.Locker,
@@ -71,7 +70,7 @@ func newUnitCategoryImage(ctx context.Context, opts factory.Options) (*http_v1.C
 	controller := http_v1.NewCategoryImage(
 		opts.RequestParser,
 		mrresponse.NewFileSender(opts.ResponseSender),
-		service,
+		useCase,
 	)
 
 	return controller, nil

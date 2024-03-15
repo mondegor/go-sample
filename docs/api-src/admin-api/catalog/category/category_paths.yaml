@@ -1,0 +1,325 @@
+/v1/catalog/categories:
+  get:
+    summary: Метод получения списка категорий
+    description: |-
+      Метод предназначен для получения списка всех категорий, сохраненных в БД
+
+      Фильтр `App.Request.Query.Filter.SearchText` использует для поиска следующие поля:
+      - caption;
+
+      Возможные значения `App.Request.Query.ListSorter.SortField`:
+      - caption,default,asc;
+      - createdAt;
+      - updatedAt;
+
+      Возможные значения `App.Request.Query.ListPager.PageSize`:
+      - от 1 до 1000 (default: 50)
+
+    operationId: getCategoryList
+    tags:
+      - Catalog.Category
+
+    security:
+      - bearerAuth: []
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+      - $ref: "#/components/parameters/App.Request.Query.Filter.SearchText"
+      - $ref: "#/components/parameters/App.Request.Query.Filter.Statuses"
+      - $ref: "#/components/parameters/App.Request.Query.ListSorter.SortField"
+      - $ref: "#/components/parameters/App.Request.Query.ListSorter.SortDirection"
+      - $ref: "#/components/parameters/App.Request.Query.ListPager.PageIndex"
+      - $ref: "#/components/parameters/App.Request.Query.ListPager.PageSize"
+
+    responses:
+      "200":
+        description: Получен список категорий
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: "#/components/schemas/Catalog.Categories.AdminAPI.Response.Model.CategoryList"
+      "401":
+        $ref: "#/components/responses/App.ResponseJson.Error401"
+      "403":
+        $ref: "#/components/responses/App.ResponseJson.Error403"
+      "500":
+        $ref: "#/components/responses/App.ResponseJson.Error5XX"
+
+  post:
+    summary: Метод добавления новой категории
+    description: |-
+      Метод предназначен для создания информации о новой категории в БД
+
+      **Ограничения и ошибки полей:**
+      - caption: required,max=128
+    operationId: createCategory
+    tags:
+      - Catalog.Category
+
+    security:
+      - bearerAuth: []
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+
+    requestBody:
+      required: true
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: "#/components/schemas/Catalog.Categories.AdminAPI.Request.Model.CreateCategory"
+
+    responses:
+      "201":
+        description: Информация о категории успешно добавлена
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: "#/components/schemas/App.Response.Model.SuccessCreatedItem"
+      "400":
+        $ref: "#/components/responses/App.ResponseJson.Error400"
+      "401":
+        $ref: "#/components/responses/App.ResponseJson.Error401"
+      "403":
+        $ref: "#/components/responses/App.ResponseJson.Error403"
+      "500":
+        $ref: "#/components/responses/App.ResponseJson.Error5XX"
+
+/v1/catalog/categories/{categoryId}:
+  get:
+    summary: Метод получения категории
+    description: Метод предназначен для получения информации об указанной категории из БД
+    operationId: getCategory
+    tags:
+      - Catalog.Category
+
+    security:
+      - bearerAuth: []
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+      - $ref: "#/components/parameters/Catalog.Categories.AdminAPI.Request.Path.CategoryID"
+
+    responses:
+      "200":
+        description: Получена информация о категории
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: "#/components/schemas/Catalog.Categories.AdminAPI.Response.Model.Category"
+      "401":
+        $ref: "#/components/responses/App.ResponseJson.Error401"
+      "403":
+        $ref: "#/components/responses/App.ResponseJson.Error403"
+      "404":
+        $ref: "#/components/responses/App.ResponseJson.Error404"
+      "500":
+        $ref: "#/components/responses/App.ResponseJson.Error5XX"
+
+  put:
+    summary: Метод сохранения категории
+    description: |-
+      Метод предназначен для сохранения информации об указанной категории в БД
+
+      **Ограничения и ошибки полей:**
+      - version: required,gte=1 | ErrVersionInvalid
+      - caption: required,max=128
+    operationId: storeCategory
+    tags:
+      - Catalog.Category
+
+    security:
+      - bearerAuth: []
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+      - $ref: "#/components/parameters/Catalog.Categories.AdminAPI.Request.Path.CategoryID"
+
+    requestBody:
+      required: true
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: "#/components/schemas/Catalog.Categories.AdminAPI.Request.Model.StoreCategory"
+
+    responses:
+      "204":
+        description: Информация о категории успешно сохранена
+      "400":
+        $ref: "#/components/responses/App.ResponseJson.Error400"
+      "401":
+        $ref: "#/components/responses/App.ResponseJson.Error401"
+      "403":
+        $ref: "#/components/responses/App.ResponseJson.Error403"
+      "404":
+        $ref: "#/components/responses/App.ResponseJson.Error404"
+      "500":
+        $ref: "#/components/responses/App.ResponseJson.Error5XX"
+
+  delete:
+    summary: Метод удаления категории
+    description: Метод предназначен для удаления информации об указанной категории из БД
+    operationId: removeCategory
+    tags:
+      - Catalog.Category
+
+    security:
+      - bearerAuth: []
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+      - $ref: "#/components/parameters/Catalog.Categories.AdminAPI.Request.Path.CategoryID"
+
+    responses:
+      "204":
+        description: Информация о категории успешно удалена
+      "401":
+        $ref: "#/components/responses/App.ResponseJson.Error401"
+      "403":
+        $ref: "#/components/responses/App.ResponseJson.Error403"
+      "404":
+        $ref: "#/components/responses/App.ResponseJson.Error404"
+      "500":
+        $ref: "#/components/responses/App.ResponseJson.Error5XX"
+
+/v1/catalog/categories/{categoryId}/status:
+  put:
+    summary: Метод изменения статуса категории
+    description: |-
+      Метод предназначен для изменения статуса категории в БД
+
+      **Ограничения и ошибки полей:**
+      - version: required,gte=1 | ErrVersionInvalid
+      - status: required,enum | ErrSwitchStatusRejected
+    operationId: changeCategoryStatus
+    tags:
+      - Catalog.Category
+
+    security:
+      - bearerAuth: []
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+      - $ref: "#/components/parameters/Catalog.Categories.AdminAPI.Request.Path.CategoryID"
+
+    requestBody:
+      required: true
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: "#/components/schemas/App.Request.Model.ChangeStatus"
+
+    responses:
+      "204":
+        description: Статус категории успешно изменён
+      "400":
+        $ref: "#/components/responses/App.ResponseJson.Error400"
+      "401":
+        $ref: "#/components/responses/App.ResponseJson.Error401"
+      "403":
+        $ref: "#/components/responses/App.ResponseJson.Error403"
+      "404":
+        $ref: "#/components/responses/App.ResponseJson.Error404"
+      "500":
+        $ref: "#/components/responses/App.ResponseJson.Error5XX"
+
+/v1/catalog/categories/{categoryId}/image:
+  get:
+    summary: Метод получения изображения категории
+    description: Метод предназначен для получения изображения указанной категории из файлового хранилища
+    operationId: getCategoryImage
+    tags:
+      - Catalog.Category
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+      - $ref: "#/components/parameters/Catalog.Categories.AdminAPI.Request.Path.CategoryID"
+
+    responses:
+      "200":
+        description: Получено изображение категории
+        content:
+          image/png:
+            schema:
+              $ref: "#/components/schemas/App.Response.Model.BinaryImage"
+          image/jpeg:
+            schema:
+              $ref: "#/components/schemas/App.Response.Model.BinaryImage"
+      "404":
+        $ref: "#/components/responses/App.ResponseJson.Error404"
+      "500":
+        $ref: "#/components/responses/App.ResponseJson.Error5XX"
+
+  put:
+    summary: Метод загруки/обновления изображения для категории
+    description: |-
+      Метод предназначен для загруки нового изображения для указанной категории в файловое хранилище.\
+      При этом старое изображение удаляется.
+
+      **Ограничения и валидация загрузки:**
+      - Загруженная картинка некорректная (битый файл, расширение, ...);
+    operationId: uploadCategoryImage
+    tags:
+      - Catalog.Category
+
+    security:
+      - bearerAuth: []
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+      - $ref: "#/components/parameters/Catalog.Categories.AdminAPI.Request.Path.CategoryID"
+
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            properties:
+              categoryImage:
+                description: Бинарный файл с расширением JPEG, PNG
+                type: string
+                format: binary
+                maxLength: 102400 # 100Kb
+
+    responses:
+      "204":
+        description: Изображение категории было сохранено
+      "400":
+        $ref: "#/components/responses/App.ResponseJson.Error400"
+      "401":
+        $ref: "#/components/responses/App.ResponseJson.Error401"
+      "500":
+        $ref: "#/components/responses/App.ResponseJson.Error5XX"
+
+  delete:
+    summary: Метод удаления изображения для категории
+    description: Метод предназначен для удаления изображения указанной категории из БД
+    operationId: removeCategoryImage
+    tags:
+      - Catalog.Category
+
+    security:
+      - bearerAuth: []
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+      - $ref: "#/components/parameters/Catalog.Categories.AdminAPI.Request.Path.CategoryID"
+
+    responses:
+      "204":
+        description: Изображение категории успешно удалено
+      "401":
+        $ref: "#/components/responses/App.ResponseJson.Error401"
+      "404":
+        $ref: "#/components/responses/App.ResponseJson.Error404"
+      "500":
+        $ref: "#/components/responses/App.ResponseJson.Error5XX"

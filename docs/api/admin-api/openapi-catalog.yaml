@@ -16,11 +16,13 @@ info:
     #### Ограничения полей
     - required - поле обязательно для заполнения;
     - omitempty - поле может быть не указано (не будет использоваться методом, в который было передано);
+    - unique - уникальное значение поля;
     - min=N - поле должно быть не менее N символов;
     - max=N - поле должно быть не более N символов;
     - gte=N - числовое поле должно быть равно или более N;
     - lte=N - числовое поле должно быть равно или менее N;
     - enum - поле должно содержать одно из ENUM значений;
+    - UUID - поле формата UUID;
     - pattern=P - поле должно соответствовать регулярному выражению P;
 
     #### Ошибки
@@ -32,23 +34,36 @@ servers:
   - url: http://localhost:8080/adm
     description: Local Host
 tags:
-  - name: Catalog.Categories
+  - name: Catalog.Category
     description: Private API Categories of product catalog
 
-  - name: Catalog.Products
+  - name: Catalog.Product
     description: Private API Products of product catalog
 
-  - name: Catalog.Trademarks
-    description: Private API Trademarks of products
+  - name: Catalog.Trademark
+    description: Private API Trademarks of product catalog
 
 paths:
   /v1/catalog/categories:
     get:
       summary: Метод получения списка категорий
-      description: Метод предназначен для получения списка всех категорий, сохраненных в БД
-      operationId: getCategories
+      description: |-
+        Метод предназначен для получения списка всех категорий, сохраненных в БД
+
+        Фильтр `App.Request.Query.Filter.SearchText` использует для поиска следующие поля:
+        - caption;
+
+        Возможные значения `App.Request.Query.ListSorter.SortField`:
+        - caption,default,asc;
+        - createdAt;
+        - updatedAt;
+
+        Возможные значения `App.Request.Query.ListPager.PageSize`:
+        - от 1 до 1000 (default: 50)
+
+      operationId: getCategoryList
       tags:
-        - Catalog.Categories
+        - Catalog.Category
 
       security:
         - bearerAuth: []
@@ -86,7 +101,7 @@ paths:
         - caption: required,max=128
       operationId: createCategory
       tags:
-        - Catalog.Categories
+        - Catalog.Category
 
       security:
         - bearerAuth: []
@@ -124,7 +139,7 @@ paths:
       description: Метод предназначен для получения информации об указанной категории из БД
       operationId: getCategory
       tags:
-        - Catalog.Categories
+        - Catalog.Category
 
       security:
         - bearerAuth: []
@@ -160,7 +175,7 @@ paths:
         - caption: required,max=128
       operationId: storeCategory
       tags:
-        - Catalog.Categories
+        - Catalog.Category
 
       security:
         - bearerAuth: []
@@ -196,7 +211,7 @@ paths:
       description: Метод предназначен для удаления информации об указанной категории из БД
       operationId: removeCategory
       tags:
-        - Catalog.Categories
+        - Catalog.Category
 
       security:
         - bearerAuth: []
@@ -229,7 +244,7 @@ paths:
         - status: required,enum | ErrSwitchStatusRejected
       operationId: changeCategoryStatus
       tags:
-        - Catalog.Categories
+        - Catalog.Category
 
       security:
         - bearerAuth: []
@@ -266,7 +281,7 @@ paths:
       description: Метод предназначен для получения изображения указанной категории из файлового хранилища
       operationId: getCategoryImage
       tags:
-        - Catalog.Categories
+        - Catalog.Category
 
       parameters:
         - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
@@ -279,10 +294,10 @@ paths:
           content:
             image/png:
               schema:
-                $ref: "#/components/schemas/App.Response.Model.BinaryFile"
+                $ref: "#/components/schemas/App.Response.Model.BinaryImage"
             image/jpeg:
               schema:
-                $ref: "#/components/schemas/App.Response.Model.BinaryFile"
+                $ref: "#/components/schemas/App.Response.Model.BinaryImage"
         "404":
           $ref: "#/components/responses/App.ResponseJson.Error404"
         "500":
@@ -298,7 +313,7 @@ paths:
         - Загруженная картинка некорректная (битый файл, расширение, ...);
       operationId: uploadCategoryImage
       tags:
-        - Catalog.Categories
+        - Catalog.Category
 
       security:
         - bearerAuth: []
@@ -335,7 +350,7 @@ paths:
       description: Метод предназначен для удаления изображения указанной категории из БД
       operationId: removeCategoryImage
       tags:
-        - Catalog.Categories
+        - Catalog.Category
 
       security:
         - bearerAuth: []
@@ -358,10 +373,26 @@ paths:
   /v1/catalog/products:
     get:
       summary: Метод получения списка товаров категории
-      description: Метод предназначен для получения списка всех товаров указанной категории, сохранённых в БД
-      operationId: getProducts
+      description: |
+        Метод предназначен для получения списка всех товаров указанной категории, сохранённых в БД
+
+        Фильтр `App.Request.Query.Filter.SearchText` использует для поиска следующие поля:
+        - article;
+        - caption;
+
+        Возможные значения `App.Request.Query.ListSorter.SortField`:
+        - article
+        - caption,default,asc;
+        - price
+        - createdAt;
+        - updatedAt;
+
+        Возможные значения `App.Request.Query.ListPager.PageSize`:
+        - от 1 до 1000 (default: 50)
+
+      operationId: getProductList
       tags:
-        - Catalog.Products
+        - Catalog.Product
 
       security:
         - bearerAuth: []
@@ -369,9 +400,9 @@ paths:
       parameters:
         - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
         - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
-        - $ref: "#/components/parameters/Catalog.Products.AdminAPI.Request.Query.Filter.CategoryID"
+        - $ref: "#/components/parameters/Custom.Request.Query.Filter.CategoryID"
         - $ref: "#/components/parameters/App.Request.Query.Filter.SearchText"
-        - $ref: "#/components/parameters/Catalog.Products.AdminAPI.Request.Query.Filter.TrademarkIDs"
+        - $ref: "#/components/parameters/Custom.Request.Query.Filter.TrademarkIDs"
         - $ref: "#/components/parameters/Custom.Request.Query.Filter.PriceMin"
         - $ref: "#/components/parameters/Custom.Request.Query.Filter.PriceMax"
         - $ref: "#/components/parameters/App.Request.Query.Filter.Statuses"
@@ -401,13 +432,13 @@ paths:
 
         **Ограничения и ошибки полей:**
         - categoryId: required,gte=1
-        - article: required,min=4,max=32,pattern=article
+        - article: required,unique,min=4,max=32,pattern=article
         - caption: required,max=128
         - trademarkId: required,gte=1
         - price: gte=0
       operationId: createProduct
       tags:
-        - Catalog.Products
+        - Catalog.Product
 
       security:
         - bearerAuth: []
@@ -445,7 +476,7 @@ paths:
       description: Метод предназначен для получения информации о товаре из БД
       operationId: getProduct
       tags:
-        - Catalog.Products
+        - Catalog.Product
 
       security:
         - bearerAuth: []
@@ -478,13 +509,13 @@ paths:
 
         **Ограничения и ошибки полей:**
         - version: required,gte=1 | ErrVersionInvalid
-        - article: omitempty,min=4,max=32,pattern=article
+        - article: omitempty,unique,min=4,max=32,pattern=article
         - caption: omitempty,max=128
         - trademarkId: omitempty,gte=1
         - price: omitempty,gte=0
       operationId: storeProduct
       tags:
-        - Catalog.Products
+        - Catalog.Product
 
       security:
         - bearerAuth: []
@@ -520,7 +551,7 @@ paths:
       description: Метод предназначен для удаления информации о товаре из БД
       operationId: removeProduct
       tags:
-        - Catalog.Products
+        - Catalog.Product
 
       security:
         - bearerAuth: []
@@ -553,7 +584,7 @@ paths:
         - status: required,enum | ErrSwitchStatusRejected
       operationId: changeProductStatus
       tags:
-        - Catalog.Products
+        - Catalog.Product
 
       security:
         - bearerAuth: []
@@ -594,7 +625,7 @@ paths:
         - Не найдено поле, после которого необходимо вставить указанное поле;
       operationId: moveProduct
       tags:
-        - Catalog.Products
+        - Catalog.Product
 
       security:
         - bearerAuth: []
@@ -628,10 +659,23 @@ paths:
   /v1/catalog/trademarks:
     get:
       summary: Метод получения списка торговых марок
-      description: Метод предназначен для получения списка всех торговых марок, сохраненных в БД
-      operationId: getTrademarks
+      description: |-
+        Метод предназначен для получения списка всех торговых марок, сохраненных в БД
+
+        Фильтр `App.Request.Query.Filter.SearchText` использует для поиска следующие поля:
+        - caption;
+
+        Возможные значения `App.Request.Query.ListSorter.SortField`:
+        - caption,default,asc;
+        - createdAt;
+        - updatedAt;
+
+        Возможные значения `App.Request.Query.ListPager.PageSize`:
+        - от 1 до 1000 (default: 50)
+
+      operationId: getTrademarkList
       tags:
-        - Catalog.Trademarks
+        - Catalog.Trademark
 
       security:
         - bearerAuth: []
@@ -669,7 +713,7 @@ paths:
         - caption: required,max=128
       operationId: createTrademark
       tags:
-        - Catalog.Trademarks
+        - Catalog.Trademark
 
       security:
         - bearerAuth: []
@@ -707,7 +751,7 @@ paths:
       description: Метод предназначен для получения информации о торговой марке из БД
       operationId: getTrademark
       tags:
-        - Catalog.Trademarks
+        - Catalog.Trademark
 
       security:
         - bearerAuth: []
@@ -743,7 +787,7 @@ paths:
         - caption: required,max=128
       operationId: storeTrademark
       tags:
-        - Catalog.Trademarks
+        - Catalog.Trademark
 
       security:
         - bearerAuth: []
@@ -779,7 +823,7 @@ paths:
       description: Метод предназначен для удаления информации о торговой марке из БД
       operationId: removeTrademark
       tags:
-        - Catalog.Trademarks
+        - Catalog.Trademark
 
       security:
         - bearerAuth: []
@@ -812,7 +856,7 @@ paths:
         - status: required,enum | ErrSwitchStatusRejected
       operationId: changeTrademarkStatus
       tags:
-        - Catalog.Trademarks
+        - Catalog.Trademark
 
       security:
         - bearerAuth: []
@@ -853,18 +897,18 @@ components:
       required: false
       schema:
         type: string
-        default: "ru"
+        default: "ru-RU"
       example: "ru;q=0.9, fr-CH, fr;q=0.8, en;q=0.7, *;q=0.5"
 
     App.Request.Header.CorrelationID:
-      description: Уникальный идентификатор запроса
-      name: CorrelationID
+      description: Уникальный идентификатор клиента
+      name: X-Correlation-Id
       in: header
       required: false
       schema:
         type: string
         format: uuid
-      example: "f7479171-83d2-4f64-84ac-892f8c0aaf48"
+      example: "1f0b7925-cee6-4e44-8ea3-4e585d12212d"
 
     App.Request.Query.Filter.SearchText:
       description: Поисковая строка
@@ -944,7 +988,7 @@ components:
       schema:
         type: integer
         maxLength: 10
-      example: 100000 # 100g/m2
+      example: 100000 # 100 coins
 
     Custom.Request.Query.Filter.PriceMax:
       description: Максимальная цена (10^2)
@@ -954,7 +998,42 @@ components:
       schema:
         type: integer
         maxLength: 10
-      example: 100000 # 100g/m2
+      example: 100000 # 100 coins
+
+    Custom.Request.Query.Filter.CategoryID:
+      description: |-
+        Фильтр категории каталога (модуль - Catalog.Category)
+
+        Возможные значения:
+        - NULL - все записи;
+        - ID категории из списка /v1/catalog/categories;
+
+        Значение по умолчанию: NULL
+      name: categoryId
+      in: query
+      required: false
+      schema:
+        type: integer
+        format: int32
+        nullable: true
+      example: 1
+
+    Custom.Request.Query.Filter.TrademarkIDs:
+      description: |-
+        Фильтр торговых марок каталога (модуль - Catalog.Trademark)
+
+        Возможные значения:
+        - NULL - все записи;
+        - Список ID торговых марок через "," (/v1/catalog/trademarks);
+
+        Значение по умолчанию: NULL
+      name: trademarkId
+      in: query
+      required: false
+      schema:
+        type: string
+        nullable: true
+      example: "1736,1691"
 
     Catalog.Categories.AdminAPI.Request.Path.CategoryID:
       description: Идентификатор категории
@@ -975,25 +1054,6 @@ components:
         type: integer
         minimum: 1
       example: 1000
-
-    Catalog.Products.AdminAPI.Request.Query.Filter.CategoryID:
-      description: Идентификатор категории
-      name: categoryId
-      in: query
-      required: false
-      schema:
-        type: integer
-        minimum: 1
-      example: 1000
-
-    Catalog.Products.AdminAPI.Request.Query.Filter.TrademarkIDs:
-      description: Список идентификаторов торговых марок через ","
-      name: trademarks
-      in: query
-      required: false
-      schema:
-        type: string
-      example: "1736,1691"
 
     Catalog.Trademarks.AdminAPI.Request.Path.TrademarkID:
       description: Идентификатор торговой марки
@@ -1020,9 +1080,11 @@ components:
       example: "ENABLED"
 
     App.Field.Article:
-      description: Уникальный артикул записи (любые буквы без пробелов)
+      description: |
+        Уникальный артикул записи (любые буквы без пробелов)
+        - pattern: ^S+$
       type: string
-      pattern: "^S+$"
+      # pattern: "^S+$"
       minLength: 2
       maxLength: 64
       example: "item-FLEX-92744"
@@ -1033,24 +1095,17 @@ components:
       maxLength: 128
       example: "Название"
 
-    App.Field.Date.CreatedAt:
+    App.Field.DateTimeCreatedAt:
       description: Дата и время создания записи (UTC)
       type: string
       format: date-time
       example: "2023-01-01T12:00:00.000+02:00"
 
-    App.Field.Date.UpdatedAt:
+    App.Field.DateTimeUpdatedAt:
       description: Дата и время обновления записи (UTC)
       type: string
       format: date-time
-      nullable: true
       example: "2023-01-01T12:00:00.000+02:00"
-
-    App.Field.IntegerID:
-      description: Идентификатор записи
-      type: integer
-      minimum: 1
-      example: 1000
 
     App.Field.ListPager.Total:
       description: Количество записей в БД с учётом указанных в запросе фильтров
@@ -1064,8 +1119,8 @@ components:
       minimum: 1
       example: 5
 
-    App.Measure.Price:
-      description: Цена изделия (10^2)
+    App.Field.Measure.Price:
+      description: Цена (10^2)
       type: integer # Money
       maxLength: 12
       minimum: 0
@@ -1102,11 +1157,11 @@ components:
           type: integer
           example: 7
 
-    App.Response.Model.BinaryFile:
-      description: DTO - бинарный файл
+    App.Response.Model.BinaryImage:
+      description: Бинарный файл одного из типов - JPEG, PNG
       type: string
       format: binary
-      maxLength: 16777216
+      maxLength: 1048576 # 1Mb
 
     App.Response.Model.ErrorList:
       description: DTO списка пользовательских ошибок 400
@@ -1165,26 +1220,26 @@ components:
       description: DTO - информация об изображении
       type: object
       required:
-        - name
+        - url
         - size
       properties:
         contentType:
-          description: Тип файла
+          description: Тип изображения
           type: string
           maxLength: 64
           example: "image/jpeg"
-        originalName:
-          description: Оригинальное название файла изображения
-          type: string
-          maxLength: 128
-          example: "image-original-name.jpg"
-        name:
-          description: Название файла изображения
-          type: string
-          maxLength: 128
-          example: "image-name.jpg"
+    #    originalName:
+    #      description: Оригинальное название файла изображения
+    #      type: string
+    #      maxLength: 128
+    #      example: "image-original-name.jpg"
+    #    name:
+    #      description: Название файла изображения
+    #      type: string
+    #      maxLength: 128
+    #      example: "image-name.jpg"
         url:
-          description: URL файла изображения
+          description: URL изображения
           type: string
           maxLength: 128
           example: "http://localhost/path/image-name.jpg"
@@ -1200,11 +1255,15 @@ components:
           description: Размер файла изображения в байтах
           type: integer
           example: 7
-        lastModified:
-          description: Дата и время обновления файла изображения (UTC)
+        createdAt:
+          description: Дата и время создания изображения (UTC)
           type: string
           format: date-time
-          nullable: true
+          example: "2023-01-01T12:00:00.000+02:00"
+        updatedAt:
+          description: Дата и время последней модификации изображения (UTC)
+          type: string
+          format: date-time
           example: "2023-01-01T12:00:00.000+02:00"
 
     App.Response.Model.SuccessCreatedItem:
@@ -1215,12 +1274,29 @@ components:
       properties:
         id:
           description: Идентификатор созданной записи
-          type: integer
-          minimum: 1
-          example: 1000
-        message:
           type: string
-          example: "Запись была успешно создана"
+          example: "f7479171-83d2-4f64-84ac-892f8c0aaf48"
+
+    Custom.Field.CategoryID:
+      description: Идентификатор категории (модуль - Catalog.Category)
+      type: integer
+      format: int32
+      minimum: 1
+      example: 2
+
+    Custom.Field.ProductID:
+      description: Идентификатор продукции (модуль - Catalog.Product)
+      type: integer
+      format: int32
+      minimum: 1
+      example: 2
+
+    Custom.Field.TrademarkID:
+      description: Идентификатор торговой марки (модуль - Catalog.Trademark)
+      type: integer
+      format: int32
+      minimum: 1
+      example: 2
 
     Catalog.Categories.AdminAPI.Request.Model.CreateCategory:
       description: DTO добавления новой категории каталога
@@ -1269,13 +1345,13 @@ components:
         - status
       properties:
         id: # categoryId
-          $ref: "#/components/schemas/App.Field.IntegerID"
+          $ref: "#/components/schemas/Custom.Field.CategoryID"
         version:
           $ref: "#/components/schemas/App.Field.TagVersion"
         createdAt:
-          $ref: "#/components/schemas/App.Field.Date.CreatedAt"
+          $ref: "#/components/schemas/App.Field.DateTimeCreatedAt"
         updatedAt:
-          $ref: "#/components/schemas/App.Field.Date.UpdatedAt"
+          $ref: "#/components/schemas/App.Field.DateTimeUpdatedAt"
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
         imageInfo:
@@ -1293,15 +1369,15 @@ components:
         - trademarkId
       properties:
         categoryId:
-          $ref: "#/components/schemas/App.Field.IntegerID"
+          $ref: "#/components/schemas/Custom.Field.CategoryID"
         article:
           $ref: "#/components/schemas/App.Field.Article"
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
         trademarkId:
-          $ref: "#/components/schemas/App.Field.IntegerID"
+          $ref: "#/components/schemas/Custom.Field.TrademarkID"
         price:
-          $ref: "#/components/schemas/App.Measure.Price"
+          $ref: "#/components/schemas/App.Field.Measure.Price"
 
     Catalog.Products.AdminAPI.Request.Model.StoreProduct:
       description: DTO сохранения товара каталога
@@ -1316,9 +1392,9 @@ components:
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
         trademarkId:
-          $ref: "#/components/schemas/App.Field.IntegerID"
+          $ref: "#/components/schemas/Custom.Field.TrademarkID"
         price:
-          $ref: "#/components/schemas/App.Measure.Price"
+          $ref: "#/components/schemas/App.Field.Measure.Price"
 
     Catalog.Products.AdminAPI.Response.Model.ProductList:
       description: DTO - список товаров каталога
@@ -1350,23 +1426,23 @@ components:
         - status
       properties:
         id: # productId
-          $ref: "#/components/schemas/App.Field.IntegerID"
+          $ref: "#/components/schemas/Custom.Field.ProductID"
         version:
           $ref: "#/components/schemas/App.Field.TagVersion"
         createdAt:
-          $ref: "#/components/schemas/App.Field.Date.CreatedAt"
+          $ref: "#/components/schemas/App.Field.DateTimeCreatedAt"
         updatedAt:
-          $ref: "#/components/schemas/App.Field.Date.UpdatedAt"
+          $ref: "#/components/schemas/App.Field.DateTimeUpdatedAt"
         categoryId:
-          $ref: "#/components/schemas/App.Field.IntegerID"
+          $ref: "#/components/schemas/Custom.Field.CategoryID"
         article:
           $ref: "#/components/schemas/App.Field.Article"
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
         trademarkId:
-          $ref: "#/components/schemas/App.Field.IntegerID"
+          $ref: "#/components/schemas/Custom.Field.TrademarkID"
         price:
-          $ref: "#/components/schemas/App.Measure.Price"
+          $ref: "#/components/schemas/App.Field.Measure.Price"
         status:
           $ref: "#/components/schemas/App.Enum.Status"
 
@@ -1417,13 +1493,13 @@ components:
         - status
       properties:
         id: # trademarkId
-          $ref: "#/components/schemas/App.Field.IntegerID"
+          $ref: "#/components/schemas/Custom.Field.TrademarkID"
         version:
           $ref: "#/components/schemas/App.Field.TagVersion"
         createdAt:
-          $ref: "#/components/schemas/App.Field.Date.CreatedAt"
+          $ref: "#/components/schemas/App.Field.DateTimeCreatedAt"
         updatedAt:
-          $ref: "#/components/schemas/App.Field.Date.UpdatedAt"
+          $ref: "#/components/schemas/App.Field.DateTimeUpdatedAt"
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
         status:
@@ -1467,6 +1543,7 @@ components:
 
   securitySchemes:
     bearerAuth:
+      description: https://www.rfc-editor.org/rfc/rfc6750
       type: http
       scheme: bearer
       bearerFormat: JWT

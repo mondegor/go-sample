@@ -24,6 +24,6 @@ func NewCategoryPostgres(
 
 // IsExists
 // result: nil - exists, ErrStorageNoRowFound - not exists, error - query error
-func (re *CategoryPostgres) IsExists(ctx context.Context, id mrtype.KeyInt32) error {
-	return repository_shared.CategoryIsExistsPostgres(ctx, re.client, id)
+func (re *CategoryPostgres) IsExists(ctx context.Context, rowID mrtype.KeyInt32) error {
+	return repository_shared.CategoryIsExistsPostgres(ctx, re.client, rowID)
 }

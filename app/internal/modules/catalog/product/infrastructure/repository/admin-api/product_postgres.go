@@ -156,7 +156,7 @@ func (re *ProductPostgres) FetchTotal(ctx context.Context, where mrstorage.SqlBu
 	return totalRow, err
 }
 
-func (re *ProductPostgres) LoadOne(ctx context.Context, row *entity.Product) error {
+func (re *ProductPostgres) FetchOne(ctx context.Context, rowID mrtype.KeyInt32) (entity.Product, error) {
 	sql := `
 		SELECT
 			tag_version,
@@ -174,10 +174,12 @@ func (re *ProductPostgres) LoadOne(ctx context.Context, row *entity.Product) err
 			product_id = $1 AND product_status <> $2
 		LIMIT 1;`
 
-	return re.client.QueryRow(
+	row := entity.Product{ID: rowID}
+
+	err := re.client.QueryRow(
 		ctx,
 		sql,
-		row.ID,
+		rowID,
 		mrenum.ItemStatusRemoved,
 	).Scan(
 		&row.TagVersion,
@@ -190,6 +192,8 @@ func (re *ProductPostgres) LoadOne(ctx context.Context, row *entity.Product) err
 		&row.Price,
 		&row.Status,
 	)
+
+	return row, err
 }
 
 func (re *ProductPostgres) FetchIdByArticle(ctx context.Context, article string) (mrtype.KeyInt32, error) {
@@ -202,20 +206,20 @@ func (re *ProductPostgres) FetchIdByArticle(ctx context.Context, article string)
 			product_article = $1
 		LIMIT 1;`
 
-	var id mrtype.KeyInt32
+	var rowID mrtype.KeyInt32
 
 	err := re.client.QueryRow(
 		ctx,
 		sql,
 		article,
 	).Scan(
-		&id,
+		&rowID,
 	)
 
-	return id, err
+	return rowID, err
 }
 
-func (re *ProductPostgres) FetchStatus(ctx context.Context, row *entity.Product) (mrenum.ItemStatus, error) {
+func (re *ProductPostgres) FetchStatus(ctx context.Context, row entity.Product) (mrenum.ItemStatus, error) {
 	sql := `
 		SELECT
 			product_status
@@ -241,10 +245,10 @@ func (re *ProductPostgres) FetchStatus(ctx context.Context, row *entity.Product)
 
 // IsExists
 // result: nil - exists, ErrStorageNoRowFound - not exists, error - query error
-func (re *ProductPostgres) IsExists(ctx context.Context, id mrtype.KeyInt32) error {
+func (re *ProductPostgres) IsExists(ctx context.Context, rowID mrtype.KeyInt32) error {
 	sql := `
 		SELECT
-			1
+			product_id
 		FROM
 			` + module.DBSchema + `.products
 		WHERE
@@ -254,14 +258,14 @@ func (re *ProductPostgres) IsExists(ctx context.Context, id mrtype.KeyInt32) err
 	return re.client.QueryRow(
 		ctx,
 		sql,
-		id,
+		rowID,
 		mrenum.ItemStatusRemoved,
 	).Scan(
-		&id,
+		&rowID,
 	)
 }
 
-func (re *ProductPostgres) Insert(ctx context.Context, row *entity.Product) error {
+func (re *ProductPostgres) Insert(ctx context.Context, row entity.Product) (mrtype.KeyInt32, error) {
 	sql := `
 		INSERT INTO ` + module.DBSchema + `.products
 			(
@@ -290,10 +294,10 @@ func (re *ProductPostgres) Insert(ctx context.Context, row *entity.Product) erro
 		&row.ID,
 	)
 
-	return err
+	return row.ID, err
 }
 
-func (re *ProductPostgres) Update(ctx context.Context, row *entity.Product) (int32, error) {
+func (re *ProductPostgres) Update(ctx context.Context, row entity.Product) (int32, error) {
 	set, err := re.sqlUpdate.SetFromEntity(row)
 
 	if err != nil || set.Empty() {
@@ -333,7 +337,7 @@ func (re *ProductPostgres) Update(ctx context.Context, row *entity.Product) (int
 	return tagVersion, err
 }
 
-func (re *ProductPostgres) UpdateStatus(ctx context.Context, row *entity.Product) (int32, error) {
+func (re *ProductPostgres) UpdateStatus(ctx context.Context, row entity.Product) (int32, error) {
 	sql := `
 		UPDATE
 			` + module.DBSchema + `.products
@@ -362,7 +366,7 @@ func (re *ProductPostgres) UpdateStatus(ctx context.Context, row *entity.Product
 	return tagVersion, err
 }
 
-func (re *ProductPostgres) Delete(ctx context.Context, id mrtype.KeyInt32) error {
+func (re *ProductPostgres) Delete(ctx context.Context, rowID mrtype.KeyInt32) error {
 	sql := `
 		UPDATE
 			` + module.DBSchema + `.products
@@ -370,7 +374,7 @@ func (re *ProductPostgres) Delete(ctx context.Context, id mrtype.KeyInt32) error
 			tag_version = tag_version + 1,
 			updated_at = NOW(),
 			product_article = NULL,
-			order_field = NULL,
+			order_index = NULL,
 			product_status = $2
 		WHERE
 			product_id = $1 AND product_status <> $2;`
@@ -378,7 +382,7 @@ func (re *ProductPostgres) Delete(ctx context.Context, id mrtype.KeyInt32) error
 	return re.client.Exec(
 		ctx,
 		sql,
-		id,
+		rowID,
 		mrenum.ItemStatusRemoved,
 	)
 }

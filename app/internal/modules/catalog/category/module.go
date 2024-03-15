@@ -4,6 +4,6 @@ const (
 	Name = "Catalog"
 
 	Permission = "modCatalogCategory"
-	DBSchema   = "gscatalog"
+	DBSchema   = "sample_catalog"
 	ImageDir   = "catalog/categories"
 )

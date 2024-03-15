@@ -22,5 +22,8 @@ type (
 		CategoryAPI  catalog.CategoryAPI
 		TrademarkAPI catalog.TrademarkAPI
 		OrdererAPI   mrorderer.API
+
+		PageSizeMax     uint64
+		PageSizeDefault uint64
 	}
 )

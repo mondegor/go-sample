@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.3
 info:
-  version: 0.3.0
+  version: 0.11.0
   title: Public API go-sample
   license:
     name: Apache-2.0
@@ -16,11 +16,13 @@ info:
     #### Ограничения полей
     - required - поле обязательно для заполнения;
     - omitempty - поле может быть не указано (не будет использоваться методом, в который было передано);
+    - unique - уникальное значение поля;
     - min=N - поле должно быть не менее N символов;
     - max=N - поле должно быть не более N символов;
     - gte=N - числовое поле должно быть равно или более N;
     - lte=N - числовое поле должно быть равно или менее N;
     - enum - поле должно содержать одно из ENUM значений;
+    - UUID - поле формата UUID;
     - pattern=P - поле должно соответствовать регулярному выражению P;
 
     #### Ошибки
@@ -32,29 +34,67 @@ servers:
   - url: http://localhost:8080
     description: Local Host
 tags:
-  - name: Catalog.Categories
+  - name: System
+    description: API System Methods
+
+  - name: Catalog.Category
     description: Public API Categories of product catalog
 
   - name: FileStation
     description: Public API Files and images
 
 paths:
+  /v1/health:
+    get:
+      summary: Метод получения ответа приложения
+      description: Метод предназначен для проверки, что приложение запущено и отвечает
+      operationId: getHealthResponse
+      tags:
+        - System
+
+      responses:
+        "200":
+          description: Возвращён ответ приложения 200 OK
+        "500":
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
+
+  /v1/system-info:
+    get:
+      summary: Метод получения системной информации приложения
+      description: Метод предназначен для получения системной информации о запущеном приложении
+      operationId: getSystemInfo
+      tags:
+        - System
+
+      responses:
+        "200":
+          description: Получена системная информация о приложении
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/App.System.Response.Model.SystemInfo"
+        "500":
+          $ref: "#/components/responses/App.ResponseJson.Error5XX"
+
   /v1/catalog/categories:
     get:
       summary: Метод получения списка категорий
-      description: Метод предназначен для получения списка категорий со статусом ENABLED, сохраненных в БД
-      operationId: getCategories
+      description: |-
+        Метод предназначен для получения списка категорий со статусом ENABLED, сохраненных в БД,
+        со следующими условиями:
+        - category_status = "ENABLED";
+
+        Фильтр `App.Request.Query.Filter.SearchText` использует для поиска следующие поля:
+        - caption;
+
+      operationId: getCategoryList
       tags:
-        - Catalog.Categories
+        - Catalog.Category
 
       parameters:
         - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
         - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
         - $ref: "#/components/parameters/App.Request.Query.Filter.SearchText"
-        - $ref: "#/components/parameters/App.Request.Query.ListSorter.SortField"
-        - $ref: "#/components/parameters/App.Request.Query.ListSorter.SortDirection"
-        - $ref: "#/components/parameters/App.Request.Query.ListPager.PageIndex"
-        - $ref: "#/components/parameters/App.Request.Query.ListPager.PageSize"
 
       responses:
         "200":
@@ -69,10 +109,14 @@ paths:
   /v1/catalog/categories/{categoryId}:
     get:
       summary: Метод получения категории
-      description: Метод предназначен для получения информации об указанной категории со статусом ENABLED из БД
+      description: |-
+        Метод предназначен для получения информации об указанной категории из БД,
+        со следующими условиями:
+          - category_status = "ENABLED";
+
       operationId: getCategory
       tags:
-        - Catalog.Categories
+        - Catalog.Category
 
       parameters:
         - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
@@ -91,7 +135,7 @@ paths:
         "500":
           $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
-  /images/{filePath}:
+  /img/{filePath}:
     get:
       summary: Метод получения указанного изображения
       description: Метод предназначен для получения указанного файла изображения из файлового хранилища
@@ -110,10 +154,10 @@ paths:
           content:
             image/png:
               schema:
-                $ref: "#/components/schemas/App.Response.Model.BinaryFile"
+                $ref: "#/components/schemas/App.Response.Model.BinaryImage"
             image/jpeg:
               schema:
-                $ref: "#/components/schemas/App.Response.Model.BinaryFile"
+                $ref: "#/components/schemas/App.Response.Model.BinaryImage"
         "404":
           $ref: "#/components/responses/App.ResponseJson.Error404"
         "500":
@@ -129,18 +173,18 @@ components:
       required: false
       schema:
         type: string
-        default: "ru"
+        default: "ru-RU"
       example: "ru;q=0.9, fr-CH, fr;q=0.8, en;q=0.7, *;q=0.5"
 
     App.Request.Header.CorrelationID:
-      description: Уникальный идентификатор запроса
-      name: CorrelationID
+      description: Уникальный идентификатор клиента
+      name: X-Correlation-Id
       in: header
       required: false
       schema:
         type: string
         format: uuid
-      example: "f7479171-83d2-4f64-84ac-892f8c0aaf48"
+      example: "1f0b7925-cee6-4e44-8ea3-4e585d12212d"
 
     App.Request.Query.Filter.SearchText:
       description: Поисковая строка
@@ -230,30 +274,11 @@ components:
       maxLength: 128
       example: "Название"
 
-    App.Field.Date.CreatedAt:
-      description: Дата и время создания записи (UTC)
-      type: string
-      format: date-time
-      example: "2023-01-01T12:00:00.000+02:00"
-
-    App.Field.Date.UpdatedAt:
-      description: Дата и время обновления записи (UTC)
-      type: string
-      format: date-time
-      nullable: true
-      example: "2023-01-01T12:00:00.000+02:00"
-
     App.Field.ImageURL:
       description: URL к изображению записи
       type: string
-      maxLength: 256
+      maxLength: 255
       example: "http://localhost/path/item-name.png"
-
-    App.Field.IntegerID:
-      description: Идентификатор записи
-      type: integer
-      minimum: 1
-      example: 1000
 
     App.Field.ListPager.Total:
       description: Количество записей в БД с учётом указанных в запросе фильтров
@@ -261,11 +286,11 @@ components:
       minimum: 0
       example: 584
 
-    App.Response.Model.BinaryFile:
-      description: DTO - бинарный файл
+    App.Response.Model.BinaryImage:
+      description: Бинарный файл одного из типов - JPEG, PNG
       type: string
       format: binary
-      maxLength: 16777216
+      maxLength: 1048576 # 1Mb
 
     App.Response.Model.ErrorList:
       description: DTO списка пользовательских ошибок 400
@@ -320,8 +345,61 @@ components:
           type: string
           example: "5add1be1-90ab5d42-02fa8b1f-672503f2"
 
+    Custom.Field.CategoryID:
+      description: Идентификатор категории (модуль - Catalog.Category)
+      type: integer
+      format: int32
+      minimum: 1
+      example: 2
+
+    App.System.Response.Model.SystemInfo:
+      description: DTO - системная информация о запущеном приложении
+      type: object
+      required:
+        - name
+        - version
+        - hostName
+        - isDebug
+        - logLevel
+        - startedAt
+      properties:
+        name:
+          description: Название приложения
+          type: string
+          maxLength: 64
+          example: "Sample App"
+        version:
+          description: Версия приложения
+          type: string
+          maxLength: 16
+          example: "v0.1.0"
+        hostName:
+          description: Название хоста, на котором запущено приложение
+          type: string
+          maxLength: 64
+          example: "host-name"
+        isDebug:
+          description: Статус режима отладки
+          type: boolean
+          example: true
+        logLevel:
+          type: string
+          enum:
+            - DEBUG
+            - INFO
+            - WARN
+            - ERROR
+            - FATAL
+            - TRACE
+          example: "ERROR"
+        startedAt:
+          description: Время запуска приложения (UTC)
+          type: string
+          format: date-time
+          example: "2023-01-01T12:00:00.000+02:00"
+
     Catalog.Categories.PublicAPI.Response.Model.CategoryList:
-      description: public DTO список торговых марок
+      description: public DTO список категорий
       type: object
       required:
         - items
@@ -336,18 +414,17 @@ components:
           $ref: "#/components/schemas/App.Field.ListPager.Total"
 
     Catalog.Categories.PublicAPI.Response.Model.Category:
-      description: public DTO торговая марка
+      description: public DTO категория
       type: object
       required:
         - id
         - caption
-        - imagePath
       properties:
         id: # categoryId
-          $ref: "#/components/schemas/App.Field.IntegerID"
+          $ref: "#/components/schemas/Custom.Field.CategoryID"
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
-        imagePath: # Относительный путь к логотипу
+        imageURL:
           $ref: "#/components/schemas/App.Field.ImageURL"
 
   responses:
@@ -371,4 +448,3 @@ components:
         application/problem+json;charset=UTF-8:
           schema:
             $ref: "#/components/schemas/App.Response.Model.ErrorDetails"
-

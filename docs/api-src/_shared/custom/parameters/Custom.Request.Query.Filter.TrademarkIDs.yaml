@@ -1,0 +1,16 @@
+Custom.Request.Query.Filter.TrademarkIDs:
+  description: |-
+    Фильтр торговых марок каталога (модуль - Catalog.Trademark)
+
+    Возможные значения:
+    - NULL - все записи;
+    - Список ID торговых марок через "," (/v1/catalog/trademarks);
+
+    Значение по умолчанию: NULL
+  name: trademarkId
+  in: query
+  required: false
+  schema:
+    type: string
+    nullable: true
+  example: "1736,1691"

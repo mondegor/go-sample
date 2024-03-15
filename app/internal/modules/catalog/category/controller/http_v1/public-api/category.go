@@ -21,19 +21,19 @@ type (
 	Category struct {
 		parser  view_shared.RequestParser
 		sender  mrserver.ResponseSender
-		service usecase.CategoryService
+		useCase usecase.CategoryUseCase
 	}
 )
 
 func NewCategory(
 	parser view_shared.RequestParser,
 	sender mrserver.ResponseSender,
-	service usecase.CategoryService,
+	useCase usecase.CategoryUseCase,
 ) *Category {
 	return &Category{
 		parser:  parser,
 		sender:  sender,
-		service: service,
+		useCase: useCase,
 	}
 }
 
@@ -45,7 +45,7 @@ func (ht *Category) Handlers() []mrserver.HttpHandler {
 }
 
 func (ht *Category) GetList(w http.ResponseWriter, r *http.Request) error {
-	items, totalItems, err := ht.service.GetList(r.Context(), ht.listParams(r))
+	items, totalItems, err := ht.useCase.GetList(r.Context(), ht.listParams(r))
 
 	if err != nil {
 		return err
@@ -70,7 +70,7 @@ func (ht *Category) listParams(r *http.Request) entity.CategoryParams {
 }
 
 func (ht *Category) Get(w http.ResponseWriter, r *http.Request) error {
-	item, err := ht.service.GetItem(
+	item, err := ht.useCase.GetItem(
 		r.Context(),
 		ht.getItemID(r),
 		mrlang.Ctx(r.Context()).LangID(),
@@ -84,5 +84,5 @@ func (ht *Category) Get(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (ht *Category) getItemID(r *http.Request) mrtype.KeyInt32 {
-	return ht.parser.FilterKeyInt32(r, "id")
+	return ht.parser.PathKeyInt32(r, "id")
 }

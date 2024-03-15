@@ -36,7 +36,8 @@ func NewCategoryModuleOptions(ctx context.Context, opts app.Options) (factory.Op
 			// opts.RequestParsers.DateTime,
 			opts.RequestParsers.Int64,
 			opts.RequestParsers.KeyInt32,
-			opts.RequestParsers.SortPage,
+			opts.RequestParsers.ListSorter,
+			opts.RequestParsers.ListPager,
 			opts.RequestParsers.String,
 			// opts.RequestParsers.UUID,
 			opts.RequestParsers.Validator,
@@ -51,6 +52,9 @@ func NewCategoryModuleOptions(ctx context.Context, opts app.Options) (factory.Op
 			ImageFileAPI:    imageFileAPI,
 			ImageURLBuilder: opts.ImageURLBuilder,
 		},
+
+		PageSizeMax:     opts.Cfg.General.PageSizeMax,
+		PageSizeDefault: opts.Cfg.General.PageSizeDefault,
 	}, nil
 }
 

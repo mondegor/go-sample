@@ -1,0 +1,9 @@
+version: 0.11.0
+title: Private API управления каталогом товаров
+license:
+  name: Apache-2.0
+  url: https://www.apache.org/licenses/LICENSE-2.0
+contact:
+  name: Andrey Nazarov
+description: |-
+  Private REST API проекта go-sample управления каталогом товаров

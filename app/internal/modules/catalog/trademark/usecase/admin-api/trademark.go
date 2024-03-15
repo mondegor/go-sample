@@ -54,41 +54,40 @@ func (uc *Trademark) GetList(ctx context.Context, params entity.TrademarkParams)
 	return items, total, nil
 }
 
-func (uc *Trademark) GetItem(ctx context.Context, id mrtype.KeyInt32) (*entity.Trademark, error) {
-	if id < 1 {
-		return nil, mrcore.FactoryErrServiceEntityNotFound.New()
+func (uc *Trademark) GetItem(ctx context.Context, itemID mrtype.KeyInt32) (entity.Trademark, error) {
+	if itemID < 1 {
+		return entity.Trademark{}, mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 
-	item := &entity.Trademark{
-		ID: id,
-	}
+	item, err := uc.storage.FetchOne(ctx, itemID)
 
-	if err := uc.storage.LoadOne(ctx, item); err != nil {
-		return nil, uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameTrademark, id)
+	if err != nil {
+		return entity.Trademark{}, uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameTrademark, itemID)
 	}
 
 	return item, nil
 }
 
-func (uc *Trademark) Create(ctx context.Context, item *entity.Trademark) error {
+func (uc *Trademark) Create(ctx context.Context, item entity.Trademark) (mrtype.KeyInt32, error) {
 	item.Status = mrenum.ItemStatusDraft
+	itemID, err := uc.storage.Insert(ctx, item)
 
-	if err := uc.storage.Insert(ctx, item); err != nil {
-		return uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameTrademark)
+	if err != nil {
+		return 0, uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameTrademark)
 	}
 
-	uc.emitEvent(ctx, "Create", mrmsg.Data{"id": item.ID})
+	uc.emitEvent(ctx, "Create", mrmsg.Data{"id": itemID})
 
-	return nil
+	return itemID, nil
 }
 
-func (uc *Trademark) Store(ctx context.Context, item *entity.Trademark) error {
+func (uc *Trademark) Store(ctx context.Context, item entity.Trademark) error {
 	if item.ID < 1 {
-		return mrcore.FactoryErrServiceEntityNotFound.New()
+		return mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 
 	if item.TagVersion < 1 {
-		return mrcore.FactoryErrServiceEntityVersionInvalid.New()
+		return mrcore.FactoryErrUseCaseEntityVersionInvalid.New()
 	}
 
 	if err := uc.storage.IsExists(ctx, item.ID); err != nil {
@@ -99,7 +98,7 @@ func (uc *Trademark) Store(ctx context.Context, item *entity.Trademark) error {
 
 	if err != nil {
 		if uc.usecaseHelper.IsNotFoundError(err) {
-			return mrcore.FactoryErrServiceEntityVersionInvalid.Wrap(err)
+			return mrcore.FactoryErrUseCaseEntityVersionInvalid.Wrap(err)
 		}
 
 		return uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameTrademark)
@@ -110,13 +109,13 @@ func (uc *Trademark) Store(ctx context.Context, item *entity.Trademark) error {
 	return nil
 }
 
-func (uc *Trademark) ChangeStatus(ctx context.Context, item *entity.Trademark) error {
+func (uc *Trademark) ChangeStatus(ctx context.Context, item entity.Trademark) error {
 	if item.ID < 1 {
-		return mrcore.FactoryErrServiceEntityNotFound.New()
+		return mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 
 	if item.TagVersion < 1 {
-		return mrcore.FactoryErrServiceEntityVersionInvalid.New()
+		return mrcore.FactoryErrUseCaseEntityVersionInvalid.New()
 	}
 
 	currentStatus, err := uc.storage.FetchStatus(ctx, item)
@@ -130,14 +129,14 @@ func (uc *Trademark) ChangeStatus(ctx context.Context, item *entity.Trademark) e
 	}
 
 	if !uc.statusFlow.Check(currentStatus, item.Status) {
-		return mrcore.FactoryErrServiceSwitchStatusRejected.New(currentStatus, item.Status)
+		return mrcore.FactoryErrUseCaseSwitchStatusRejected.New(currentStatus, item.Status)
 	}
 
 	version, err := uc.storage.UpdateStatus(ctx, item)
 
 	if err != nil {
 		if uc.usecaseHelper.IsNotFoundError(err) {
-			return mrcore.FactoryErrServiceEntityVersionInvalid.Wrap(err)
+			return mrcore.FactoryErrUseCaseEntityVersionInvalid.Wrap(err)
 		}
 
 		return uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameTrademark)
@@ -148,16 +147,16 @@ func (uc *Trademark) ChangeStatus(ctx context.Context, item *entity.Trademark) e
 	return nil
 }
 
-func (uc *Trademark) Remove(ctx context.Context, id mrtype.KeyInt32) error {
-	if id < 1 {
-		return mrcore.FactoryErrServiceEntityNotFound.New()
+func (uc *Trademark) Remove(ctx context.Context, itemID mrtype.KeyInt32) error {
+	if itemID < 1 {
+		return mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 
-	if err := uc.storage.Delete(ctx, id); err != nil {
-		return uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameTrademark, id)
+	if err := uc.storage.Delete(ctx, itemID); err != nil {
+		return uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameTrademark, itemID)
 	}
 
-	uc.emitEvent(ctx, "Remove", mrmsg.Data{"id": id})
+	uc.emitEvent(ctx, "Remove", mrmsg.Data{"id": itemID})
 
 	return nil
 }

@@ -28,7 +28,7 @@ type (
 	Trademark struct {
 		parser     view_shared.RequestParser
 		sender     mrserver.ResponseSender
-		service    usecase.TrademarkService
+		useCase    usecase.TrademarkUseCase
 		listSorter mrview.ListSorter
 	}
 )
@@ -36,13 +36,13 @@ type (
 func NewTrademark(
 	parser view_shared.RequestParser,
 	sender mrserver.ResponseSender,
-	service usecase.TrademarkService,
+	useCase usecase.TrademarkUseCase,
 	listSorter mrview.ListSorter,
 ) *Trademark {
 	return &Trademark{
 		parser:     parser,
 		sender:     sender,
-		service:    service,
+		useCase:    useCase,
 		listSorter: listSorter,
 	}
 }
@@ -61,7 +61,7 @@ func (ht *Trademark) Handlers() []mrserver.HttpHandler {
 }
 
 func (ht *Trademark) GetList(w http.ResponseWriter, r *http.Request) error {
-	items, totalItems, err := ht.service.GetList(r.Context(), ht.listParams(r))
+	items, totalItems, err := ht.useCase.GetList(r.Context(), ht.listParams(r))
 
 	if err != nil {
 		return err
@@ -89,7 +89,7 @@ func (ht *Trademark) listParams(r *http.Request) entity.TrademarkParams {
 }
 
 func (ht *Trademark) Get(w http.ResponseWriter, r *http.Request) error {
-	item, err := ht.service.GetItem(r.Context(), ht.getItemID(r))
+	item, err := ht.useCase.GetItem(r.Context(), ht.getItemID(r))
 
 	if err != nil {
 		return ht.wrapError(err, r)
@@ -109,21 +109,21 @@ func (ht *Trademark) Create(w http.ResponseWriter, r *http.Request) error {
 		Caption: request.Caption,
 	}
 
-	if err := ht.service.Create(r.Context(), &item); err != nil {
+	if itemID, err := ht.useCase.Create(r.Context(), item); err != nil {
 		return ht.wrapError(err, r)
+	} else {
+		return ht.sender.Send(
+			w,
+			http.StatusCreated,
+			SuccessCreatedItemResponse{
+				ItemID: strconv.Itoa(int(itemID)),
+				Message: mrlang.Ctx(r.Context()).TranslateMessage(
+					"msgCatalogTrademarkSuccessCreated",
+					"entity has been success created",
+				),
+			},
+		)
 	}
-
-	return ht.sender.Send(
-		w,
-		http.StatusCreated,
-		SuccessCreatedItemResponse{
-			ItemID: strconv.Itoa(int(item.ID)),
-			Message: mrlang.Ctx(r.Context()).TranslateMessage(
-				"msgCatalogTrademarkSuccessCreated",
-				"entity has been success created",
-			),
-		},
-	)
 }
 
 func (ht *Trademark) Store(w http.ResponseWriter, r *http.Request) error {
@@ -139,7 +139,7 @@ func (ht *Trademark) Store(w http.ResponseWriter, r *http.Request) error {
 		Caption:    request.Caption,
 	}
 
-	if err := ht.service.Store(r.Context(), &item); err != nil {
+	if err := ht.useCase.Store(r.Context(), item); err != nil {
 		return ht.wrapError(err, r)
 	}
 
@@ -159,7 +159,7 @@ func (ht *Trademark) ChangeStatus(w http.ResponseWriter, r *http.Request) error 
 		Status:     request.Status,
 	}
 
-	if err := ht.service.ChangeStatus(r.Context(), &item); err != nil {
+	if err := ht.useCase.ChangeStatus(r.Context(), item); err != nil {
 		return ht.wrapError(err, r)
 	}
 
@@ -167,7 +167,7 @@ func (ht *Trademark) ChangeStatus(w http.ResponseWriter, r *http.Request) error 
 }
 
 func (ht *Trademark) Remove(w http.ResponseWriter, r *http.Request) error {
-	if err := ht.service.Remove(r.Context(), ht.getItemID(r)); err != nil {
+	if err := ht.useCase.Remove(r.Context(), ht.getItemID(r)); err != nil {
 		return ht.wrapError(err, r)
 	}
 
@@ -183,15 +183,15 @@ func (ht *Trademark) getRawItemID(r *http.Request) string {
 }
 
 func (ht *Trademark) wrapError(err error, r *http.Request) error {
-	if mrcore.FactoryErrServiceEntityNotFound.Is(err) {
+	if mrcore.FactoryErrUseCaseEntityNotFound.Is(err) {
 		return catalog.FactoryErrTrademarkNotFound.Wrap(err, ht.getRawItemID(r))
 	}
 
-	if mrcore.FactoryErrServiceEntityVersionInvalid.Is(err) {
+	if mrcore.FactoryErrUseCaseEntityVersionInvalid.Is(err) {
 		return mrerr.NewCustomError("version", err)
 	}
 
-	if mrcore.FactoryErrServiceSwitchStatusRejected.Is(err) {
+	if mrcore.FactoryErrUseCaseSwitchStatusRejected.Is(err) {
 		return mrerr.NewCustomError("status", err)
 	}
 

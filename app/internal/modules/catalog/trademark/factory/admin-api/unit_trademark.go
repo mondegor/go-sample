@@ -2,7 +2,6 @@ package factory
 
 import (
 	"context"
-	module "go-sample/internal/modules/catalog/trademark"
 	http_v1 "go-sample/internal/modules/catalog/trademark/controller/http_v1/admin-api"
 	entity "go-sample/internal/modules/catalog/trademark/entity/admin-api"
 	"go-sample/internal/modules/catalog/trademark/factory"
@@ -35,17 +34,17 @@ func newUnitTrademark(ctx context.Context, opts factory.Options) (*http_v1.Trade
 
 	storage := repository.NewTrademarkPostgres(
 		opts.PostgresAdapter,
-		mrsql.NewBuilderSelect(
+		mrpostgres.NewSqlBuilderSelect(
 			mrpostgres.NewSqlBuilderWhere(),
-			mrpostgres.NewSqlBuilderOrderByWithDefaultSort(ctx, metaOrderBy.DefaultSort()),
-			mrpostgres.NewSqlBuilderPager(module.PageSizeMax),
+			mrpostgres.NewSqlBuilderOrderBy(ctx, metaOrderBy.DefaultSort()),
+			mrpostgres.NewSqlBuilderPager(opts.PageSizeMax),
 		),
 	)
-	service := usecase.NewTrademark(storage, opts.EventEmitter, opts.UsecaseHelper)
+	useCase := usecase.NewTrademark(storage, opts.EventEmitter, opts.UsecaseHelper)
 	controller := http_v1.NewTrademark(
 		opts.RequestParser,
 		opts.ResponseSender,
-		service,
+		useCase,
 		metaOrderBy,
 	)
 

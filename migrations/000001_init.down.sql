@@ -1,7 +1,7 @@
 -- --------------------------------------------------------------------------------------------------
 
-DROP TABLE gscatalog.products;
-DROP TABLE gscatalog.trademarks;
-DROP TABLE gscatalog.categories;
+DROP TABLE sample_catalog.products;
+DROP TABLE sample_catalog.trademarks;
+DROP TABLE sample_catalog.categories;
 
-DROP SCHEMA gscatalog;
+DROP SCHEMA sample_catalog;

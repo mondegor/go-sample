@@ -1,0 +1,9 @@
+Catalog.Products.AdminAPI.Request.Path.ProductID:
+  description: Идентификатор товара
+  name: productId
+  in: path
+  required: true
+  schema:
+    type: integer
+    minimum: 1
+  example: 1000

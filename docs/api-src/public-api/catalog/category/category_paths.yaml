@@ -1,0 +1,58 @@
+/v1/catalog/categories:
+  get:
+    summary: Метод получения списка категорий
+    description: |-
+      Метод предназначен для получения списка категорий со статусом ENABLED, сохраненных в БД,
+      со следующими условиями:
+      - category_status = "ENABLED";
+
+      Фильтр `App.Request.Query.Filter.SearchText` использует для поиска следующие поля:
+      - caption;
+
+    operationId: getCategoryList
+    tags:
+      - Catalog.Category
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+      - $ref: "#/components/parameters/App.Request.Query.Filter.SearchText"
+
+    responses:
+      "200":
+        description: Получен список категорий
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: "#/components/schemas/Catalog.Categories.PublicAPI.Response.Model.CategoryList"
+      "500":
+        $ref: "#/components/responses/App.ResponseJson.Error5XX"
+
+/v1/catalog/categories/{categoryId}:
+  get:
+    summary: Метод получения категории
+    description: |-
+      Метод предназначен для получения информации об указанной категории из БД,
+      со следующими условиями:
+        - category_status = "ENABLED";
+
+    operationId: getCategory
+    tags:
+      - Catalog.Category
+
+    parameters:
+      - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
+      - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
+      - $ref: "#/components/parameters/Catalog.Categories.PublicAPI.Request.Path.CategoryID"
+
+    responses:
+      "200":
+        description: Получена информация о категории
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: "#/components/schemas/Catalog.Categories.PublicAPI.Response.Model.Category"
+      "404":
+        $ref: "#/components/responses/App.ResponseJson.Error404"
+      "500":
+        $ref: "#/components/responses/App.ResponseJson.Error5XX"

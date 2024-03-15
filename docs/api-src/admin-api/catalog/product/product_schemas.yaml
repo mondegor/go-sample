@@ -1,0 +1,86 @@
+Catalog.Products.AdminAPI.Request.Model.CreateProduct:
+  description: DTO добавления нового товара каталога
+  type: object
+  required:
+    - categoryId
+    - article
+    - caption
+    - trademarkId
+  properties:
+    categoryId:
+      $ref: "#/components/schemas/Custom.Field.CategoryID"
+    article:
+      $ref: "#/components/schemas/App.Field.Article"
+    caption:
+      $ref: "#/components/schemas/App.Field.Caption"
+    trademarkId:
+      $ref: "#/components/schemas/Custom.Field.TrademarkID"
+    price:
+      $ref: "#/components/schemas/App.Field.Measure.Price"
+
+Catalog.Products.AdminAPI.Request.Model.StoreProduct:
+  description: DTO сохранения товара каталога
+  type: object
+  required:
+    - version
+  properties:
+    version:
+      $ref: "#/components/schemas/App.Field.TagVersion"
+    article:
+      $ref: "#/components/schemas/App.Field.Article"
+    caption:
+      $ref: "#/components/schemas/App.Field.Caption"
+    trademarkId:
+      $ref: "#/components/schemas/Custom.Field.TrademarkID"
+    price:
+      $ref: "#/components/schemas/App.Field.Measure.Price"
+
+Catalog.Products.AdminAPI.Response.Model.ProductList:
+  description: DTO - список товаров каталога
+  type: object
+  required:
+    - items
+    - total
+  properties:
+    items:
+      description: Список записей ограниченный фильтром и pageSize
+      type: array
+      items:
+        $ref: "#/components/schemas/Catalog.Products.AdminAPI.Response.Model.Product"
+    total:
+      $ref: "#/components/schemas/App.Field.ListPager.Total"
+
+Catalog.Products.AdminAPI.Response.Model.Product:
+  description: DTO - товар каталога
+  type: object
+  required:
+    - id
+    - version
+    - createdAt
+    - categoryId
+    - article
+    - caption
+    - trademarkId
+    - price
+    - status
+  properties:
+    id: # productId
+      $ref: "#/components/schemas/Custom.Field.ProductID"
+    version:
+      $ref: "#/components/schemas/App.Field.TagVersion"
+    createdAt:
+      $ref: "#/components/schemas/App.Field.DateTimeCreatedAt"
+    updatedAt:
+      $ref: "#/components/schemas/App.Field.DateTimeUpdatedAt"
+    categoryId:
+      $ref: "#/components/schemas/Custom.Field.CategoryID"
+    article:
+      $ref: "#/components/schemas/App.Field.Article"
+    caption:
+      $ref: "#/components/schemas/App.Field.Caption"
+    trademarkId:
+      $ref: "#/components/schemas/Custom.Field.TrademarkID"
+    price:
+      $ref: "#/components/schemas/App.Field.Measure.Price"
+    status:
+      $ref: "#/components/schemas/App.Enum.Status"

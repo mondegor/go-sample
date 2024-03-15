@@ -1,0 +1,28 @@
+Catalog.Categories.PublicAPI.Response.Model.CategoryList:
+  description: public DTO список категорий
+  type: object
+  required:
+    - items
+    - total
+  properties:
+    items:
+      description: Список записей ограниченный фильтром и pageSize
+      type: array
+      items:
+        $ref: "#/components/schemas/Catalog.Categories.PublicAPI.Response.Model.Category"
+    total:
+      $ref: "#/components/schemas/App.Field.ListPager.Total"
+
+Catalog.Categories.PublicAPI.Response.Model.Category:
+  description: public DTO категория
+  type: object
+  required:
+    - id
+    - caption
+  properties:
+    id: # categoryId
+      $ref: "#/components/schemas/Custom.Field.CategoryID"
+    caption:
+      $ref: "#/components/schemas/App.Field.Caption"
+    imageURL:
+      $ref: "#/components/schemas/App.Field.ImageURL"

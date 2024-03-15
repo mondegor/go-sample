@@ -8,6 +8,7 @@ import (
 
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-webcore/mrenum"
+	"github.com/mondegor/go-webcore/mrtype"
 )
 
 type (
@@ -110,7 +111,7 @@ func (re *CategoryPostgres) FetchTotal(ctx context.Context, where mrstorage.SqlB
 	return totalRow, err
 }
 
-func (re *CategoryPostgres) LoadOne(ctx context.Context, row *entity.Category) error {
+func (re *CategoryPostgres) FetchOne(ctx context.Context, rowID mrtype.KeyInt32) (entity.Category, error) {
 	sql := `
 		SELECT
 			category_caption,
@@ -121,13 +122,17 @@ func (re *CategoryPostgres) LoadOne(ctx context.Context, row *entity.Category) e
 			category_id = $1 AND category_status = $2
 		LIMIT 1;`
 
-	return re.client.QueryRow(
+	row := entity.Category{ID: rowID}
+
+	err := re.client.QueryRow(
 		ctx,
 		sql,
-		row.ID,
+		rowID,
 		mrenum.ItemStatusEnabled,
 	).Scan(
 		&row.Caption,
 		&row.ImageURL,
 	)
+
+	return row, err
 }

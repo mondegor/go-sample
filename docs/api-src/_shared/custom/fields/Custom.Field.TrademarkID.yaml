@@ -1,0 +1,6 @@
+Custom.Field.TrademarkID:
+  description: Идентификатор торговой марки (модуль - Catalog.Trademark)
+  type: integer
+  format: int32
+  minimum: 1
+  example: 2

@@ -11,23 +11,23 @@ import (
 
 type (
 	CategoryLangDecorator struct {
-		service CategoryService
+		useCase CategoryUseCase
 		dict    *mrlang.MultiLangDictionary
 	}
 )
 
 func NewCategoryLangDecorator(
-	service CategoryService,
+	useCase CategoryUseCase,
 	dict *mrlang.MultiLangDictionary,
 ) *CategoryLangDecorator {
 	return &CategoryLangDecorator{
-		service: service,
+		useCase: useCase,
 		dict:    dict,
 	}
 }
 
 func (uc *CategoryLangDecorator) GetList(ctx context.Context, params entity.CategoryParams) ([]entity.Category, int64, error) {
-	items, total, err := uc.service.GetList(ctx, params)
+	items, total, err := uc.useCase.GetList(ctx, params)
 
 	if err != nil {
 		return nil, 0, err
@@ -42,11 +42,11 @@ func (uc *CategoryLangDecorator) GetList(ctx context.Context, params entity.Cate
 	return items, total, nil
 }
 
-func (uc *CategoryLangDecorator) GetItem(ctx context.Context, id mrtype.KeyInt32, languageID uint16) (*entity.Category, error) {
-	item, err := uc.service.GetItem(ctx, id, languageID)
+func (uc *CategoryLangDecorator) GetItem(ctx context.Context, itemID mrtype.KeyInt32, languageID uint16) (entity.Category, error) {
+	item, err := uc.useCase.GetItem(ctx, itemID, languageID)
 
 	if err != nil {
-		return nil, err
+		return entity.Category{}, err
 	}
 
 	item.Caption = uc.getDict(ctx, languageID).ItemByID(int(item.ID)).Attr("caption", item.Caption)

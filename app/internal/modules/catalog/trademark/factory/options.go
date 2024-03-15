@@ -16,5 +16,8 @@ type (
 		PostgresAdapter *mrpostgres.ConnAdapter
 		RequestParser   *view_shared.Parser
 		ResponseSender  *mrresponse.Sender
+
+		PageSizeMax     uint64
+		PageSizeDefault uint64
 	}
 )

@@ -21,19 +21,19 @@ type (
 	CategoryImage struct {
 		parser  view_shared.RequestParser
 		sender  mrserver.FileResponseSender
-		service usecase.CategoryImageService
+		useCase usecase.CategoryImageUseCase
 	}
 )
 
 func NewCategoryImage(
 	parser view_shared.RequestParser,
 	sender mrserver.FileResponseSender,
-	service usecase.CategoryImageService,
+	useCase usecase.CategoryImageUseCase,
 ) *CategoryImage {
 	return &CategoryImage{
 		parser:  parser,
 		sender:  sender,
-		service: service,
+		useCase: useCase,
 	}
 }
 
@@ -46,7 +46,7 @@ func (ht *CategoryImage) Handlers() []mrserver.HttpHandler {
 }
 
 func (ht *CategoryImage) GetImage(w http.ResponseWriter, r *http.Request) error {
-	item, err := ht.service.GetFile(r.Context(), ht.getParentID(r))
+	item, err := ht.useCase.GetFile(r.Context(), ht.getParentID(r))
 
 	if err != nil {
 		return ht.wrapError(err, r)
@@ -54,7 +54,7 @@ func (ht *CategoryImage) GetImage(w http.ResponseWriter, r *http.Request) error 
 
 	defer item.Body.Close()
 
-	return ht.sender.SendFile(w, item.ImageInfo.ToFile(), "", item.Body)
+	return ht.sender.SendFile(r.Context(), w, item.ToFile())
 }
 
 func (ht *CategoryImage) UploadImage(w http.ResponseWriter, r *http.Request) error {
@@ -66,7 +66,7 @@ func (ht *CategoryImage) UploadImage(w http.ResponseWriter, r *http.Request) err
 
 	defer image.Body.Close()
 
-	if err = ht.service.StoreFile(r.Context(), ht.getParentID(r), image); err != nil {
+	if err = ht.useCase.StoreFile(r.Context(), ht.getParentID(r), image); err != nil {
 		return ht.wrapError(err, r)
 	}
 
@@ -74,7 +74,7 @@ func (ht *CategoryImage) UploadImage(w http.ResponseWriter, r *http.Request) err
 }
 
 func (ht *CategoryImage) RemoveImage(w http.ResponseWriter, r *http.Request) error {
-	if err := ht.service.RemoveFile(r.Context(), ht.getParentID(r)); err != nil {
+	if err := ht.useCase.RemoveFile(r.Context(), ht.getParentID(r)); err != nil {
 		return ht.wrapError(err, r)
 	}
 
@@ -90,7 +90,7 @@ func (ht *CategoryImage) getRawParentID(r *http.Request) string {
 }
 
 func (ht *CategoryImage) wrapError(err error, r *http.Request) error {
-	if mrcore.FactoryErrServiceEntityNotFound.Is(err) {
+	if mrcore.FactoryErrUseCaseEntityNotFound.Is(err) {
 		return usecase_shared.FactoryErrCategoryImageNotFound.Wrap(err, ht.getRawParentID(r))
 	}
 

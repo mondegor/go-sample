@@ -54,17 +54,15 @@ func (uc *Category) GetList(ctx context.Context, params entity.CategoryParams) (
 	return items, total, nil
 }
 
-func (uc *Category) GetItem(ctx context.Context, id mrtype.KeyInt32, languageID uint16) (*entity.Category, error) {
-	if id < 1 {
-		return nil, mrcore.FactoryErrServiceEntityNotFound.New()
+func (uc *Category) GetItem(ctx context.Context, itemID mrtype.KeyInt32, languageID uint16) (entity.Category, error) {
+	if itemID < 1 {
+		return entity.Category{}, mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 
-	item := &entity.Category{
-		ID: id,
-	}
+	item, err := uc.storage.FetchOne(ctx, itemID)
 
-	if err := uc.storage.LoadOne(ctx, item); err != nil {
-		return nil, uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategory, id)
+	if err != nil {
+		return entity.Category{}, uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategory, itemID)
 	}
 
 	item.ImageURL = uc.imgBaseURL.FullPath(item.ImageURL)

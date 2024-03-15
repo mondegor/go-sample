@@ -130,7 +130,7 @@ func (re *CategoryPostgres) FetchTotal(ctx context.Context, where mrstorage.SqlB
 	return totalRow, err
 }
 
-func (re *CategoryPostgres) LoadOne(ctx context.Context, row *entity.Category) error {
+func (re *CategoryPostgres) FetchOne(ctx context.Context, rowID mrtype.KeyInt32) (entity.Category, error) {
 	sql := `
 		SELECT
 			tag_version,
@@ -145,10 +145,12 @@ func (re *CategoryPostgres) LoadOne(ctx context.Context, row *entity.Category) e
 			category_id = $1 AND category_status <> $2
 		LIMIT 1;`
 
-	return re.client.QueryRow(
+	row := entity.Category{ID: rowID}
+
+	err := re.client.QueryRow(
 		ctx,
 		sql,
-		row.ID,
+		rowID,
 		mrenum.ItemStatusRemoved,
 	).Scan(
 		&row.TagVersion,
@@ -158,9 +160,11 @@ func (re *CategoryPostgres) LoadOne(ctx context.Context, row *entity.Category) e
 		&row.ImageMeta,
 		&row.Status,
 	)
+
+	return row, err
 }
 
-func (re *CategoryPostgres) FetchStatus(ctx context.Context, row *entity.Category) (mrenum.ItemStatus, error) {
+func (re *CategoryPostgres) FetchStatus(ctx context.Context, row entity.Category) (mrenum.ItemStatus, error) {
 	sql := `
 		SELECT
 			category_status
@@ -186,11 +190,11 @@ func (re *CategoryPostgres) FetchStatus(ctx context.Context, row *entity.Categor
 
 // IsExists
 // result: nil - exists, ErrStorageNoRowFound - not exists, error - query error
-func (re *CategoryPostgres) IsExists(ctx context.Context, id mrtype.KeyInt32) error {
-	return repository_shared.CategoryIsExistsPostgres(ctx, re.client, id)
+func (re *CategoryPostgres) IsExists(ctx context.Context, rowID mrtype.KeyInt32) error {
+	return repository_shared.CategoryIsExistsPostgres(ctx, re.client, rowID)
 }
 
-func (re *CategoryPostgres) Insert(ctx context.Context, row *entity.Category) error {
+func (re *CategoryPostgres) Insert(ctx context.Context, row entity.Category) (mrtype.KeyInt32, error) {
 	sql := `
 		INSERT INTO ` + module.DBSchema + `.categories
 			(
@@ -202,7 +206,7 @@ func (re *CategoryPostgres) Insert(ctx context.Context, row *entity.Category) er
 		RETURNING
 			category_id;`
 
-	return re.client.QueryRow(
+	err := re.client.QueryRow(
 		ctx,
 		sql,
 		row.Caption,
@@ -210,9 +214,11 @@ func (re *CategoryPostgres) Insert(ctx context.Context, row *entity.Category) er
 	).Scan(
 		&row.ID,
 	)
+
+	return row.ID, err
 }
 
-func (re *CategoryPostgres) Update(ctx context.Context, row *entity.Category) (int32, error) {
+func (re *CategoryPostgres) Update(ctx context.Context, row entity.Category) (int32, error) {
 	sql := `
 		UPDATE
 			` + module.DBSchema + `.categories
@@ -241,7 +247,7 @@ func (re *CategoryPostgres) Update(ctx context.Context, row *entity.Category) (i
 	return tagVersion, err
 }
 
-func (re *CategoryPostgres) UpdateStatus(ctx context.Context, row *entity.Category) (int32, error) {
+func (re *CategoryPostgres) UpdateStatus(ctx context.Context, row entity.Category) (int32, error) {
 	sql := `
 		UPDATE
 			` + module.DBSchema + `.categories
@@ -270,7 +276,7 @@ func (re *CategoryPostgres) UpdateStatus(ctx context.Context, row *entity.Catego
 	return tagVersion, err
 }
 
-func (re *CategoryPostgres) Delete(ctx context.Context, id mrtype.KeyInt32) error {
+func (re *CategoryPostgres) Delete(ctx context.Context, rowID mrtype.KeyInt32) error {
 	sql := `
 		UPDATE
 			` + module.DBSchema + `.categories
@@ -284,7 +290,7 @@ func (re *CategoryPostgres) Delete(ctx context.Context, id mrtype.KeyInt32) erro
 	return re.client.Exec(
 		ctx,
 		sql,
-		id,
+		rowID,
 		mrenum.ItemStatusRemoved,
 	)
 }

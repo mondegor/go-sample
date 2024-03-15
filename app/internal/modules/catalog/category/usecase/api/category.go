@@ -21,7 +21,7 @@ type (
 	}
 
 	CategoryStorage interface {
-		IsExists(ctx context.Context, id mrtype.KeyInt32) error
+		IsExists(ctx context.Context, rowID mrtype.KeyInt32) error
 	}
 )
 
@@ -35,16 +35,16 @@ func NewCategory(
 	}
 }
 
-func (uc *Category) CheckingAvailability(ctx context.Context, id mrtype.KeyInt32) error {
-	uc.debugCmd(ctx, "CheckingAvailability", mrmsg.Data{"id": id})
+func (uc *Category) CheckingAvailability(ctx context.Context, itemID mrtype.KeyInt32) error {
+	uc.debugCmd(ctx, "CheckingAvailability", mrmsg.Data{"id": itemID})
 
-	if id < 1 {
-		return catalog.FactoryErrCategoryNotFound.New(id)
+	if itemID < 1 {
+		return catalog.FactoryErrCategoryNotFound.New(itemID)
 	}
 
-	if err := uc.storage.IsExists(ctx, id); err != nil {
+	if err := uc.storage.IsExists(ctx, itemID); err != nil {
 		if uc.usecaseHelper.IsNotFoundError(err) {
-			return catalog.FactoryErrCategoryNotFound.New(id)
+			return catalog.FactoryErrCategoryNotFound.New(itemID)
 		}
 
 		return uc.usecaseHelper.WrapErrorFailed(err, categoryAPIName)

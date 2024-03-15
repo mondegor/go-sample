@@ -8,7 +8,7 @@ import (
 )
 
 type (
-	CategoryImageService interface {
+	CategoryImageUseCase interface {
 		// GetFile - WARNING you don't forget to call item.Body.Close()
 		GetFile(ctx context.Context, categoryID mrtype.KeyInt32) (mrtype.Image, error)
 		StoreFile(ctx context.Context, categoryID mrtype.KeyInt32, image mrtype.Image) error

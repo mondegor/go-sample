@@ -4,5 +4,5 @@ const (
 	Name = "Catalog.Product"
 
 	Permission = "modCatalogProduct"
-	DBSchema   = "gscatalog"
+	DBSchema   = "sample_catalog"
 )

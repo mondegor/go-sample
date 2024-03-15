@@ -23,6 +23,9 @@ type (
 		ResponseSender  *mrresponse.Sender
 
 		UnitCategory UnitCategoryOptions
+
+		PageSizeMax     uint64
+		PageSizeDefault uint64
 	}
 
 	UnitCategoryOptions struct {

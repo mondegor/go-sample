@@ -47,7 +47,7 @@ func NewCategoryImage(
 // GetFile - WARNING you don't forget to call item.File.Body.Close()
 func (uc *CategoryImage) GetFile(ctx context.Context, categoryID mrtype.KeyInt32) (mrtype.Image, error) {
 	if categoryID < 1 {
-		return mrtype.Image{}, mrcore.FactoryErrServiceEntityNotFound.New()
+		return mrtype.Image{}, mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 
 	imageMeta, err := uc.storage.FetchMeta(ctx, categoryID)
@@ -57,7 +57,7 @@ func (uc *CategoryImage) GetFile(ctx context.Context, categoryID mrtype.KeyInt32
 	}
 
 	if imageMeta.Path == "" {
-		return mrtype.Image{}, mrcore.FactoryErrServiceEntityNotFound.New()
+		return mrtype.Image{}, mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 
 	image, err := uc.fileAPI.DownloadFile(ctx, imageMeta.Path)
@@ -74,11 +74,11 @@ func (uc *CategoryImage) GetFile(ctx context.Context, categoryID mrtype.KeyInt32
 
 func (uc *CategoryImage) StoreFile(ctx context.Context, categoryID mrtype.KeyInt32, image mrtype.Image) error {
 	if categoryID < 1 {
-		return mrcore.FactoryErrServiceEntityNotFound.New()
+		return mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 
 	if image.OriginalName == "" || image.Size == 0 {
-		return mrcore.FactoryErrServiceInvalidFile.New()
+		return mrcore.FactoryErrUseCaseInvalidFile.New()
 	}
 
 	newImagePath, err := uc.getImagePath(categoryID, image.OriginalName)
@@ -130,7 +130,7 @@ func (uc *CategoryImage) StoreFile(ctx context.Context, categoryID mrtype.KeyInt
 
 func (uc *CategoryImage) RemoveFile(ctx context.Context, categoryID mrtype.KeyInt32) error {
 	if categoryID < 1 {
-		return mrcore.FactoryErrServiceEntityNotFound.New()
+		return mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 
 	unlock, err := uc.locker.Lock(ctx, uc.getLockKey(categoryID))

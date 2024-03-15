@@ -67,52 +67,51 @@ func (uc *Product) GetList(ctx context.Context, params entity.ProductParams) ([]
 	return items, total, nil
 }
 
-func (uc *Product) GetItem(ctx context.Context, id mrtype.KeyInt32) (*entity.Product, error) {
-	if id < 1 {
-		return nil, mrcore.FactoryErrServiceEntityNotFound.New()
+func (uc *Product) GetItem(ctx context.Context, itemID mrtype.KeyInt32) (entity.Product, error) {
+	if itemID < 1 {
+		return entity.Product{}, mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 
-	item := &entity.Product{
-		ID: id,
-	}
+	item, err := uc.storage.FetchOne(ctx, itemID)
 
-	if err := uc.storage.LoadOne(ctx, item); err != nil {
-		return nil, uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, id)
+	if err != nil {
+		return entity.Product{}, uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, itemID)
 	}
 
 	return item, nil
 }
 
-func (uc *Product) Create(ctx context.Context, item *entity.Product) error {
+func (uc *Product) Create(ctx context.Context, item entity.Product) (mrtype.KeyInt32, error) {
 	if err := uc.checkItem(ctx, item); err != nil {
-		return err
+		return 0, err
 	}
 
 	item.Status = mrenum.ItemStatusDraft
+	itemID, err := uc.storage.Insert(ctx, item)
 
-	if err := uc.storage.Insert(ctx, item); err != nil {
-		return uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameProduct)
+	if err != nil {
+		return 0, uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameProduct)
 	}
 
-	uc.emitEvent(ctx, "Create", mrmsg.Data{"id": item.ID})
+	uc.emitEvent(ctx, "Create", mrmsg.Data{"id": itemID})
 
 	meta := uc.storage.GetMetaData(item.CategoryID)
 	ordererAPI := uc.ordererAPI.WithMetaData(meta)
 
-	if err := ordererAPI.MoveToLast(ctx, item.ID); err != nil {
+	if err := ordererAPI.MoveToLast(ctx, itemID); err != nil {
 		mrlog.Ctx(ctx).Error().Err(err)
 	}
 
-	return nil
+	return itemID, nil
 }
 
-func (uc *Product) Store(ctx context.Context, item *entity.Product) error {
+func (uc *Product) Store(ctx context.Context, item entity.Product) error {
 	if item.ID < 1 {
-		return mrcore.FactoryErrServiceEntityNotFound.New()
+		return mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 
 	if item.TagVersion < 1 {
-		return mrcore.FactoryErrServiceEntityVersionInvalid.New()
+		return mrcore.FactoryErrUseCaseEntityVersionInvalid.New()
 	}
 
 	if err := uc.storage.IsExists(ctx, item.ID); err != nil {
@@ -127,7 +126,7 @@ func (uc *Product) Store(ctx context.Context, item *entity.Product) error {
 
 	if err != nil {
 		if uc.usecaseHelper.IsNotFoundError(err) {
-			return mrcore.FactoryErrServiceEntityVersionInvalid.Wrap(err)
+			return mrcore.FactoryErrUseCaseEntityVersionInvalid.Wrap(err)
 		}
 
 		return uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameProduct)
@@ -138,13 +137,13 @@ func (uc *Product) Store(ctx context.Context, item *entity.Product) error {
 	return nil
 }
 
-func (uc *Product) ChangeStatus(ctx context.Context, item *entity.Product) error {
+func (uc *Product) ChangeStatus(ctx context.Context, item entity.Product) error {
 	if item.ID < 1 {
-		return mrcore.FactoryErrServiceEntityNotFound.New()
+		return mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 
 	if item.TagVersion < 1 {
-		return mrcore.FactoryErrServiceEntityVersionInvalid.New()
+		return mrcore.FactoryErrUseCaseEntityVersionInvalid.New()
 	}
 
 	currentStatus, err := uc.storage.FetchStatus(ctx, item)
@@ -158,14 +157,14 @@ func (uc *Product) ChangeStatus(ctx context.Context, item *entity.Product) error
 	}
 
 	if !uc.statusFlow.Check(currentStatus, item.Status) {
-		return mrcore.FactoryErrServiceSwitchStatusRejected.New(currentStatus, item.Status)
+		return mrcore.FactoryErrUseCaseSwitchStatusRejected.New(currentStatus, item.Status)
 	}
 
 	version, err := uc.storage.UpdateStatus(ctx, item)
 
 	if err != nil {
 		if uc.usecaseHelper.IsNotFoundError(err) {
-			return mrcore.FactoryErrServiceEntityVersionInvalid.Wrap(err)
+			return mrcore.FactoryErrUseCaseEntityVersionInvalid.Wrap(err)
 		}
 
 		return uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameProduct)
@@ -176,31 +175,29 @@ func (uc *Product) ChangeStatus(ctx context.Context, item *entity.Product) error
 	return nil
 }
 
-func (uc *Product) Remove(ctx context.Context, id mrtype.KeyInt32) error {
-	if id < 1 {
-		return mrcore.FactoryErrServiceEntityNotFound.New()
+func (uc *Product) Remove(ctx context.Context, itemID mrtype.KeyInt32) error {
+	if itemID < 1 {
+		return mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 
-	if err := uc.storage.Delete(ctx, id); err != nil {
-		return uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, id)
+	if err := uc.storage.Delete(ctx, itemID); err != nil {
+		return uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, itemID)
 	}
 
-	uc.emitEvent(ctx, "Remove", mrmsg.Data{"id": id})
+	uc.emitEvent(ctx, "Remove", mrmsg.Data{"id": itemID})
 
 	return nil
 }
 
-func (uc *Product) MoveAfterID(ctx context.Context, id mrtype.KeyInt32, afterID mrtype.KeyInt32) error {
-	if id < 1 {
-		return mrcore.FactoryErrServiceEntityNotFound.New()
+func (uc *Product) MoveAfterID(ctx context.Context, itemID mrtype.KeyInt32, afterID mrtype.KeyInt32) error {
+	if itemID < 1 {
+		return mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 
-	item := entity.Product{
-		ID: id,
-	}
+	item, err := uc.storage.FetchOne(ctx, itemID)
 
-	if err := uc.storage.LoadOne(ctx, &item); err != nil {
-		return uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, id)
+	if err != nil {
+		return uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, itemID)
 	}
 
 	if item.CategoryID < 1 {
@@ -210,16 +207,16 @@ func (uc *Product) MoveAfterID(ctx context.Context, id mrtype.KeyInt32, afterID 
 	meta := uc.storage.GetMetaData(item.CategoryID)
 	ordererAPI := uc.ordererAPI.WithMetaData(meta)
 
-	if err := ordererAPI.MoveAfterID(ctx, id, afterID); err != nil {
+	if err := ordererAPI.MoveAfterID(ctx, itemID, afterID); err != nil {
 		return err
 	}
 
-	uc.emitEvent(ctx, "Move", mrmsg.Data{"id": id, "afterId": afterID})
+	uc.emitEvent(ctx, "Move", mrmsg.Data{"id": itemID, "afterId": afterID})
 
 	return nil
 }
 
-func (uc *Product) checkItem(ctx context.Context, item *entity.Product) error {
+func (uc *Product) checkItem(ctx context.Context, item entity.Product) error {
 	if err := uc.checkArticle(ctx, item); err != nil {
 		return err
 	}
@@ -239,8 +236,8 @@ func (uc *Product) checkItem(ctx context.Context, item *entity.Product) error {
 	return nil
 }
 
-func (uc *Product) checkArticle(ctx context.Context, item *entity.Product) error {
-	id, err := uc.storage.FetchIdByArticle(ctx, item.Article)
+func (uc *Product) checkArticle(ctx context.Context, item entity.Product) error {
+	itemID, err := uc.storage.FetchIdByArticle(ctx, item.Article)
 
 	if err != nil {
 		if uc.usecaseHelper.IsNotFoundError(err) {
@@ -250,7 +247,7 @@ func (uc *Product) checkArticle(ctx context.Context, item *entity.Product) error
 		return uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameProduct)
 	}
 
-	if item.ID != id {
+	if item.ID != itemID {
 		return usecase_shared.FactoryErrProductArticleAlreadyExists.New(item.Article)
 	}
 

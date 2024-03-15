@@ -11,7 +11,7 @@ import (
 
 // TrademarkIsExistsPostgres
 // result: nil - exists, ErrStorageNoRowFound - not exists, error - query error
-func TrademarkIsExistsPostgres(ctx context.Context, conn mrstorage.DBConn, id mrtype.KeyInt32) error {
+func TrademarkIsExistsPostgres(ctx context.Context, conn mrstorage.DBConn, rowID mrtype.KeyInt32) error {
 	sql := `
 		SELECT
 			1
@@ -24,9 +24,9 @@ func TrademarkIsExistsPostgres(ctx context.Context, conn mrstorage.DBConn, id mr
 	return conn.QueryRow(
 		ctx,
 		sql,
-		id,
+		rowID,
 		mrenum.ItemStatusRemoved,
 	).Scan(
-		&id,
+		&rowID,
 	)
 }

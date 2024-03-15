@@ -2,7 +2,6 @@ package factory
 
 import (
 	"context"
-	module "go-sample/internal/modules/catalog/product"
 	http_v1 "go-sample/internal/modules/catalog/product/controller/http_v1/admin-api"
 	entity "go-sample/internal/modules/catalog/product/entity/admin-api"
 	"go-sample/internal/modules/catalog/product/factory"
@@ -41,17 +40,18 @@ func newUnitProduct(ctx context.Context, opts factory.Options) (*http_v1.Product
 
 	storage := repository.NewProductPostgres(
 		opts.PostgresAdapter,
-		mrsql.NewBuilderSelect(
+		mrpostgres.NewSqlBuilderSelect(
 			mrpostgres.NewSqlBuilderWhere(),
-			mrpostgres.NewSqlBuilderOrderByWithDefaultSort(ctx, metaOrderBy.DefaultSort()),
-			mrpostgres.NewSqlBuilderPager(module.PageSizeMax),
+			mrpostgres.NewSqlBuilderOrderBy(ctx, metaOrderBy.DefaultSort()),
+			mrpostgres.NewSqlBuilderPager(opts.PageSizeMax),
 		),
-		mrsql.NewBuilderUpdateWithMeta(
+		mrpostgres.NewSqlBuilderUpdateWithMeta(
 			entityMetaUpdate,
 			mrpostgres.NewSqlBuilderSet(),
+			nil,
 		),
 	)
-	service := usecase.NewProduct(
+	useCase := usecase.NewProduct(
 		storage,
 		opts.CategoryAPI,
 		opts.TrademarkAPI,
@@ -62,7 +62,7 @@ func newUnitProduct(ctx context.Context, opts factory.Options) (*http_v1.Product
 	controller := http_v1.NewProduct(
 		opts.RequestParser,
 		opts.ResponseSender,
-		service,
+		useCase,
 		metaOrderBy,
 	)
 

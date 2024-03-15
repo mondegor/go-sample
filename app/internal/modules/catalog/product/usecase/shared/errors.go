@@ -9,5 +9,5 @@ var (
 		"errCatalogProductNotFound", ErrorKindUser, "product with ID={{ .id }} not found")
 
 	FactoryErrProductArticleAlreadyExists = NewFactory(
-		"errCatalogProductArticleAlreadyExists", ErrorKindUser, "product article '{{ .name }}' already exist")
+		"errCatalogProductArticleAlreadyExists", ErrorKindUser, "product article '{{ .name }}' already exists")
 )

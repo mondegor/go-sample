@@ -1,0 +1,60 @@
+Catalog.Categories.AdminAPI.Request.Model.CreateCategory:
+  description: DTO добавления новой категории каталога
+  type: object
+  required:
+    - caption
+  properties:
+    caption:
+      $ref: "#/components/schemas/App.Field.Caption"
+
+Catalog.Categories.AdminAPI.Request.Model.StoreCategory:
+  description: DTO сохранения категории каталога
+  type: object
+  required:
+    - version
+    - caption
+  properties:
+    version:
+      $ref: "#/components/schemas/App.Field.TagVersion"
+    caption:
+      $ref: "#/components/schemas/App.Field.Caption"
+
+Catalog.Categories.AdminAPI.Response.Model.CategoryList:
+  description: DTO - список категорий каталога
+  type: object
+  required:
+    - items
+    - total
+  properties:
+    items:
+      description: Список записей ограниченный фильтром и pageSize
+      type: array
+      items:
+        $ref: "#/components/schemas/Catalog.Categories.AdminAPI.Response.Model.Category"
+    total:
+      $ref: "#/components/schemas/App.Field.ListPager.Total"
+
+Catalog.Categories.AdminAPI.Response.Model.Category:
+  description: DTO - категория каталога
+  type: object
+  required:
+    - id
+    - version
+    - createdAt
+    - caption
+    - status
+  properties:
+    id: # categoryId
+      $ref: "#/components/schemas/Custom.Field.CategoryID"
+    version:
+      $ref: "#/components/schemas/App.Field.TagVersion"
+    createdAt:
+      $ref: "#/components/schemas/App.Field.DateTimeCreatedAt"
+    updatedAt:
+      $ref: "#/components/schemas/App.Field.DateTimeUpdatedAt"
+    caption:
+      $ref: "#/components/schemas/App.Field.Caption"
+    imageInfo:
+      $ref: "#/components/schemas/App.Response.Model.ImageInfo"
+    status:
+      $ref: "#/components/schemas/App.Enum.Status"

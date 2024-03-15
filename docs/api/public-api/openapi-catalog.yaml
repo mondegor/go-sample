@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.3
 info:
-  version: 0.3.0
+  version: 0.11.0
   title: Public API категорий товаров
   license:
     name: Apache-2.0
@@ -16,11 +16,13 @@ info:
     #### Ограничения полей
     - required - поле обязательно для заполнения;
     - omitempty - поле может быть не указано (не будет использоваться методом, в который было передано);
+    - unique - уникальное значение поля;
     - min=N - поле должно быть не менее N символов;
     - max=N - поле должно быть не более N символов;
     - gte=N - числовое поле должно быть равно или более N;
     - lte=N - числовое поле должно быть равно или менее N;
     - enum - поле должно содержать одно из ENUM значений;
+    - UUID - поле формата UUID;
     - pattern=P - поле должно соответствовать регулярному выражению P;
 
     #### Ошибки
@@ -32,26 +34,29 @@ servers:
   - url: http://localhost:8080
     description: Local Host
 tags:
-  - name: Catalog.Categories
+  - name: Catalog.Category
     description: Public API Categories of product catalog
 
 paths:
   /v1/catalog/categories:
     get:
       summary: Метод получения списка категорий
-      description: Метод предназначен для получения списка категорий со статусом ENABLED, сохраненных в БД
-      operationId: getCategories
+      description: |-
+        Метод предназначен для получения списка категорий со статусом ENABLED, сохраненных в БД,
+        со следующими условиями:
+        - category_status = "ENABLED";
+
+        Фильтр `App.Request.Query.Filter.SearchText` использует для поиска следующие поля:
+        - caption;
+
+      operationId: getCategoryList
       tags:
-        - Catalog.Categories
+        - Catalog.Category
 
       parameters:
         - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
         - $ref: "#/components/parameters/App.Request.Header.CorrelationID"
         - $ref: "#/components/parameters/App.Request.Query.Filter.SearchText"
-        - $ref: "#/components/parameters/App.Request.Query.ListSorter.SortField"
-        - $ref: "#/components/parameters/App.Request.Query.ListSorter.SortDirection"
-        - $ref: "#/components/parameters/App.Request.Query.ListPager.PageIndex"
-        - $ref: "#/components/parameters/App.Request.Query.ListPager.PageSize"
 
       responses:
         "200":
@@ -66,10 +71,14 @@ paths:
   /v1/catalog/categories/{categoryId}:
     get:
       summary: Метод получения категории
-      description: Метод предназначен для получения информации об указанной категории со статусом ENABLED из БД
+      description: |-
+        Метод предназначен для получения информации об указанной категории из БД,
+        со следующими условиями:
+          - category_status = "ENABLED";
+
       operationId: getCategory
       tags:
-        - Catalog.Categories
+        - Catalog.Category
 
       parameters:
         - $ref: "#/components/parameters/App.Request.Header.AcceptLanguage"
@@ -98,18 +107,18 @@ components:
       required: false
       schema:
         type: string
-        default: "ru"
+        default: "ru-RU"
       example: "ru;q=0.9, fr-CH, fr;q=0.8, en;q=0.7, *;q=0.5"
 
     App.Request.Header.CorrelationID:
-      description: Уникальный идентификатор запроса
-      name: CorrelationID
+      description: Уникальный идентификатор клиента
+      name: X-Correlation-Id
       in: header
       required: false
       schema:
         type: string
         format: uuid
-      example: "f7479171-83d2-4f64-84ac-892f8c0aaf48"
+      example: "1f0b7925-cee6-4e44-8ea3-4e585d12212d"
 
     App.Request.Query.Filter.SearchText:
       description: Поисковая строка
@@ -188,30 +197,11 @@ components:
       maxLength: 128
       example: "Название"
 
-    App.Field.Date.CreatedAt:
-      description: Дата и время создания записи (UTC)
-      type: string
-      format: date-time
-      example: "2023-01-01T12:00:00.000+02:00"
-
-    App.Field.Date.UpdatedAt:
-      description: Дата и время обновления записи (UTC)
-      type: string
-      format: date-time
-      nullable: true
-      example: "2023-01-01T12:00:00.000+02:00"
-
     App.Field.ImageURL:
       description: URL к изображению записи
       type: string
-      maxLength: 256
+      maxLength: 255
       example: "http://localhost/path/item-name.png"
-
-    App.Field.IntegerID:
-      description: Идентификатор записи
-      type: integer
-      minimum: 1
-      example: 1000
 
     App.Field.ListPager.Total:
       description: Количество записей в БД с учётом указанных в запросе фильтров
@@ -272,8 +262,15 @@ components:
           type: string
           example: "5add1be1-90ab5d42-02fa8b1f-672503f2"
 
+    Custom.Field.CategoryID:
+      description: Идентификатор категории (модуль - Catalog.Category)
+      type: integer
+      format: int32
+      minimum: 1
+      example: 2
+
     Catalog.Categories.PublicAPI.Response.Model.CategoryList:
-      description: public DTO список торговых марок
+      description: public DTO список категорий
       type: object
       required:
         - items
@@ -288,18 +285,17 @@ components:
           $ref: "#/components/schemas/App.Field.ListPager.Total"
 
     Catalog.Categories.PublicAPI.Response.Model.Category:
-      description: public DTO торговая марка
+      description: public DTO категория
       type: object
       required:
         - id
         - caption
-        - imagePath
       properties:
         id: # categoryId
-          $ref: "#/components/schemas/App.Field.IntegerID"
+          $ref: "#/components/schemas/Custom.Field.CategoryID"
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
-        imagePath: # Относительный путь к логотипу
+        imageURL:
           $ref: "#/components/schemas/App.Field.ImageURL"
 
   responses:
@@ -323,4 +319,3 @@ components:
         application/problem+json;charset=UTF-8:
           schema:
             $ref: "#/components/schemas/App.Response.Model.ErrorDetails"
-

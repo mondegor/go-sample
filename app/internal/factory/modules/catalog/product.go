@@ -17,7 +17,8 @@ func NewProductModuleOptions(ctx context.Context, opts app.Options) (factory.Opt
 			// opts.RequestParsers.DateTime,
 			opts.RequestParsers.Int64,
 			opts.RequestParsers.KeyInt32,
-			opts.RequestParsers.SortPage,
+			opts.RequestParsers.ListSorter,
+			opts.RequestParsers.ListPager,
 			opts.RequestParsers.String,
 			// opts.RequestParsers.UUID,
 			opts.RequestParsers.Validator,
@@ -30,5 +31,8 @@ func NewProductModuleOptions(ctx context.Context, opts app.Options) (factory.Opt
 		CategoryAPI:  opts.CatalogCategoryAPI,
 		OrdererAPI:   opts.OrdererAPI,
 		TrademarkAPI: opts.CatalogTrademarkAPI,
+
+		PageSizeMax:     opts.Cfg.General.PageSizeMax,
+		PageSizeDefault: opts.Cfg.General.PageSizeDefault,
 	}, nil
 }

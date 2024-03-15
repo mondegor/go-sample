@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.3
 info:
-  version: 0.3.0
+  version: 0.11.0
   title: Public API получения файлов по URL
   license:
     name: Apache-2.0
@@ -16,11 +16,13 @@ info:
     #### Ограничения полей
     - required - поле обязательно для заполнения;
     - omitempty - поле может быть не указано (не будет использоваться методом, в который было передано);
+    - unique - уникальное значение поля;
     - min=N - поле должно быть не менее N символов;
     - max=N - поле должно быть не более N символов;
     - gte=N - числовое поле должно быть равно или более N;
     - lte=N - числовое поле должно быть равно или менее N;
     - enum - поле должно содержать одно из ENUM значений;
+    - UUID - поле формата UUID;
     - pattern=P - поле должно соответствовать регулярному выражению P;
 
     #### Ошибки
@@ -36,7 +38,7 @@ tags:
     description: Public API Files and images
 
 paths:
-  /images/{filePath}:
+  /img/{filePath}:
     get:
       summary: Метод получения указанного изображения
       description: Метод предназначен для получения указанного файла изображения из файлового хранилища
@@ -55,10 +57,10 @@ paths:
           content:
             image/png:
               schema:
-                $ref: "#/components/schemas/App.Response.Model.BinaryFile"
+                $ref: "#/components/schemas/App.Response.Model.BinaryImage"
             image/jpeg:
               schema:
-                $ref: "#/components/schemas/App.Response.Model.BinaryFile"
+                $ref: "#/components/schemas/App.Response.Model.BinaryImage"
         "404":
           $ref: "#/components/responses/App.ResponseJson.Error404"
         "500":
@@ -74,18 +76,18 @@ components:
       required: false
       schema:
         type: string
-        default: "ru"
+        default: "ru-RU"
       example: "ru;q=0.9, fr-CH, fr;q=0.8, en;q=0.7, *;q=0.5"
 
     App.Request.Header.CorrelationID:
-      description: Уникальный идентификатор запроса
-      name: CorrelationID
+      description: Уникальный идентификатор клиента
+      name: X-Correlation-Id
       in: header
       required: false
       schema:
         type: string
         format: uuid
-      example: "f7479171-83d2-4f64-84ac-892f8c0aaf48"
+      example: "1f0b7925-cee6-4e44-8ea3-4e585d12212d"
 
     FileStation.PublicAPI.Request.Path.FilePath:
       description: Относительный путь к файлу
@@ -99,24 +101,11 @@ components:
       example: "category/item-name.jpg"
 
   schemas:
-    App.Field.Date.CreatedAt:
-      description: Дата и время создания записи (UTC)
-      type: string
-      format: date-time
-      example: "2023-01-01T12:00:00.000+02:00"
-
-    App.Field.Date.UpdatedAt:
-      description: Дата и время обновления записи (UTC)
-      type: string
-      format: date-time
-      nullable: true
-      example: "2023-01-01T12:00:00.000+02:00"
-
-    App.Response.Model.BinaryFile:
-      description: DTO - бинарный файл
+    App.Response.Model.BinaryImage:
+      description: Бинарный файл одного из типов - JPEG, PNG
       type: string
       format: binary
-      maxLength: 16777216
+      maxLength: 1048576 # 1Mb
 
     App.Response.Model.ErrorList:
       description: DTO списка пользовательских ошибок 400
@@ -192,4 +181,3 @@ components:
         application/problem+json;charset=UTF-8:
           schema:
             $ref: "#/components/schemas/App.Response.Model.ErrorDetails"
-

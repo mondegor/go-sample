@@ -21,7 +21,8 @@ func NewTrademarkModuleOptions(ctx context.Context, opts app.Options) (factory.O
 			// opts.RequestParsers.DateTime,
 			opts.RequestParsers.Int64,
 			opts.RequestParsers.KeyInt32,
-			opts.RequestParsers.SortPage,
+			opts.RequestParsers.ListSorter,
+			opts.RequestParsers.ListPager,
 			opts.RequestParsers.String,
 			// opts.RequestParsers.UUID,
 			opts.RequestParsers.Validator,
@@ -30,6 +31,9 @@ func NewTrademarkModuleOptions(ctx context.Context, opts app.Options) (factory.O
 			opts.RequestParsers.ItemStatus,
 		),
 		ResponseSender: opts.ResponseSender,
+
+		PageSizeMax:     opts.Cfg.General.PageSizeMax,
+		PageSizeDefault: opts.Cfg.General.PageSizeDefault,
 	}, nil
 }
 
