@@ -1,6 +1,11 @@
 # Go Sample Changelog
 Все изменения сервиса Go Sample будут документироваться на этой странице.
 
+## 2024-03-16
+### Changed
+- Все поля БД типа `timestamp` теперь с `with time zone`;
+- Заменено `version` -> `tagVersion`;
+
 ## 2024-03-15
 ### Changed
 - Рефакторинг кода:

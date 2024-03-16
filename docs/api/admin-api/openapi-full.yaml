@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.3
 info:
-  version: 0.11.0
+  version: 0.11.1
   title: Private API go-sample
   license:
     name: Apache-2.0
@@ -206,7 +206,7 @@ paths:
         Метод предназначен для сохранения информации об указанной категории в БД
 
         **Ограничения и ошибки полей:**
-        - version: required,gte=1 | ErrVersionInvalid
+        - tagVersion: required,gte=1 | ErrVersionInvalid
         - caption: required,max=128
       operationId: storeCategory
       tags:
@@ -275,7 +275,7 @@ paths:
         Метод предназначен для изменения статуса категории в БД
 
         **Ограничения и ошибки полей:**
-        - version: required,gte=1 | ErrVersionInvalid
+        - tagVersion: required,gte=1 | ErrVersionInvalid
         - status: required,enum | ErrSwitchStatusRejected
       operationId: changeCategoryStatus
       tags:
@@ -543,7 +543,7 @@ paths:
         Метод предназначен для сохранения информации о товаре в БД
 
         **Ограничения и ошибки полей:**
-        - version: required,gte=1 | ErrVersionInvalid
+        - tagVersion: required,gte=1 | ErrVersionInvalid
         - article: omitempty,unique,min=4,max=32,pattern=article
         - caption: omitempty,max=128
         - trademarkId: omitempty,gte=1
@@ -615,7 +615,7 @@ paths:
         Метод предназначен для изменения статуса товара в БД
 
         **Ограничения и ошибки полей:**
-        - version: required,gte=1 | ErrVersionInvalid
+        - tagVersion: required,gte=1 | ErrVersionInvalid
         - status: required,enum | ErrSwitchStatusRejected
       operationId: changeProductStatus
       tags:
@@ -818,7 +818,7 @@ paths:
         Метод предназначен для сохранения информации о торговой марке в БД
 
         **Ограничения и ошибки полей:**
-        - version: required,gte=1 | ErrVersionInvalid
+        - tagVersion: required,gte=1 | ErrVersionInvalid
         - caption: required,max=128
       operationId: storeTrademark
       tags:
@@ -887,7 +887,7 @@ paths:
         Метод предназначен для изменения статуса торговой марки в БД
 
         **Ограничения и ошибки полей:**
-        - version: required,gte=1 | ErrVersionInvalid
+        - tagVersion: required,gte=1 | ErrVersionInvalid
         - status: required,enum | ErrSwitchStatusRejected
       operationId: changeTrademarkStatus
       tags:
@@ -1171,10 +1171,10 @@ components:
         - DISABLED -> ENABLED;
       type: object
       required:
-        - version
+        - tagVersion
         - status
       properties:
-        version:
+        tagVersion:
           $ref: "#/components/schemas/App.Field.TagVersion"
         status:
           $ref: "#/components/schemas/App.Enum.Status"
@@ -1311,6 +1311,9 @@ components:
           description: Идентификатор созданной записи
           type: string
           example: "f7479171-83d2-4f64-84ac-892f8c0aaf48"
+        message:
+          type: string
+          example: "Запись была успешно создана"
 
     Custom.Field.CategoryID:
       description: Идентификатор категории (модуль - Catalog.Category)
@@ -1338,7 +1341,7 @@ components:
       type: object
       required:
         - name
-        - version
+        - tagVersion
         - hostName
         - isDebug
         - logLevel
@@ -1392,10 +1395,10 @@ components:
       description: DTO сохранения категории каталога
       type: object
       required:
-        - version
+        - tagVersion
         - caption
       properties:
-        version:
+        tagVersion:
           $ref: "#/components/schemas/App.Field.TagVersion"
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
@@ -1420,14 +1423,14 @@ components:
       type: object
       required:
         - id
-        - version
+        - tagVersion
         - createdAt
         - caption
         - status
       properties:
         id: # categoryId
           $ref: "#/components/schemas/Custom.Field.CategoryID"
-        version:
+        tagVersion:
           $ref: "#/components/schemas/App.Field.TagVersion"
         createdAt:
           $ref: "#/components/schemas/App.Field.DateTimeCreatedAt"
@@ -1464,9 +1467,9 @@ components:
       description: DTO сохранения товара каталога
       type: object
       required:
-        - version
+        - tagVersion
       properties:
-        version:
+        tagVersion:
           $ref: "#/components/schemas/App.Field.TagVersion"
         article:
           $ref: "#/components/schemas/App.Field.Article"
@@ -1497,7 +1500,7 @@ components:
       type: object
       required:
         - id
-        - version
+        - tagVersion
         - createdAt
         - categoryId
         - article
@@ -1508,7 +1511,7 @@ components:
       properties:
         id: # productId
           $ref: "#/components/schemas/Custom.Field.ProductID"
-        version:
+        tagVersion:
           $ref: "#/components/schemas/App.Field.TagVersion"
         createdAt:
           $ref: "#/components/schemas/App.Field.DateTimeCreatedAt"
@@ -1540,10 +1543,10 @@ components:
       description: DTO сохранения торговой марки
       type: object
       required:
-        - version
+        - tagVersion
         - caption
       properties:
-        version:
+        tagVersion:
           $ref: "#/components/schemas/App.Field.TagVersion"
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
@@ -1568,14 +1571,14 @@ components:
       type: object
       required:
         - id
-        - version
+        - tagVersion
         - createdAt
         - caption
         - status
       properties:
         id: # trademarkId
           $ref: "#/components/schemas/Custom.Field.TrademarkID"
-        version:
+        tagVersion:
           $ref: "#/components/schemas/App.Field.TagVersion"
         createdAt:
           $ref: "#/components/schemas/App.Field.DateTimeCreatedAt"

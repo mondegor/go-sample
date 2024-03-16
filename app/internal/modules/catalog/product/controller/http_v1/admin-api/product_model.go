@@ -17,7 +17,7 @@ type (
 	}
 
 	StoreProductRequest struct {
-		Version     int32               `json:"version" validate:"required,gte=1"`
+		TagVersion  int32               `json:"tagVersion" validate:"required,gte=1"`
 		Article     string              `json:"article" validate:"omitempty,min=4,max=32,tag_article"`
 		Caption     string              `json:"caption" validate:"omitempty,max=128"`
 		TrademarkID mrtype.KeyInt32     `json:"trademarkId" validate:"omitempty,gte=1"`

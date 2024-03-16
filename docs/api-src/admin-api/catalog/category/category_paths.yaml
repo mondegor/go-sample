@@ -125,7 +125,7 @@
       Метод предназначен для сохранения информации об указанной категории в БД
 
       **Ограничения и ошибки полей:**
-      - version: required,gte=1 | ErrVersionInvalid
+      - tagVersion: required,gte=1 | ErrVersionInvalid
       - caption: required,max=128
     operationId: storeCategory
     tags:
@@ -194,7 +194,7 @@
       Метод предназначен для изменения статуса категории в БД
 
       **Ограничения и ошибки полей:**
-      - version: required,gte=1 | ErrVersionInvalid
+      - tagVersion: required,gte=1 | ErrVersionInvalid
       - status: required,enum | ErrSwitchStatusRejected
     operationId: changeCategoryStatus
     tags:

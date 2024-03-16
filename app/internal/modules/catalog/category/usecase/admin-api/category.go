@@ -105,7 +105,7 @@ func (uc *Category) Store(ctx context.Context, item entity.Category) error {
 		return uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategory, item.ID)
 	}
 
-	version, err := uc.storage.Update(ctx, item)
+	tagVersion, err := uc.storage.Update(ctx, item)
 
 	if err != nil {
 		if uc.usecaseHelper.IsNotFoundError(err) {
@@ -115,7 +115,7 @@ func (uc *Category) Store(ctx context.Context, item entity.Category) error {
 		return uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameCategory)
 	}
 
-	uc.emitEvent(ctx, "Store", mrmsg.Data{"id": item.ID, "ver": version})
+	uc.emitEvent(ctx, "Store", mrmsg.Data{"id": item.ID, "ver": tagVersion})
 
 	return nil
 }
@@ -143,7 +143,7 @@ func (uc *Category) ChangeStatus(ctx context.Context, item entity.Category) erro
 		return mrcore.FactoryErrUseCaseSwitchStatusRejected.New(currentStatus, item.Status)
 	}
 
-	version, err := uc.storage.UpdateStatus(ctx, item)
+	tagVersion, err := uc.storage.UpdateStatus(ctx, item)
 
 	if err != nil {
 		if uc.usecaseHelper.IsNotFoundError(err) {
@@ -153,7 +153,7 @@ func (uc *Category) ChangeStatus(ctx context.Context, item entity.Category) erro
 		return uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameCategory)
 	}
 
-	uc.emitEvent(ctx, "ChangeStatus", mrmsg.Data{"id": item.ID, "ver": version, "status": item.Status})
+	uc.emitEvent(ctx, "ChangeStatus", mrmsg.Data{"id": item.ID, "ver": tagVersion, "status": item.Status})
 
 	return nil
 }

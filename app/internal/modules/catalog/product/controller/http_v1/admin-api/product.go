@@ -146,7 +146,7 @@ func (ht *Product) Store(w http.ResponseWriter, r *http.Request) error {
 
 	item := entity.Product{
 		ID:          ht.getItemID(r),
-		TagVersion:  request.Version,
+		TagVersion:  request.TagVersion,
 		Article:     request.Article,
 		Caption:     request.Caption,
 		TrademarkID: request.TrademarkID,
@@ -216,7 +216,7 @@ func (ht *Product) wrapError(err error, r *http.Request) error {
 	}
 
 	if mrcore.FactoryErrUseCaseEntityVersionInvalid.Is(err) {
-		return mrerr.NewCustomError("version", err)
+		return mrerr.NewCustomError("tagVersion", err)
 	}
 
 	if mrcore.FactoryErrUseCaseSwitchStatusRejected.Is(err) {

@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.3
 info:
-  version: 0.11.0
+  version: 0.11.1
   title: Public API go-sample
   license:
     name: Apache-2.0
@@ -357,7 +357,7 @@ components:
       type: object
       required:
         - name
-        - version
+        - tagVersion
         - hostName
         - isDebug
         - logLevel

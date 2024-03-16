@@ -136,7 +136,7 @@
       Метод предназначен для сохранения информации о товаре в БД
 
       **Ограничения и ошибки полей:**
-      - version: required,gte=1 | ErrVersionInvalid
+      - tagVersion: required,gte=1 | ErrVersionInvalid
       - article: omitempty,unique,min=4,max=32,pattern=article
       - caption: omitempty,max=128
       - trademarkId: omitempty,gte=1
@@ -208,7 +208,7 @@
       Метод предназначен для изменения статуса товара в БД
 
       **Ограничения и ошибки полей:**
-      - version: required,gte=1 | ErrVersionInvalid
+      - tagVersion: required,gte=1 | ErrVersionInvalid
       - status: required,enum | ErrSwitchStatusRejected
     operationId: changeProductStatus
     tags:
