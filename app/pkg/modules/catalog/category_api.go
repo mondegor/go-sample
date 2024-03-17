@@ -3,14 +3,14 @@ package catalog
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/mondegor/go-sysmess/mrerr"
-	"github.com/mondegor/go-webcore/mrtype"
 )
 
 type (
 	CategoryAPI interface {
 		// CheckingAvailability - error: FactoryErrCategoryNotFound or Failed
-		CheckingAvailability(ctx context.Context, itemID mrtype.KeyInt32) error
+		CheckingAvailability(ctx context.Context, itemID uuid.UUID) error
 	}
 )
 

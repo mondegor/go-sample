@@ -8,6 +8,7 @@ import (
 	"path"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/mondegor/go-storage/mrentity"
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-sysmess/mrmsg"
@@ -45,8 +46,8 @@ func NewCategoryImage(
 }
 
 // GetFile - WARNING you don't forget to call item.File.Body.Close()
-func (uc *CategoryImage) GetFile(ctx context.Context, categoryID mrtype.KeyInt32) (mrtype.Image, error) {
-	if categoryID < 1 {
+func (uc *CategoryImage) GetFile(ctx context.Context, categoryID uuid.UUID) (mrtype.Image, error) {
+	if categoryID == uuid.Nil {
 		return mrtype.Image{}, mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 
@@ -72,8 +73,8 @@ func (uc *CategoryImage) GetFile(ctx context.Context, categoryID mrtype.KeyInt32
 	}, nil
 }
 
-func (uc *CategoryImage) StoreFile(ctx context.Context, categoryID mrtype.KeyInt32, image mrtype.Image) error {
-	if categoryID < 1 {
+func (uc *CategoryImage) StoreFile(ctx context.Context, categoryID uuid.UUID, image mrtype.Image) error {
+	if categoryID == uuid.Nil {
 		return mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 
@@ -128,8 +129,8 @@ func (uc *CategoryImage) StoreFile(ctx context.Context, categoryID mrtype.KeyInt
 	return nil
 }
 
-func (uc *CategoryImage) RemoveFile(ctx context.Context, categoryID mrtype.KeyInt32) error {
-	if categoryID < 1 {
+func (uc *CategoryImage) RemoveFile(ctx context.Context, categoryID uuid.UUID) error {
+	if categoryID == uuid.Nil {
 		return mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 
@@ -157,14 +158,14 @@ func (uc *CategoryImage) RemoveFile(ctx context.Context, categoryID mrtype.KeyIn
 	return nil
 }
 
-func (uc *CategoryImage) getLockKey(categoryID mrtype.KeyInt32) string {
-	return fmt.Sprintf("%s:%d", entity.ModelNameCategoryImage, categoryID)
+func (uc *CategoryImage) getLockKey(categoryID uuid.UUID) string {
+	return fmt.Sprintf("%s:%s", entity.ModelNameCategoryImage, categoryID)
 }
 
-func (uc *CategoryImage) getImagePath(categoryID mrtype.KeyInt32, filePath string) (string, error) {
+func (uc *CategoryImage) getImagePath(categoryID uuid.UUID, filePath string) (string, error) {
 	if ext := path.Ext(filePath); ext != "" {
 		return fmt.Sprintf(
-			"%s/%03x-%x%s",
+			"%s/%s-%x%s",
 			module.ImageDir,
 			categoryID,
 			time.Now().UTC().UnixNano()&0xffff,

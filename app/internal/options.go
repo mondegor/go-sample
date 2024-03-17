@@ -61,8 +61,8 @@ type (
 		ListSorter *mrparser.ListSorter
 		ListPager  *mrparser.ListPager
 		String     *mrparser.String
-		// UUID       *mrparser.UUID
-		Validator *mrparser.Validator
+		UUID       *mrparser.UUID
+		Validator  *mrparser.Validator
 		// File       *mrparser.File
 		Image *mrparser.Image
 	}

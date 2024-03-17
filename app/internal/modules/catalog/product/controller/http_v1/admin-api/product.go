@@ -7,14 +7,12 @@ import (
 	usecase "go-sample/internal/modules/catalog/product/usecase/admin-api"
 	usecase_shared "go-sample/internal/modules/catalog/product/usecase/shared"
 	"go-sample/pkg/modules/catalog"
+	"go-sample/pkg/shared/view"
 	"net/http"
-	"strconv"
 
 	"github.com/mondegor/go-components/mrorderer"
 	"github.com/mondegor/go-sysmess/mrerr"
-	"github.com/mondegor/go-sysmess/mrlang"
 	"github.com/mondegor/go-webcore/mrcore"
-
 	"github.com/mondegor/go-webcore/mrserver"
 	"github.com/mondegor/go-webcore/mrtype"
 	"github.com/mondegor/go-webcore/mrview"
@@ -84,7 +82,7 @@ func (ht *Product) GetList(w http.ResponseWriter, r *http.Request) error {
 func (ht *Product) listParams(r *http.Request) entity.ProductParams {
 	return entity.ProductParams{
 		Filter: entity.ProductListFilter{
-			CategoryID:   ht.parser.FilterKeyInt32(r, module.ParamNameFilterCatalogCategoryID),
+			CategoryID:   ht.parser.FilterUUID(r, module.ParamNameFilterCatalogCategoryID),
 			SearchText:   ht.parser.FilterString(r, module.ParamNameFilterSearchText),
 			TrademarkIDs: ht.parser.FilterKeyInt32List(r, module.ParamNameFilterCatalogTrademarkIDs),
 			Price:        ht.parser.FilterRangeInt64(r, module.ParamNameFilterPriceRange),
@@ -126,12 +124,8 @@ func (ht *Product) Create(w http.ResponseWriter, r *http.Request) error {
 		return ht.sender.Send(
 			w,
 			http.StatusCreated,
-			SuccessCreatedItemResponse{
-				ItemID: strconv.Itoa(int(itemID)),
-				Message: mrlang.Ctx(r.Context()).TranslateMessage(
-					"msgCatalogProductSuccessCreated",
-					"entity has been success created",
-				),
+			view.SuccessCreatedItemInt32Response{
+				ItemID: itemID,
 			},
 		)
 	}
@@ -161,7 +155,7 @@ func (ht *Product) Store(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (ht *Product) ChangeStatus(w http.ResponseWriter, r *http.Request) error {
-	request := ChangeItemStatusRequest{}
+	request := view.ChangeItemStatusRequest{}
 
 	if err := ht.parser.Validate(r, &request); err != nil {
 		return err
@@ -189,7 +183,7 @@ func (ht *Product) Remove(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (ht *Product) Move(w http.ResponseWriter, r *http.Request) error {
-	request := MoveItemRequest{}
+	request := view.MoveItemRequest{}
 
 	if err := ht.parser.Validate(r, &request); err != nil {
 		return err

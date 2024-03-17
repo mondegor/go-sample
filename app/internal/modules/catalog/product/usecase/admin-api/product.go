@@ -6,6 +6,7 @@ import (
 	usecase_shared "go-sample/internal/modules/catalog/product/usecase/shared"
 	"go-sample/pkg/modules/catalog"
 
+	"github.com/google/uuid"
 	"github.com/mondegor/go-components/mrorderer"
 	"github.com/mondegor/go-sysmess/mrmsg"
 	"github.com/mondegor/go-webcore/mrcore"
@@ -200,7 +201,7 @@ func (uc *Product) MoveAfterID(ctx context.Context, itemID mrtype.KeyInt32, afte
 		return uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, itemID)
 	}
 
-	if item.CategoryID < 1 {
+	if item.CategoryID == uuid.Nil {
 		return mrcore.FactoryErrInternal.WithAttr(entity.ModelNameProduct, mrmsg.Data{"categoryId": item.CategoryID}).New()
 	}
 
@@ -221,7 +222,7 @@ func (uc *Product) checkItem(ctx context.Context, item entity.Product) error {
 		return err
 	}
 
-	if item.ID == 0 || item.CategoryID > 0 {
+	if item.ID == 0 || item.CategoryID != uuid.Nil {
 		if err := uc.categoryAPI.CheckingAvailability(ctx, item.CategoryID); err != nil {
 			return err
 		}

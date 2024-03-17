@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/mondegor/go-storage/mrentity"
 	"github.com/mondegor/go-webcore/mrtype"
 )
@@ -10,14 +11,14 @@ import (
 type (
 	CategoryImageUseCase interface {
 		// GetFile - WARNING you don't forget to call item.Body.Close()
-		GetFile(ctx context.Context, categoryID mrtype.KeyInt32) (mrtype.Image, error)
-		StoreFile(ctx context.Context, categoryID mrtype.KeyInt32, image mrtype.Image) error
-		RemoveFile(ctx context.Context, categoryID mrtype.KeyInt32) error
+		GetFile(ctx context.Context, categoryID uuid.UUID) (mrtype.Image, error)
+		StoreFile(ctx context.Context, categoryID uuid.UUID, image mrtype.Image) error
+		RemoveFile(ctx context.Context, categoryID uuid.UUID) error
 	}
 
 	CategoryImageStorage interface {
-		FetchMeta(ctx context.Context, categoryID mrtype.KeyInt32) (mrentity.ImageMeta, error)
-		UpdateMeta(ctx context.Context, categoryID mrtype.KeyInt32, meta mrentity.ImageMeta) error
-		DeleteMeta(ctx context.Context, categoryID mrtype.KeyInt32) error
+		FetchMeta(ctx context.Context, categoryID uuid.UUID) (mrentity.ImageMeta, error)
+		UpdateMeta(ctx context.Context, categoryID uuid.UUID, meta mrentity.ImageMeta) error
+		DeleteMeta(ctx context.Context, categoryID uuid.UUID) error
 	}
 )

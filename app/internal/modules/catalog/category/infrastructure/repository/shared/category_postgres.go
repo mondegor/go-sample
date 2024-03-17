@@ -4,17 +4,17 @@ import (
 	"context"
 	module "go-sample/internal/modules/catalog/category"
 
+	"github.com/google/uuid"
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-webcore/mrenum"
-	"github.com/mondegor/go-webcore/mrtype"
 )
 
 // CategoryIsExistsPostgres
 // result: nil - exists, ErrStorageNoRowFound - not exists, error - query error
-func CategoryIsExistsPostgres(ctx context.Context, conn mrstorage.DBConn, rowID mrtype.KeyInt32) error {
+func CategoryIsExistsPostgres(ctx context.Context, conn mrstorage.DBConn, rowID uuid.UUID) error {
 	sql := `
 		SELECT
-			1
+			category_id
 		FROM
 			` + module.DBSchema + `.categories
 		WHERE

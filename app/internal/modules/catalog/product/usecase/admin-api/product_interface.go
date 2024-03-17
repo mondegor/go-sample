@@ -4,6 +4,7 @@ import (
 	"context"
 	"go-sample/internal/modules/catalog/product/entity/admin-api"
 
+	"github.com/google/uuid"
 	"github.com/mondegor/go-components/mrorderer"
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-webcore/mrenum"
@@ -22,7 +23,7 @@ type (
 	}
 
 	ProductStorage interface {
-		GetMetaData(categoryID mrtype.KeyInt32) mrorderer.EntityMeta
+		GetMetaData(categoryID uuid.UUID) mrorderer.EntityMeta
 		NewFetchParams(params entity.ProductParams) mrstorage.SqlSelectParams
 		Fetch(ctx context.Context, params mrstorage.SqlSelectParams) ([]entity.Product, error)
 		FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPart) (int64, error)

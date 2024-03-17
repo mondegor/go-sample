@@ -7,9 +7,9 @@ import (
 	repository_shared "go-sample/internal/modules/catalog/category/infrastructure/repository/shared"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-webcore/mrenum"
-	"github.com/mondegor/go-webcore/mrtype"
 )
 
 type (
@@ -130,7 +130,7 @@ func (re *CategoryPostgres) FetchTotal(ctx context.Context, where mrstorage.SqlB
 	return totalRow, err
 }
 
-func (re *CategoryPostgres) FetchOne(ctx context.Context, rowID mrtype.KeyInt32) (entity.Category, error) {
+func (re *CategoryPostgres) FetchOne(ctx context.Context, rowID uuid.UUID) (entity.Category, error) {
 	sql := `
 		SELECT
 			tag_version,
@@ -190,19 +190,20 @@ func (re *CategoryPostgres) FetchStatus(ctx context.Context, row entity.Category
 
 // IsExists
 // result: nil - exists, ErrStorageNoRowFound - not exists, error - query error
-func (re *CategoryPostgres) IsExists(ctx context.Context, rowID mrtype.KeyInt32) error {
+func (re *CategoryPostgres) IsExists(ctx context.Context, rowID uuid.UUID) error {
 	return repository_shared.CategoryIsExistsPostgres(ctx, re.client, rowID)
 }
 
-func (re *CategoryPostgres) Insert(ctx context.Context, row entity.Category) (mrtype.KeyInt32, error) {
+func (re *CategoryPostgres) Insert(ctx context.Context, row entity.Category) (uuid.UUID, error) {
 	sql := `
 		INSERT INTO ` + module.DBSchema + `.categories
 			(
+				category_id,
 				category_caption,
 				category_status
 			)
 		VALUES
-			($1, $2)
+			(gen_random_uuid(), $1, $2)
 		RETURNING
 			category_id;`
 
@@ -276,7 +277,7 @@ func (re *CategoryPostgres) UpdateStatus(ctx context.Context, row entity.Categor
 	return tagVersion, err
 }
 
-func (re *CategoryPostgres) Delete(ctx context.Context, rowID mrtype.KeyInt32) error {
+func (re *CategoryPostgres) Delete(ctx context.Context, rowID uuid.UUID) error {
 	sql := `
 		UPDATE
 			` + module.DBSchema + `.categories

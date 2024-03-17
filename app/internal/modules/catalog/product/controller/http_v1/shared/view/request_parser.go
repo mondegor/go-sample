@@ -14,7 +14,7 @@ type (
 		mrserver.RequestParserListSorter
 		mrserver.RequestParserListPager
 		mrserver.RequestParserString
-		// mrserver.RequestParserUUID
+		mrserver.RequestParserUUID
 		mrserver.RequestParserValidate
 		// mrserver.RequestParserFile
 		// mrserver.RequestParserImage
@@ -29,7 +29,7 @@ type (
 		*mrparser.ListSorter
 		*mrparser.ListPager
 		*mrparser.String
-		// *mrparser.UUID
+		*mrparser.UUID
 		*mrparser.Validator
 		// *mrparser.File
 		// *mrparser.Image
@@ -45,7 +45,7 @@ func NewParser(
 	p5 *mrparser.ListSorter,
 	p6 *mrparser.ListPager,
 	p7 *mrparser.String,
-	// p8 *mrparser.UUID,
+	p8 *mrparser.UUID,
 	p9 *mrparser.Validator,
 	// p10 *mrparser.File,
 	// p11 *mrparser.Image,
@@ -59,8 +59,8 @@ func NewParser(
 		ListSorter: p5,
 		ListPager:  p6,
 		String:     p7,
-		// UUID:      p8,
-		Validator: p9,
+		UUID:       p8,
+		Validator:  p9,
 		// File:      p10,
 		// Image:     p11,
 		ItemStatus: p12,

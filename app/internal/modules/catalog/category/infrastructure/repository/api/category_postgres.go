@@ -4,8 +4,8 @@ import (
 	"context"
 	repository_shared "go-sample/internal/modules/catalog/category/infrastructure/repository/shared"
 
+	"github.com/google/uuid"
 	"github.com/mondegor/go-storage/mrstorage"
-	"github.com/mondegor/go-webcore/mrtype"
 )
 
 type (
@@ -24,6 +24,6 @@ func NewCategoryPostgres(
 
 // IsExists
 // result: nil - exists, ErrStorageNoRowFound - not exists, error - query error
-func (re *CategoryPostgres) IsExists(ctx context.Context, rowID mrtype.KeyInt32) error {
+func (re *CategoryPostgres) IsExists(ctx context.Context, rowID uuid.UUID) error {
 	return repository_shared.CategoryIsExistsPostgres(ctx, re.client, rowID)
 }

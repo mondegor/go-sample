@@ -1,6 +1,5 @@
 Custom.Field.CategoryID:
   description: Идентификатор категории (модуль - Catalog.Category)
-  type: integer
-  format: int32
-  minimum: 1
-  example: 2
+  type: string
+  format: uuid
+  example: "21de1e21-0a4a-47a5-b60d-67c7f78a3278"

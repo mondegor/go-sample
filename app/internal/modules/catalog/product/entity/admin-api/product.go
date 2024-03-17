@@ -4,6 +4,7 @@ import (
 	entity_shared "go-sample/internal/modules/catalog/product/entity/shared"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/mondegor/go-webcore/mrenum"
 	"github.com/mondegor/go-webcore/mrtype"
 )
@@ -19,7 +20,7 @@ type (
 		CreatedAt  time.Time       `json:"createdAt" sort:"createdAt"`           // created_at
 		UpdatedAt  *time.Time      `json:"updatedAt,omitempty" sort:"updatedAt"` // updated_at
 
-		CategoryID  mrtype.KeyInt32     `json:"categoryId" upd:"category_id"` // ps_catalog.categories::category_id
+		CategoryID  uuid.UUID           `json:"categoryId" upd:"category_id"` // ps_catalog.categories::category_id
 		Article     string              `json:"article" sort:"article" upd:"product_article"`
 		Caption     string              `json:"caption" sort:"caption,default" upd:"product_caption"`
 		TrademarkID mrtype.KeyInt32     `json:"trademarkId" upd:"trademark_id"`         // ps_catalog.trademarks::trademark_id
@@ -35,7 +36,7 @@ type (
 	}
 
 	ProductListFilter struct {
-		CategoryID   mrtype.KeyInt32
+		CategoryID   uuid.UUID
 		SearchText   string
 		TrademarkIDs []mrtype.KeyInt32
 		Price        mrtype.RangeInt64

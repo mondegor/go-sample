@@ -1,4 +1,4 @@
-# Описание Go Sample v0.11.1
+# Описание Go Sample v0.11.2
 Этот репозиторий содержит описание сервиса Go Sample.
 
 ## Статус сервиса
@@ -31,7 +31,7 @@ Web сервис каталога продукции, который решае�
 - `mrcmd openapi build-all` - сборка документации всех API;
 
 ### Примеры запуска сборки документации из консоли Windows:
-- GitBash (cmd): `"C:\Program Files\Git\git-bash.exe" --cd=d:\mrwork\tn-docs mrcmd openapi build-all`
+- GitBash (cmd): `"C:\Program Files\Git\git-bash.exe" --cd=d:\mrwork\tn-docs mrcmd openapi build-all`;
 - WSL (PowerShell): `cd D:\workdir\go-sample; wsl -d Ubuntu-20.04 -e mrcmd openapi build-all`;
 
 ## Разворачивание, установка и запуск сервиса

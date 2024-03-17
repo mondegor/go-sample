@@ -20,7 +20,7 @@ func NewProductModuleOptions(ctx context.Context, opts app.Options) (factory.Opt
 			opts.RequestParsers.ListSorter,
 			opts.RequestParsers.ListPager,
 			opts.RequestParsers.String,
-			// opts.RequestParsers.UUID,
+			opts.RequestParsers.UUID,
 			opts.RequestParsers.Validator,
 			// opts.RequestParsers.File,
 			// opts.RequestParsers.Image,

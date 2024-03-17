@@ -4,10 +4,10 @@ import (
 	"context"
 	module "go-sample/internal/modules/catalog/category"
 
+	"github.com/google/uuid"
 	"github.com/mondegor/go-storage/mrentity"
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-webcore/mrenum"
-	"github.com/mondegor/go-webcore/mrtype"
 )
 
 type (
@@ -24,7 +24,7 @@ func NewCategoryImagePostgres(
 	}
 }
 
-func (re *CategoryImagePostgres) FetchMeta(ctx context.Context, categoryID mrtype.KeyInt32) (mrentity.ImageMeta, error) {
+func (re *CategoryImagePostgres) FetchMeta(ctx context.Context, categoryID uuid.UUID) (mrentity.ImageMeta, error) {
 	sql := `
 		SELECT
 			image_meta
@@ -48,7 +48,7 @@ func (re *CategoryImagePostgres) FetchMeta(ctx context.Context, categoryID mrtyp
 	return imageMeta, err
 }
 
-func (re *CategoryImagePostgres) UpdateMeta(ctx context.Context, categoryID mrtype.KeyInt32, meta mrentity.ImageMeta) error {
+func (re *CategoryImagePostgres) UpdateMeta(ctx context.Context, categoryID uuid.UUID, meta mrentity.ImageMeta) error {
 	sql := `
 		UPDATE
 			` + module.DBSchema + `.categories
@@ -67,6 +67,6 @@ func (re *CategoryImagePostgres) UpdateMeta(ctx context.Context, categoryID mrty
 	)
 }
 
-func (re *CategoryImagePostgres) DeleteMeta(ctx context.Context, categoryID mrtype.KeyInt32) error {
+func (re *CategoryImagePostgres) DeleteMeta(ctx context.Context, categoryID uuid.UUID) error {
 	return re.UpdateMeta(ctx, categoryID, mrentity.ImageMeta{})
 }

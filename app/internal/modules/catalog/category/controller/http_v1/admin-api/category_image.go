@@ -7,10 +7,10 @@ import (
 	usecase_shared "go-sample/internal/modules/catalog/category/usecase/shared"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrserver"
 	"github.com/mondegor/go-webcore/mrserver/mrparser"
-	"github.com/mondegor/go-webcore/mrtype"
 )
 
 const (
@@ -81,8 +81,8 @@ func (ht *CategoryImage) RemoveImage(w http.ResponseWriter, r *http.Request) err
 	return ht.sender.SendNoContent(w)
 }
 
-func (ht *CategoryImage) getParentID(r *http.Request) mrtype.KeyInt32 {
-	return ht.parser.PathKeyInt32(r, "id")
+func (ht *CategoryImage) getParentID(r *http.Request) uuid.UUID {
+	return ht.parser.PathParamUUID(r, "id")
 }
 
 func (ht *CategoryImage) getRawParentID(r *http.Request) string {

@@ -6,4 +6,4 @@ permissions:
   - modCatalogCategory
   - modCatalogProduct
   - modCatalogTrademark
-  - modFileStationImageProxy
+  - modFileStation

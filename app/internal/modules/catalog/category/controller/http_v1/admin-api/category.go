@@ -6,15 +6,13 @@ import (
 	"go-sample/internal/modules/catalog/category/entity/admin-api"
 	usecase "go-sample/internal/modules/catalog/category/usecase/admin-api"
 	"go-sample/pkg/modules/catalog"
+	"go-sample/pkg/shared/view"
 	"net/http"
-	"strconv"
 
+	"github.com/google/uuid"
 	"github.com/mondegor/go-sysmess/mrerr"
-	"github.com/mondegor/go-sysmess/mrlang"
 	"github.com/mondegor/go-webcore/mrcore"
-
 	"github.com/mondegor/go-webcore/mrserver"
-	"github.com/mondegor/go-webcore/mrtype"
 	"github.com/mondegor/go-webcore/mrview"
 )
 
@@ -115,12 +113,8 @@ func (ht *Category) Create(w http.ResponseWriter, r *http.Request) error {
 		return ht.sender.Send(
 			w,
 			http.StatusCreated,
-			SuccessCreatedItemResponse{
-				ItemID: strconv.Itoa(int(itemID)),
-				Message: mrlang.Ctx(r.Context()).TranslateMessage(
-					"msgCatalogCategorySuccessCreated",
-					"entity has been success created",
-				),
+			view.SuccessCreatedItemResponse{
+				ItemID: itemID.String(),
 			},
 		)
 	}
@@ -147,7 +141,7 @@ func (ht *Category) Store(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (ht *Category) ChangeStatus(w http.ResponseWriter, r *http.Request) error {
-	request := ChangeItemStatusRequest{}
+	request := view.ChangeItemStatusRequest{}
 
 	if err := ht.parser.Validate(r, &request); err != nil {
 		return err
@@ -174,8 +168,8 @@ func (ht *Category) Remove(w http.ResponseWriter, r *http.Request) error {
 	return ht.sender.SendNoContent(w)
 }
 
-func (ht *Category) getItemID(r *http.Request) mrtype.KeyInt32 {
-	return ht.parser.PathKeyInt32(r, "id")
+func (ht *Category) getItemID(r *http.Request) uuid.UUID {
+	return ht.parser.PathParamUUID(r, "id")
 }
 
 func (ht *Category) getRawItemID(r *http.Request) string {

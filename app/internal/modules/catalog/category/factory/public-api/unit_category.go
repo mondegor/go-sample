@@ -32,8 +32,10 @@ func newUnitCategory(ctx context.Context, opts factory.Options) (*http_v1.Catego
 			mrpostgres.NewSqlBuilderPager(opts.PageSizeMax),
 		),
 	)
-	useCase := usecase.NewCategoryLangDecorator(
-		usecase.NewCategory(storage, opts.UsecaseHelper, opts.UnitCategory.ImageURLBuilder),
+	useCase := usecase.NewCategory(
+		storage,
+		opts.UsecaseHelper,
+		opts.UnitCategory.ImageURLBuilder,
 		opts.UnitCategory.Dictionary,
 	)
 	controller := http_v1.NewCategory(

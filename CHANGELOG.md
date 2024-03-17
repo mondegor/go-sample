@@ -1,6 +1,21 @@
 # Go Sample Changelog
 Все изменения сервиса Go Sample будут документироваться на этой странице.
 
+## 2024-03-17
+### Added
+- Добавлен `App.Response.Model.SuccessCreatedItemInt32` в API и в `pkg`;
+
+### Changed
+- Идентификатор категории был заменён с int на uuid;
+- Перенесены в `pkg` часто используемые сервисом модели:
+  - SuccessCreatedItemResponse;
+  - ChangeItemStatusRequest;
+  - MoveItemRequest;
+
+### Removed
+- Удалён `App.Response.Model.Success`;
+- Удалён `App.Response.Model.SuccessModifyItem`;
+
 ## 2024-03-16
 ### Changed
 - Все поля БД типа `timestamp` теперь с `with time zone`;

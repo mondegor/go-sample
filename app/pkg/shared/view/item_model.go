@@ -1,4 +1,4 @@
-package http_v1
+package view
 
 import (
 	"github.com/mondegor/go-webcore/mrenum"
@@ -16,7 +16,10 @@ type (
 	}
 
 	SuccessCreatedItemResponse struct {
-		ItemID  string `json:"id"`
-		Message string `json:"message,omitempty"`
+		ItemID string `json:"id"`
+	}
+
+	SuccessCreatedItemInt32Response struct {
+		ItemID mrtype.KeyInt32 `json:"id"`
 	}
 )

@@ -118,7 +118,7 @@ access_control:
     - modCatalogCategory
     - modCatalogProduct
     - modCatalogTrademark
-    - modFileStationImageProxy
+    - modFileStation
 
 modules_settings:
   general:

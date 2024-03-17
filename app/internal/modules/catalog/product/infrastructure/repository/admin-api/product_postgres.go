@@ -6,6 +6,7 @@ import (
 	"go-sample/internal/modules/catalog/product/entity/admin-api"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/mondegor/go-components/mrorderer"
 	"github.com/mondegor/go-storage/mrsql"
 	"github.com/mondegor/go-storage/mrstorage"
@@ -33,7 +34,7 @@ func NewProductPostgres(
 	}
 }
 
-func (re *ProductPostgres) GetMetaData(categoryID mrtype.KeyInt32) mrorderer.EntityMeta {
+func (re *ProductPostgres) GetMetaData(categoryID uuid.UUID) mrorderer.EntityMeta {
 	return mrorderer.NewEntityMeta(
 		module.DBSchema+".products",
 		"product_id",
@@ -51,7 +52,7 @@ func (re *ProductPostgres) NewFetchParams(params entity.ProductParams) mrstorage
 		Where: re.sqlSelect.Where(func(w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
 			return w.JoinAnd(
 				w.NotEqual("product_status", mrenum.ItemStatusRemoved),
-				w.FilterEqualInt64("category_id", int64(params.Filter.CategoryID), 0),
+				w.FilterEqualUUID("category_id", params.Filter.CategoryID),
 				w.FilterLikeFields([]string{"UPPER(product_article)", "UPPER(product_caption)"}, strings.ToUpper(params.Filter.SearchText)),
 				w.FilterAnyOf("trademark_id", params.Filter.TrademarkIDs),
 				w.FilterRangeInt64("product_price", params.Filter.Price, 0),

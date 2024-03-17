@@ -4,12 +4,13 @@ import (
 	entity "go-sample/internal/modules/catalog/product/entity/admin-api"
 	entity_shared "go-sample/internal/modules/catalog/product/entity/shared"
 
+	"github.com/google/uuid"
 	"github.com/mondegor/go-webcore/mrtype"
 )
 
 type (
 	CreateProductRequest struct {
-		CategoryID  mrtype.KeyInt32     `json:"categoryId" validate:"required,gte=1"`
+		CategoryID  uuid.UUID           `json:"categoryId" validate:"required,min=16,max=64"`
 		Article     string              `json:"article" validate:"required,min=4,max=32,tag_article"`
 		Caption     string              `json:"caption" validate:"required,max=128"`
 		TrademarkID mrtype.KeyInt32     `json:"trademarkId" validate:"required,gte=1"`

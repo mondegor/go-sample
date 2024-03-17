@@ -4,10 +4,10 @@ import (
 	"context"
 	"go-sample/pkg/modules/catalog"
 
+	"github.com/google/uuid"
 	"github.com/mondegor/go-sysmess/mrmsg"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrlog"
-	"github.com/mondegor/go-webcore/mrtype"
 )
 
 const (
@@ -21,7 +21,7 @@ type (
 	}
 
 	CategoryStorage interface {
-		IsExists(ctx context.Context, rowID mrtype.KeyInt32) error
+		IsExists(ctx context.Context, rowID uuid.UUID) error
 	}
 )
 
@@ -35,10 +35,10 @@ func NewCategory(
 	}
 }
 
-func (uc *Category) CheckingAvailability(ctx context.Context, itemID mrtype.KeyInt32) error {
+func (uc *Category) CheckingAvailability(ctx context.Context, itemID uuid.UUID) error {
 	uc.debugCmd(ctx, "CheckingAvailability", mrmsg.Data{"id": itemID})
 
-	if itemID < 1 {
+	if itemID == uuid.Nil {
 		return catalog.FactoryErrCategoryNotFound.New(itemID)
 	}
 

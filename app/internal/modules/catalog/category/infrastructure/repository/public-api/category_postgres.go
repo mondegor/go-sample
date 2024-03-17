@@ -6,9 +6,9 @@ import (
 	"go-sample/internal/modules/catalog/category/entity/public-api"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-webcore/mrenum"
-	"github.com/mondegor/go-webcore/mrtype"
 )
 
 type (
@@ -111,7 +111,7 @@ func (re *CategoryPostgres) FetchTotal(ctx context.Context, where mrstorage.SqlB
 	return totalRow, err
 }
 
-func (re *CategoryPostgres) FetchOne(ctx context.Context, rowID mrtype.KeyInt32) (entity.Category, error) {
+func (re *CategoryPostgres) FetchOne(ctx context.Context, rowID uuid.UUID) (entity.Category, error) {
 	sql := `
 		SELECT
 			category_caption,

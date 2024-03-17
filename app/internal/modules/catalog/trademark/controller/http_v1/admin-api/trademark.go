@@ -6,13 +6,11 @@ import (
 	entity "go-sample/internal/modules/catalog/trademark/entity/admin-api"
 	usecase "go-sample/internal/modules/catalog/trademark/usecase/admin-api"
 	"go-sample/pkg/modules/catalog"
+	"go-sample/pkg/shared/view"
 	"net/http"
-	"strconv"
 
 	"github.com/mondegor/go-sysmess/mrerr"
-	"github.com/mondegor/go-sysmess/mrlang"
 	"github.com/mondegor/go-webcore/mrcore"
-
 	"github.com/mondegor/go-webcore/mrserver"
 	"github.com/mondegor/go-webcore/mrtype"
 	"github.com/mondegor/go-webcore/mrview"
@@ -115,12 +113,8 @@ func (ht *Trademark) Create(w http.ResponseWriter, r *http.Request) error {
 		return ht.sender.Send(
 			w,
 			http.StatusCreated,
-			SuccessCreatedItemResponse{
-				ItemID: strconv.Itoa(int(itemID)),
-				Message: mrlang.Ctx(r.Context()).TranslateMessage(
-					"msgCatalogTrademarkSuccessCreated",
-					"entity has been success created",
-				),
+			view.SuccessCreatedItemInt32Response{
+				ItemID: itemID,
 			},
 		)
 	}
@@ -147,7 +141,7 @@ func (ht *Trademark) Store(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (ht *Trademark) ChangeStatus(w http.ResponseWriter, r *http.Request) error {
-	request := ChangeItemStatusRequest{}
+	request := view.ChangeItemStatusRequest{}
 
 	if err := ht.parser.Validate(r, &request); err != nil {
 		return err

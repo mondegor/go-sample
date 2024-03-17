@@ -87,6 +87,7 @@ mrcmd_func_openapi_build_pub_catalog() {
     # "${sharedDir}/components/models/App.Response.Model.ImageInfo.yaml"
     # "${sharedDir}/components/models/App.Response.Model.Success.yaml"
     # "${sharedDir}/components/models/App.Response.Model.SuccessCreatedItem.yaml"
+    # "${sharedDir}/components/models/App.Response.Model.SuccessCreatedItemInt32.yaml"
 
     "${sharedDir}/custom/fields/Custom.Field.CategoryID.yaml"
     # "${sharedDir}/custom/fields/Custom.Field.ProductID.yaml"

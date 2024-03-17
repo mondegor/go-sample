@@ -4,7 +4,7 @@ Custom.Request.Query.Filter.TrademarkIDs:
 
     Возможные значения:
     - NULL - все записи;
-    - Список ID торговых марок через "," (/v1/catalog/trademarks);
+    - Список ID торговых марок через "," из списка /v1/catalog/trademarks;
 
     Значение по умолчанию: NULL
   name: trademarkId

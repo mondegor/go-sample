@@ -4,13 +4,13 @@ import (
 	"context"
 	"go-sample/internal/modules/catalog/category/entity/admin-api"
 
+	"github.com/google/uuid"
 	"github.com/mondegor/go-storage/mrentity"
 	"github.com/mondegor/go-sysmess/mrmsg"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrenum"
 	"github.com/mondegor/go-webcore/mrlib"
 	"github.com/mondegor/go-webcore/mrsender"
-	"github.com/mondegor/go-webcore/mrtype"
 )
 
 type (
@@ -63,8 +63,8 @@ func (uc *Category) GetList(ctx context.Context, params entity.CategoryParams) (
 	return items, total, nil
 }
 
-func (uc *Category) GetItem(ctx context.Context, itemID mrtype.KeyInt32) (entity.Category, error) {
-	if itemID < 1 {
+func (uc *Category) GetItem(ctx context.Context, itemID uuid.UUID) (entity.Category, error) {
+	if itemID == uuid.Nil {
 		return entity.Category{}, mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 
@@ -79,12 +79,12 @@ func (uc *Category) GetItem(ctx context.Context, itemID mrtype.KeyInt32) (entity
 	return item, nil
 }
 
-func (uc *Category) Create(ctx context.Context, item entity.Category) (mrtype.KeyInt32, error) {
+func (uc *Category) Create(ctx context.Context, item entity.Category) (uuid.UUID, error) {
 	item.Status = mrenum.ItemStatusDraft
 	itemID, err := uc.storage.Insert(ctx, item)
 
 	if err != nil {
-		return 0, uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameCategory)
+		return uuid.Nil, uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameCategory)
 	}
 
 	uc.emitEvent(ctx, "Create", mrmsg.Data{"id": itemID})
@@ -93,7 +93,7 @@ func (uc *Category) Create(ctx context.Context, item entity.Category) (mrtype.Ke
 }
 
 func (uc *Category) Store(ctx context.Context, item entity.Category) error {
-	if item.ID < 1 {
+	if item.ID == uuid.Nil {
 		return mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 
@@ -121,7 +121,7 @@ func (uc *Category) Store(ctx context.Context, item entity.Category) error {
 }
 
 func (uc *Category) ChangeStatus(ctx context.Context, item entity.Category) error {
-	if item.ID < 1 {
+	if item.ID == uuid.Nil {
 		return mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 
@@ -158,8 +158,8 @@ func (uc *Category) ChangeStatus(ctx context.Context, item entity.Category) erro
 	return nil
 }
 
-func (uc *Category) Remove(ctx context.Context, itemID mrtype.KeyInt32) error {
-	if itemID < 1 {
+func (uc *Category) Remove(ctx context.Context, itemID uuid.UUID) error {
+	if itemID == uuid.Nil {
 		return mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 

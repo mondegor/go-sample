@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.3
 info:
-  version: 0.11.1
+  version: 0.11.2
   title: Private API go-sample
   license:
     name: Apache-2.0
@@ -158,7 +158,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/App.Response.Model.SuccessCreatedItem"
+                $ref: "#/components/schemas/App.Response.Model.SuccessCreatedItemInt32"
         "400":
           $ref: "#/components/responses/App.ResponseJson.Error400"
         "401":
@@ -407,9 +407,9 @@ paths:
 
   /v1/catalog/products:
     get:
-      summary: Метод получения списка товаров категории
+      summary: Метод получения списка товаров
       description: |
-        Метод предназначен для получения списка всех товаров указанной категории, сохранённых в БД
+        Метод предназначен для получения списка всех товаров, сохранённых в БД
 
         Фильтр `App.Request.Query.Filter.SearchText` использует для поиска следующие поля:
         - article;
@@ -466,7 +466,7 @@ paths:
         Метод предназначен для создания информации о новом товаре в БД
 
         **Ограничения и ошибки полей:**
-        - categoryId: required,gte=1
+        - categoryId: required,UUID (Catalog.Category::CategoryID)
         - article: required,unique,min=4,max=32,pattern=article
         - caption: required,max=128
         - trademarkId: required,gte=1
@@ -495,7 +495,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/App.Response.Model.SuccessCreatedItem"
+                $ref: "#/components/schemas/App.Response.Model.SuccessCreatedItemInt32"
         "400":
           $ref: "#/components/responses/App.ResponseJson.Error400"
         "401":
@@ -770,7 +770,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/App.Response.Model.SuccessCreatedItem"
+                $ref: "#/components/schemas/App.Response.Model.SuccessCreatedItemInt32"
         "400":
           $ref: "#/components/responses/App.ResponseJson.Error400"
         "401":
@@ -1059,7 +1059,7 @@ components:
 
         Возможные значения:
         - NULL - все записи;
-        - Список ID торговых марок через "," (/v1/catalog/trademarks);
+        - Список ID торговых марок через "," из списка /v1/catalog/trademarks;
 
         Значение по умолчанию: NULL
       name: trademarkId
@@ -1301,26 +1301,23 @@ components:
           format: date-time
           example: "2023-01-01T12:00:00.000+02:00"
 
-    App.Response.Model.SuccessCreatedItem:
-      description: DTO результата создания записи
+    App.Response.Model.SuccessCreatedItemInt32:
+      description: DTO результата создания записи (int32 ID)
       type: object
       required:
         - id
       properties:
         id:
           description: Идентификатор созданной записи
-          type: string
-          example: "f7479171-83d2-4f64-84ac-892f8c0aaf48"
-        message:
-          type: string
-          example: "Запись была успешно создана"
+          type: integer
+          format: int32
+          example: 2147483647
 
     Custom.Field.CategoryID:
       description: Идентификатор категории (модуль - Catalog.Category)
-      type: integer
-      format: int32
-      minimum: 1
-      example: 2
+      type: string
+      format: uuid
+      example: "21de1e21-0a4a-47a5-b60d-67c7f78a3278"
 
     Custom.Field.ProductID:
       description: Идентификатор продукции (модуль - Catalog.Product)

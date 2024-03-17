@@ -1,8 +1,8 @@
 /v1/catalog/products:
   get:
-    summary: Метод получения списка товаров категории
+    summary: Метод получения списка товаров
     description: |
-      Метод предназначен для получения списка всех товаров указанной категории, сохранённых в БД
+      Метод предназначен для получения списка всех товаров, сохранённых в БД
 
       Фильтр `App.Request.Query.Filter.SearchText` использует для поиска следующие поля:
       - article;
@@ -59,7 +59,7 @@
       Метод предназначен для создания информации о новом товаре в БД
 
       **Ограничения и ошибки полей:**
-      - categoryId: required,gte=1
+      - categoryId: required,UUID (Catalog.Category::CategoryID)
       - article: required,unique,min=4,max=32,pattern=article
       - caption: required,max=128
       - trademarkId: required,gte=1
@@ -88,7 +88,7 @@
         content:
           application/json;charset=UTF-8:
             schema:
-              $ref: "#/components/schemas/App.Response.Model.SuccessCreatedItem"
+              $ref: "#/components/schemas/App.Response.Model.SuccessCreatedItemInt32"
       "400":
         $ref: "#/components/responses/App.ResponseJson.Error400"
       "401":
