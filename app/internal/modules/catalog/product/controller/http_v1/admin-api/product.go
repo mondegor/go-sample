@@ -54,10 +54,10 @@ func (ht *Product) Handlers() []mrserver.HttpHandler {
 		{http.MethodPost, productListURL, "", ht.Create},
 
 		{http.MethodGet, productItemURL, "", ht.Get},
-		{http.MethodPut, productItemURL, "", ht.Store},
+		{http.MethodPatch, productItemURL, "", ht.Store},
 		{http.MethodDelete, productItemURL, "", ht.Remove},
 
-		{http.MethodPut, productItemChangeStatusURL, "", ht.ChangeStatus},
+		{http.MethodPatch, productItemChangeStatusURL, "", ht.ChangeStatus},
 		{http.MethodPatch, productItemMoveURL, "", ht.Move},
 	}
 }

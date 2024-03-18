@@ -54,7 +54,7 @@ func (ht *Trademark) Handlers() []mrserver.HttpHandler {
 		{http.MethodPut, trademarkItemURL, "", ht.Store},
 		{http.MethodDelete, trademarkItemURL, "", ht.Remove},
 
-		{http.MethodPut, trademarkItemChangeStatusURL, "", ht.ChangeStatus},
+		{http.MethodPatch, trademarkItemChangeStatusURL, "", ht.ChangeStatus},
 	}
 }
 

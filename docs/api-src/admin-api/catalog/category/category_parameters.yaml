@@ -4,6 +4,6 @@ Catalog.Categories.AdminAPI.Request.Path.CategoryID:
   in: path
   required: true
   schema:
-    type: integer
-    minimum: 1
-  example: 1000
+    type: string
+    format: uuid
+  example: "21de1e21-0a4a-47a5-b60d-67c7f78a3278"

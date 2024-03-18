@@ -54,7 +54,7 @@ func (ht *Category) Handlers() []mrserver.HttpHandler {
 		{http.MethodPut, categoryItemURL, "", ht.Store},
 		{http.MethodDelete, categoryItemURL, "", ht.Remove},
 
-		{http.MethodPut, categoryItemChangeStatusURL, "", ht.ChangeStatus},
+		{http.MethodPatch, categoryItemChangeStatusURL, "", ht.ChangeStatus},
 	}
 }
 

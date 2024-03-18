@@ -130,7 +130,7 @@
       "500":
         $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
-  put:
+  patch:
     summary: Метод сохранения товара
     description: |-
       Метод предназначен для сохранения информации о товаре в БД
@@ -202,7 +202,7 @@
         $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
 /v1/catalog/products/{productId}/status:
-  put:
+  patch:
     summary: Метод изменения статуса товара
     description: |-
       Метод предназначен для изменения статуса товара в БД

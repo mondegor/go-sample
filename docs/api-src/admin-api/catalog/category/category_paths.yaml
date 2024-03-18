@@ -188,7 +188,7 @@
         $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
 /v1/catalog/categories/{categoryId}/status:
-  put:
+  patch:
     summary: Метод изменения статуса категории
     description: |-
       Метод предназначен для изменения статуса категории в БД
@@ -257,7 +257,7 @@
       "500":
         $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
-  put:
+  patch:
     summary: Метод загруки/обновления изображения для категории
     description: |-
       Метод предназначен для загруки нового изображения для указанной категории в файловое хранилище.\

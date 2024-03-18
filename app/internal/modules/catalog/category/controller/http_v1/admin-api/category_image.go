@@ -40,7 +40,7 @@ func NewCategoryImage(
 func (ht *CategoryImage) Handlers() []mrserver.HttpHandler {
 	return []mrserver.HttpHandler{
 		{http.MethodGet, categoryItemImageURL, "", ht.GetImage},
-		{http.MethodPut, categoryItemImageURL, "", ht.UploadImage},
+		{http.MethodPatch, categoryItemImageURL, "", ht.UploadImage},
 		{http.MethodDelete, categoryItemImageURL, "", ht.RemoveImage},
 	}
 }

@@ -188,7 +188,7 @@
         $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
 /v1/catalog/trademarks/{trademarkId}/status:
-  put:
+  patch:
     summary: Метод изменения статуса торговой марки
     description: |-
       Метод предназначен для изменения статуса торговой марки в БД

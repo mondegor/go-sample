@@ -1,6 +1,15 @@
 # Go Sample Changelog
 Все изменения сервиса Go Sample будут документироваться на этой странице.
 
+## 2024-03-18
+### Changed
+- Внедрена новая версия библиотеки `go-sysmess`, в связи с этим:
+    - в функции `IsAutoCallerOnFunc` изменено условие с использованием `HasCallStack()`;
+- В некоторых API методах тип `PUT` преобразован в `PATCH` для более строгого соответствия API спецификации;
+
+### Fixed
+- В `Catalog.Categories.AdminAPI.Request.Path.CategoryID` исправлен тип с `intеger` на `UUID`;
+
 ## 2024-03-17
 ### Added
 - Добавлен `App.Response.Model.SuccessCreatedItemInt32` в API и в `pkg`;

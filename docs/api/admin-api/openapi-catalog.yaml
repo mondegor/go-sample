@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.3
 info:
-  version: 0.3.0
+  version: 0.12.1
   title: Private API управления каталогом товаров
   license:
     name: Apache-2.0
@@ -234,7 +234,7 @@ paths:
           $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
   /v1/catalog/categories/{categoryId}/status:
-    put:
+    patch:
       summary: Метод изменения статуса категории
       description: |-
         Метод предназначен для изменения статуса категории в БД
@@ -303,7 +303,7 @@ paths:
         "500":
           $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
-    put:
+    patch:
       summary: Метод загруки/обновления изображения для категории
       description: |-
         Метод предназначен для загруки нового изображения для указанной категории в файловое хранилище.\
@@ -502,7 +502,7 @@ paths:
         "500":
           $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
-    put:
+    patch:
       summary: Метод сохранения товара
       description: |-
         Метод предназначен для сохранения информации о товаре в БД
@@ -574,7 +574,7 @@ paths:
           $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
   /v1/catalog/products/{productId}/status:
-    put:
+    patch:
       summary: Метод изменения статуса товара
       description: |-
         Метод предназначен для изменения статуса товара в БД
@@ -846,7 +846,7 @@ paths:
           $ref: "#/components/responses/App.ResponseJson.Error5XX"
 
   /v1/catalog/trademarks/{trademarkId}/status:
-    put:
+    patch:
       summary: Метод изменения статуса торговой марки
       description: |-
         Метод предназначен для изменения статуса торговой марки в БД
@@ -1041,9 +1041,9 @@ components:
       in: path
       required: true
       schema:
-        type: integer
-        minimum: 1
-      example: 1000
+        type: string
+        format: uuid
+      example: "21de1e21-0a4a-47a5-b60d-67c7f78a3278"
 
     Catalog.Products.AdminAPI.Request.Path.ProductID:
       description: Идентификатор товара
