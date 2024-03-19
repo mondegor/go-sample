@@ -3,9 +3,10 @@
 
 ## 2024-03-19
 ### Added
-Добавлены следующие ошибки:
-- `catalog.FactoryErrCategoryRequired`;
-- `catalog.FactoryErrTrademarkRequired`;
+- Добавлены следующие ошибки:
+    - `catalog.FactoryErrCategoryRequired`;
+    - `catalog.FactoryErrTrademarkRequired`;
+- Добавлен API компонент `App.Field.RewriteName`;
 
 ### Changed
 - Переименованы методы:
