@@ -29,7 +29,7 @@ func NewTrademarkPostgres(
 	}
 }
 
-func (re *TrademarkPostgres) NewFetchParams(params entity.TrademarkParams) mrstorage.SqlSelectParams {
+func (re *TrademarkPostgres) NewSelectParams(params entity.TrademarkParams) mrstorage.SqlSelectParams {
 	return mrstorage.SqlSelectParams{
 		Where: re.sqlSelect.Where(func(w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
 			return w.JoinAnd(

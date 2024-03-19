@@ -23,8 +23,8 @@ type (
 	}
 
 	ProductStorage interface {
-		GetMetaData(categoryID uuid.UUID) mrorderer.EntityMeta
-		NewFetchParams(params entity.ProductParams) mrstorage.SqlSelectParams
+		NewOrderMeta(categoryID uuid.UUID) mrorderer.EntityMeta
+		NewSelectParams(params entity.ProductParams) mrstorage.SqlSelectParams
 		Fetch(ctx context.Context, params mrstorage.SqlSelectParams) ([]entity.Product, error)
 		FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPart) (int64, error)
 		FetchOne(ctx context.Context, rowID mrtype.KeyInt32) (entity.Product, error)

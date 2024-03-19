@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.3
 info:
-  version: 0.11.3
+  version: 0.1.8
   title: Public API категорий товаров
   license:
     name: Apache-2.0

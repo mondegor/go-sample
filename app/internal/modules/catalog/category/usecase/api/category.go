@@ -19,10 +19,6 @@ type (
 		storage       CategoryStorage
 		usecaseHelper *mrcore.UsecaseHelper
 	}
-
-	CategoryStorage interface {
-		IsExists(ctx context.Context, rowID uuid.UUID) error
-	}
 )
 
 func NewCategory(
@@ -39,7 +35,7 @@ func (uc *Category) CheckingAvailability(ctx context.Context, itemID uuid.UUID) 
 	uc.debugCmd(ctx, "CheckingAvailability", mrmsg.Data{"id": itemID})
 
 	if itemID == uuid.Nil {
-		return catalog.FactoryErrCategoryNotFound.New(itemID)
+		return catalog.FactoryErrCategoryRequired.New()
 	}
 
 	if err := uc.storage.IsExists(ctx, itemID); err != nil {

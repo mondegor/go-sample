@@ -1,6 +1,17 @@
 # Go Sample Changelog
 Все изменения сервиса Go Sample будут документироваться на этой странице.
 
+## 2024-03-19
+### Added
+Добавлены следующие ошибки:
+- `catalog.FactoryErrCategoryRequired`;
+- `catalog.FactoryErrTrademarkRequired`;
+
+### Changed
+- Переименованы методы:
+    - `NewFetchParams -> NewSelectParams`;
+    - `GetMetaData -> NewOrderMeta`;
+
 ## 2024-03-18
 ### Changed
 - Внедрена новая версия библиотеки `go-sysmess`, в связи с этим:
@@ -17,9 +28,9 @@
 ### Changed
 - Идентификатор категории был заменён с int на uuid;
 - Перенесены в `pkg` часто используемые сервисом модели:
-  - SuccessCreatedItemResponse;
-  - ChangeItemStatusRequest;
-  - MoveItemRequest;
+    - `SuccessCreatedItemResponse`;
+    - `ChangeItemStatusRequest`;
+    - `MoveItemRequest`;
 
 ### Removed
 - Удалён `App.Response.Model.Success`;
@@ -28,16 +39,16 @@
 ## 2024-03-16
 ### Changed
 - Все поля БД типа `timestamp` теперь с `with time zone`;
-- Заменено `version` -> `tagVersion`;
+- Заменено `version -> tagVersion`;
 
 ## 2024-03-15
 ### Changed
 - Рефакторинг кода:
-    - переименование `FactoryErrService*` -> `FactoryErrUseCase*`, `errService*` -> `errUseCase*`;
-    - переименование интерфейсов `*Service` -> `*UseCase`;
+    - переименование `FactoryErrService* -> FactoryErrUseCase*`, `errService* -> errUseCase*`;
+    - переименование интерфейсов `*Service -> *UseCase`;
     - замена методов `LoadOne` на `FetchOne`;
     - методы `Create`, `Insert` теперь возвращают ID записи;
-    - схема БД переименована `gscatalog` -> `sample_catalog`;
+    - схема БД переименована `gscatalog -> sample_catalog`;
 - Вся мета информация об изображениях стала необязательной (`imageUrl`, и т.д.);
 - Настройки `PageSizeMax` и `PageSizeDefault` вынесены в общие настройки модулей `ModulesSettings.General`;
 - Парсер `SortPage` разделён на два: `ListSorter`, `ListPager`;
@@ -60,9 +71,9 @@
 ## 2024-02-05
 ### Changed
 - Переименованы:
-  - `datetime_created` -> `created_at`;
-  - `datetime_updated` -> `updated_at`;
-  - `modules.Options` -> `app.Options`;
+    - `datetime_created -> created_at`;
+    - `datetime_updated -> updated_at`;
+    - `modules.Options -> app.Options`;
 - Создание модулей переехало в `factory/modules/*`;
 - Большинство юнитов было преобразовано в модули, которые объединены доменами;
 
@@ -71,34 +82,34 @@
 - Внедрён новый интерфейс логгера, добавлен режим трассировки запросов;
 - Для многих методов добавлен параметр `ctx context.Context`;
 - Заменён устаревший интерфейс `mrcore.EventBox` на `mrsender.EventEmitter`;
-- Переименован `ServiceHelper` -> `UsecaseHelper`;
+- Переименован `ServiceHelper -> UsecaseHelper`;
 - Внедрены `mrlib.CallEachFunc`, `CloseFunc` для группового закрытия ресурсов;
 - Переименован `CorrelationID` на `X-Correlation-ID`;
-- Объекты конфигураций/опций теперь передаются по значению (`*Config` -> `Config`, `*Options` -> `Options`);
+- Объекты конфигураций/опций теперь передаются по значению (`*Config -> Config`, `*Options -> Options`);
 - Внедрён `oklog/run` для управления одновременным запуском нескольких серверов (http, grpc)
 - Добавлены методы для создания и инициализации всех глобальных настроек приложения
   (`CreateAppEnvironment`, `InitAppEnvironment`);
 - Теперь модули собираются в рамках отдельных серверов (см. `factory.NewRestServer`);
 - Изменены некоторые переменные окружения:
-  - удалён `APPX_LOG_PREFIX`;
-  - добавлен `APPX_LOG_TIMESTAMP=RFC3339|RFC3339Nano|DateTime|TimeOnly` (формат даты в логах);
-  - добавлен `APPX_LOG_JSON=true|false` (вывод логов в json формате);
-  - добавлен `APPX_LOG_COLOR=true|false` (использование цветного вывода логов в консоле);
-  - переименованы:
-    - `APPX_SERVICE_LISTEN_TYPE` -> `APPX_SERVER_LISTEN_TYPE`;
-    - `APPX_SERVICE_LISTEN_SOCK` -> `APPX_SERVER_LISTEN_SOCK`;
-    - `APPX_SERVICE_BIND` -> `APPX_SERVER_LISTEN_BIND`;
-    - `APPX_SERVICE_PORT` -> `APPX_SERVER_LISTEN_PORT`;
+    - удалён `APPX_LOG_PREFIX`;
+    - добавлен `APPX_LOG_TIMESTAMP=RFC3339|RFC3339Nano|DateTime|TimeOnly` (формат даты в логах);
+    - добавлен `APPX_LOG_JSON=true|false` (вывод логов в json формате);
+    - добавлен `APPX_LOG_COLOR=true|false` (использование цветного вывода логов в консоле);
+    - переименованы:
+        - `APPX_SERVICE_LISTEN_TYPE -> APPX_SERVER_LISTEN_TYPE`;
+        - `APPX_SERVICE_LISTEN_SOCK -> APPX_SERVER_LISTEN_SOCK`;
+        - `APPX_SERVICE_BIND -> APPX_SERVER_LISTEN_BIND`;
+        - `APPX_SERVICE_PORT -> APPX_SERVER_LISTEN_PORT`;
 
 ## 2024-01-25
 ### Added
 - Внедрены парсеры на основе интерфейсов `mrserver.RequestParserFile` и
   `mrserver.RequestParserImage` для получения файлов и изображений из `multipart` формы.
-  - заменено `mrreq.File` -> `ht.parser.FormImage`;
-  - в `CategoryImageService` изменён тип `mrtype.File` -> `mrtype.Image`;
+  - заменено `mrreq.File -> ht.parser.FormImage`;
+  - в `CategoryImageService` изменён тип `mrtype.File -> mrtype.Image`;
 
 ### Changed
-- Переименовано `ConvertImageMetaToInfo` -> `ImageMetaToInfoPointer`;
+- Переименовано `ConvertImageMetaToInfo -> ImageMetaToInfoPointer`;
 
 ### Removed
 - `mrserver.RequestParserPath` удалён вместо него используется
@@ -117,14 +128,14 @@
       `mrserver.ResponseSender`, `FileResponseSender`, `ErrorResponseSender`;
     - Вместо метода `Validate(structRequest any)` используется объект `mrparser.Validator`;
 - Произведены следующие замены:
-    - `HttpController.AddHandlers` -> `Handlers() []HttpHandler`.
-      Убрана зависимость контроллера от роутера и секции.
-      Для установки стандартных разрешений добавлены следующие методы
+    - `HttpController.AddHandlers -> Handlers() []HttpHandler`
+      убрана зависимость контроллера от роутера и секции,
+      для установки стандартных разрешений добавлены следующие методы
       `mrfactory.WithPermission`, `mrfactory.WithMiddlewareCheckAccess`;
-    - `ModulesAccess` -> `AccessControl` (`modules_access` -> `access_control`) и добавлен интерфейс `mrcore.AccessControl`;
-    - `ClientSection` -> `AppSection` (`client_section` -> `app_section`) удалена зависимость от `AccessControl`;
+    - `ModulesAccess -> AccessControl` (`modules_access -> access_control`) и добавлен интерфейс `mrcore.AccessControl`;
+    - `ClientSection -> AppSection` (`client_section -> app_section`) удалена зависимость от `AccessControl`;
 - При внедрении новой версии библиотеки `go-sysmess` было заменено:
-    - `mrerr.FieldErrorList` -> `CustomErrorList`;
+    - `mrerr.FieldErrorList -> CustomErrorList`;
 
 ## 2024-01-19
 ### Changed
@@ -161,7 +172,7 @@
     - добавлен пакет measures со стандартными компонентами;
 - Добавлена обработка и вывод поля `UpdatedAt` с учётом того, что оно необязательное;
 - Схема БД `gosample` заменена на `gs_catalog`, у таблиц удалён префикс `catalog_`;
-- Заменено `mrerr.Arg` -> `mrmsg.Data`, `S3Pool` -> `FileProviderPool`;
+- Заменено `mrerr.Arg -> mrmsg.Data`, `S3Pool -> FileProviderPool`;
 
 ## 2023-12-07
 ### Changed
@@ -172,8 +183,8 @@
     - из `mrcore.FactoryErrServiceEntityNotFound` удалены параметры;
     - для обработки `tagVersion` теперь используется `mrcore.FactoryErrServiceEntityVersionInvalid`;
     - `mrcore.FactoryErrServiceTemporarilyUnavailable` заменено на `uc.serviceHelper.WrapErrorFailed`;
-    - `uc.serviceHelper.WrapErrorForSelect` -> `uc.serviceHelper.WrapErrorEntityNotFoundOrFailed`;
-    - `mrcore.FactoryErrServiceIncorrectSwitchStatus` -> `mrcore.FactoryErrServiceSwitchStatusRejected`;
+    - `uc.serviceHelper.WrapErrorForSelect -> uc.serviceHelper.WrapErrorEntityNotFoundOrFailed`;
+    - `mrcore.FactoryErrServiceIncorrectSwitchStatus -> mrcore.FactoryErrServiceSwitchStatusRejected`;
     - добавлены ошибки: `FactoryErrCategoryImageNotFound`, `FactoryErrProductNotFound`;
 - Добавлен механизм виртуальных файловых провайдеров (S3 хранилищ).
   В конфиге прописан виртуальный файловый провайдер `imageStorage` с привязкой к реальному бакету S3 хранилища.
@@ -183,8 +194,8 @@
   Для каждого юнита добавлена своя константа с названием схемы БД;
 - Изменения в REST API документации:
     - добавлен `App.Response.Model.ErrorList` (массив `App.Response.Model.ErrorAttribute`);
-    - переименован `App.Response.Model.Error` -> `App.Response.Model.ErrorDetails`;
-    - переименовано поле у `App.Response.Model.ErrorDetails`: `detail` -> `details`;
+    - переименован `App.Response.Model.Error -> App.Response.Model.ErrorDetails`;
+    - переименовано поле у `App.Response.Model.ErrorDetails`: `detail -> details`;
 - Теперь юниты используют обращение друг к другу через API.
   Для этого вместо storageCategory и storageTrademark ранее используемые юнитом product добавлены соответствующие CategoryServiceAPI и TrademarkServiceAPI;
 
@@ -208,8 +219,8 @@
 - Название схемы данных БД вынесена в константу module.DBSchema;
 - Доработан конфиг приложения, добавлен ModulesSettings для настроек модулей;
 - Переименовано:
-    - `mrcore.ClientData` -> `mrcore.ClientContext`;
-    - `ClientContext::ParseAndValidate` -> `ClientContext::Validate` (удалён `ClientContext::Parse`);
+    - `mrcore.ClientData -> mrcore.ClientContext`;
+    - `ClientContext::ParseAndValidate -> ClientContext::Validate` (удалён `ClientContext::Parse`);
 - Обновлены зависимости от библиотек, доработаны компоненты под новое ядро системы;
 - Обновлён `.editorconfig`;
 
@@ -232,8 +243,8 @@
 
 ### Changed
 - Переименованы следующие сущности:
-    - `mrcom_status` -> `mrenum`;
-    - `mrcom_orderer` -> `mrorderer`;
+    - `mrcom_status -> mrenum`;
+    - `mrcom_orderer -> mrorderer`;
 - Обновлены зависимости библиотеки;
 
 ## 2023-10-09

@@ -29,7 +29,7 @@ func NewCategoryPostgres(
 	}
 }
 
-func (re *CategoryPostgres) NewFetchParams(params entity.CategoryParams) mrstorage.SqlSelectParams {
+func (re *CategoryPostgres) NewSelectParams(params entity.CategoryParams) mrstorage.SqlSelectParams {
 	return mrstorage.SqlSelectParams{
 		Where: re.sqlSelect.Where(func(w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
 			return w.JoinAnd(

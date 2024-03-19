@@ -19,10 +19,6 @@ type (
 		storage       TrademarkStorage
 		usecaseHelper *mrcore.UsecaseHelper
 	}
-
-	TrademarkStorage interface {
-		IsExists(ctx context.Context, rowID mrtype.KeyInt32) error
-	}
 )
 
 func NewTrademark(
@@ -39,7 +35,7 @@ func (uc *Trademark) CheckingAvailability(ctx context.Context, itemID mrtype.Key
 	uc.debugCmd(ctx, "CheckingAvailability", mrmsg.Data{"id": itemID})
 
 	if itemID < 1 {
-		return catalog.FactoryErrTrademarkNotFound.New(itemID)
+		return catalog.FactoryErrTrademarkRequired.New()
 	}
 
 	if err := uc.storage.IsExists(ctx, itemID); err != nil {

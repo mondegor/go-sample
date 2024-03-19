@@ -48,7 +48,7 @@ func NewProduct(
 }
 
 func (uc *Product) GetList(ctx context.Context, params entity.ProductParams) ([]entity.Product, int64, error) {
-	fetchParams := uc.storage.NewFetchParams(params)
+	fetchParams := uc.storage.NewSelectParams(params)
 	total, err := uc.storage.FetchTotal(ctx, fetchParams.Where)
 
 	if err != nil {
@@ -96,7 +96,7 @@ func (uc *Product) Create(ctx context.Context, item entity.Product) (mrtype.KeyI
 
 	uc.emitEvent(ctx, "Create", mrmsg.Data{"id": itemID})
 
-	meta := uc.storage.GetMetaData(item.CategoryID)
+	meta := uc.storage.NewOrderMeta(item.CategoryID)
 	ordererAPI := uc.ordererAPI.WithMetaData(meta)
 
 	if err := ordererAPI.MoveToLast(ctx, itemID); err != nil {
@@ -205,7 +205,7 @@ func (uc *Product) MoveAfterID(ctx context.Context, itemID mrtype.KeyInt32, afte
 		return mrcore.FactoryErrInternal.WithAttr(entity.ModelNameProduct, mrmsg.Data{"categoryId": item.CategoryID}).New()
 	}
 
-	meta := uc.storage.GetMetaData(item.CategoryID)
+	meta := uc.storage.NewOrderMeta(item.CategoryID)
 	ordererAPI := uc.ordererAPI.WithMetaData(meta)
 
 	if err := ordererAPI.MoveAfterID(ctx, itemID, afterID); err != nil {

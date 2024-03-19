@@ -20,7 +20,7 @@ type (
 	}
 
 	TrademarkStorage interface {
-		NewFetchParams(params entity.TrademarkParams) mrstorage.SqlSelectParams
+		NewSelectParams(params entity.TrademarkParams) mrstorage.SqlSelectParams
 		Fetch(ctx context.Context, params mrstorage.SqlSelectParams) ([]entity.Trademark, error)
 		FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPart) (int64, error)
 		FetchOne(ctx context.Context, rowID mrtype.KeyInt32) (entity.Trademark, error)

@@ -34,7 +34,7 @@ func NewProductPostgres(
 	}
 }
 
-func (re *ProductPostgres) GetMetaData(categoryID uuid.UUID) mrorderer.EntityMeta {
+func (re *ProductPostgres) NewOrderMeta(categoryID uuid.UUID) mrorderer.EntityMeta {
 	return mrorderer.NewEntityMeta(
 		module.DBSchema+".products",
 		"product_id",
@@ -47,7 +47,7 @@ func (re *ProductPostgres) GetMetaData(categoryID uuid.UUID) mrorderer.EntityMet
 	)
 }
 
-func (re *ProductPostgres) NewFetchParams(params entity.ProductParams) mrstorage.SqlSelectParams {
+func (re *ProductPostgres) NewSelectParams(params entity.ProductParams) mrstorage.SqlSelectParams {
 	return mrstorage.SqlSelectParams{
 		Where: re.sqlSelect.Where(func(w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
 			return w.JoinAnd(

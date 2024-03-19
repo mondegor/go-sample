@@ -9,12 +9,15 @@ import (
 
 type (
 	TrademarkAPI interface {
-		// CheckingAvailability - error: FactoryErrTrademarkNotFound or Failed
+		// CheckingAvailability - error: FactoryErrTrademarkRequired | FactoryErrTrademarkNotFound |
 		CheckingAvailability(ctx context.Context, itemID mrtype.KeyInt32) error
 	}
 )
 
 var (
+	FactoryErrTrademarkRequired = mrerr.NewFactory(
+		"errCatalogTrademarkRequired", mrerr.ErrorKindUser, "trademark ID is required")
+
 	FactoryErrTrademarkNotFound = mrerr.NewFactory(
 		"errCatalogTrademarkNotFound", mrerr.ErrorKindUser, "trademark with ID={{ .id }} not found")
 )

@@ -15,7 +15,7 @@ type (
 	}
 
 	CategoryStorage interface {
-		NewFetchParams(params entity.CategoryParams) mrstorage.SqlSelectParams
+		NewSelectParams(params entity.CategoryParams) mrstorage.SqlSelectParams
 		Fetch(ctx context.Context, params mrstorage.SqlSelectParams) ([]entity.Category, error)
 		FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPart) (int64, error)
 		FetchOne(ctx context.Context, rowID uuid.UUID) (entity.Category, error)
