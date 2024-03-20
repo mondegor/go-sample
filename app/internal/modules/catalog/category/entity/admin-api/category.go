@@ -16,16 +16,15 @@ const (
 
 type (
 	Category struct { // DB: ps_catalog.categories
-		ID         uuid.UUID  `json:"id"`                                   // category_id
-		TagVersion int32      `json:"tagVersion"`                           // tag_version
-		CreatedAt  time.Time  `json:"createdAt" sort:"createdAt"`           // created_at
-		UpdatedAt  *time.Time `json:"updatedAt,omitempty" sort:"updatedAt"` // updated_at
+		ID         uuid.UUID         `json:"id"` // category_id
+		TagVersion int32             `json:"tagVersion"`
+		Caption    string            `json:"caption" sort:"caption,default"`
+		Status     mrenum.ItemStatus `json:"status"`
+		CreatedAt  time.Time         `json:"createdAt" sort:"createdAt"`
+		UpdatedAt  *time.Time        `json:"updatedAt,omitempty" sort:"updatedAt"`
 
-		Caption   string              `json:"caption" sort:"caption,default"` // category_caption
 		ImageInfo *mrtype.ImageInfo   `json:"imageInfo,omitempty"`
 		ImageMeta *mrentity.ImageMeta `json:"-"` // image_meta
-
-		Status mrenum.ItemStatus `json:"status"` // category_status
 	}
 
 	CategoryParams struct {

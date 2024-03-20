@@ -31,55 +31,51 @@ func NewRestServer(ctx context.Context, opts app.Options) (*mrserver.ServerAdapt
 	// section: admin-api
 	sectionAdminAPI := NewAppSectionAdminAPI(ctx, opts)
 
-	if err := RegisterSystemHandlers(ctx, opts.Cfg, router, sectionAdminAPI); err != nil {
+	if err = RegisterSystemHandlers(ctx, opts.Cfg, router, sectionAdminAPI); err != nil {
 		return nil, err
 	}
 
-	if controllers, err := factory_catalog_category_adm.CreateModule(ctx, opts.CatalogCategoryModule); err != nil {
-		return nil, err
-	} else {
-		router.Register(
-			mrfactory.WithMiddlewareCheckAccess(ctx, controllers, sectionAdminAPI, opts.AccessControl)...,
-		)
-	}
+	err = registerAdminAPIControllers(
+		ctx,
+		opts,
+		func(list []mrserver.HttpController, err error) error {
+			if err == nil {
+				router.Register(
+					mrfactory.WithMiddlewareCheckAccess(ctx, list, sectionAdminAPI, opts.AccessControl)...,
+				)
+			}
 
-	if controllers, err := factory_catalog_product_adm.CreateModule(ctx, opts.CatalogProductModule); err != nil {
-		return nil, err
-	} else {
-		router.Register(
-			mrfactory.WithMiddlewareCheckAccess(ctx, controllers, sectionAdminAPI, opts.AccessControl)...,
-		)
-	}
+			return err
+		},
+	)
 
-	if controllers, err := factory_catalog_trademark_adm.CreateModule(ctx, opts.CatalogTrademarkModule); err != nil {
+	if err != nil {
 		return nil, err
-	} else {
-		router.Register(
-			mrfactory.WithMiddlewareCheckAccess(ctx, controllers, sectionAdminAPI, opts.AccessControl)...,
-		)
 	}
 
 	// section: public
 	sectionPublicAPI := NewAppSectionPublicAPI(ctx, opts)
 
-	if err := RegisterSystemHandlers(ctx, opts.Cfg, router, sectionPublicAPI); err != nil {
+	if err = RegisterSystemHandlers(ctx, opts.Cfg, router, sectionPublicAPI); err != nil {
 		return nil, err
 	}
 
-	if controllers, err := factory_catalog_category_pub.CreateModule(ctx, opts.CatalogCategoryModule); err != nil {
-		return nil, err
-	} else {
-		router.Register(
-			mrfactory.WithMiddlewareCheckAccess(ctx, controllers, sectionPublicAPI, opts.AccessControl)...,
-		)
-	}
+	err = registerPublicAPIControllers(
+		ctx,
+		opts,
+		func(list []mrserver.HttpController, err error) error {
+			if err == nil {
+				router.Register(
+					mrfactory.WithMiddlewareCheckAccess(ctx, list, sectionPublicAPI, opts.AccessControl)...,
+				)
+			}
 
-	if controllers, err := factory_filestation_pub.CreateModule(ctx, opts.FileStationModule); err != nil {
+			return err
+		},
+	)
+
+	if err != nil {
 		return nil, err
-	} else {
-		router.Register(
-			mrfactory.WithMiddlewareCheckAccess(ctx, controllers, sectionPublicAPI, opts.AccessControl)...,
-		)
 	}
 
 	srvOpts := opts.Cfg.Servers.RestServer
@@ -101,4 +97,32 @@ func NewRestServer(ctx context.Context, opts app.Options) (*mrserver.ServerAdapt
 			},
 		},
 	), nil
+}
+
+func registerAdminAPIControllers(ctx context.Context, opts app.Options, registerFunc func([]mrserver.HttpController, error) error) error {
+	if err := registerFunc(factory_catalog_category_adm.CreateModule(ctx, opts.CatalogCategoryModule)); err != nil {
+		return err
+	}
+
+	if err := registerFunc(factory_catalog_product_adm.CreateModule(ctx, opts.CatalogProductModule)); err != nil {
+		return err
+	}
+
+	if err := registerFunc(factory_catalog_trademark_adm.CreateModule(ctx, opts.CatalogTrademarkModule)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func registerPublicAPIControllers(ctx context.Context, opts app.Options, registerFunc func([]mrserver.HttpController, error) error) error {
+	if err := registerFunc(factory_catalog_category_pub.CreateModule(ctx, opts.CatalogCategoryModule)); err != nil {
+		return err
+	}
+
+	if err := registerFunc(factory_filestation_pub.CreateModule(ctx, opts.FileStationModule)); err != nil {
+		return err
+	}
+
+	return nil
 }

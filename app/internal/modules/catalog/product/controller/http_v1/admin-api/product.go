@@ -115,7 +115,7 @@ func (ht *Product) Create(w http.ResponseWriter, r *http.Request) error {
 		Article:     request.Article,
 		TrademarkID: request.TrademarkID,
 		Caption:     request.Caption,
-		Price:       request.Price,
+		Price:       &request.Price,
 	}
 
 	if itemID, err := ht.useCase.Create(r.Context(), item); err != nil {

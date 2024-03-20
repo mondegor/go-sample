@@ -18,11 +18,11 @@ type (
 	}
 
 	StoreProductRequest struct {
-		TagVersion  int32               `json:"tagVersion" validate:"required,gte=1"`
-		Article     string              `json:"article" validate:"omitempty,min=4,max=32,tag_article"`
-		Caption     string              `json:"caption" validate:"omitempty,max=128"`
-		TrademarkID mrtype.KeyInt32     `json:"trademarkId" validate:"omitempty,gte=1"`
-		Price       entity_shared.Money `json:"price" validate:"omitempty,gte=0"`
+		TagVersion  int32                `json:"tagVersion" validate:"required,gte=1"`
+		Article     string               `json:"article" validate:"omitempty,min=4,max=32,tag_article"`
+		Caption     string               `json:"caption" validate:"omitempty,max=128"`
+		TrademarkID mrtype.KeyInt32      `json:"trademarkId" validate:"omitempty,gte=1"`
+		Price       *entity_shared.Money `json:"price" validate:"omitempty,gte=0"`
 	}
 
 	ProductListResponse struct {

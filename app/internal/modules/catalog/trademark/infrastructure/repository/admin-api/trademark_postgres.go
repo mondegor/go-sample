@@ -57,10 +57,10 @@ func (re *TrademarkPostgres) Fetch(ctx context.Context, params mrstorage.SqlSele
 		SELECT
 			trademark_id,
 			tag_version,
-			created_at as createdAt,
-			updated_at as updatedAt,
 			trademark_caption as caption,
-			trademark_status
+			trademark_status,
+			created_at as createdAt,
+			updated_at as updatedAt
 		FROM
 			` + module.DBSchema + `.trademarks
 		WHERE
@@ -88,10 +88,10 @@ func (re *TrademarkPostgres) Fetch(ctx context.Context, params mrstorage.SqlSele
 		err = cursor.Scan(
 			&row.ID,
 			&row.TagVersion,
-			&row.CreatedAt,
-			&row.UpdatedAt,
 			&row.Caption,
 			&row.Status,
+			&row.CreatedAt,
+			&row.UpdatedAt,
 		)
 
 		if err != nil {
@@ -132,10 +132,10 @@ func (re *TrademarkPostgres) FetchOne(ctx context.Context, rowID mrtype.KeyInt32
 	sql := `
 		SELECT
 			tag_version,
-			created_at,
-			updated_at,
 			trademark_caption,
-			trademark_status
+			trademark_status,
+			created_at,
+			updated_at
 		FROM
 			` + module.DBSchema + `.trademarks
 		WHERE
@@ -151,10 +151,10 @@ func (re *TrademarkPostgres) FetchOne(ctx context.Context, rowID mrtype.KeyInt32
 		mrenum.ItemStatusRemoved,
 	).Scan(
 		&row.TagVersion,
-		&row.CreatedAt,
-		&row.UpdatedAt,
 		&row.Caption,
 		&row.Status,
+		&row.CreatedAt,
+		&row.UpdatedAt,
 	)
 
 	return row, err

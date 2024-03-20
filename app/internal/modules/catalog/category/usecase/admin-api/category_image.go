@@ -115,7 +115,7 @@ func (uc *CategoryImage) StoreFile(ctx context.Context, categoryID uuid.UUID, im
 		Width:        image.Width,
 		Height:       image.Height,
 		Size:         image.Size,
-		UpdatedAt:    mrtype.TimePointer(time.Now().UTC()),
+		UpdatedAt:    mrtype.TimeToPointer(time.Now().UTC()),
 	}
 
 	if err = uc.storage.UpdateMeta(ctx, categoryID, imageMeta); err != nil {

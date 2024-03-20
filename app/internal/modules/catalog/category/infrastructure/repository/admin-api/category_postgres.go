@@ -57,11 +57,11 @@ func (re *CategoryPostgres) Fetch(ctx context.Context, params mrstorage.SqlSelec
 		SELECT
 			category_id,
 			tag_version,
-			created_at as createdAt,
-			updated_at as updatedAt,
 			category_caption as caption,
 			image_meta,
-			category_status
+			category_status,
+			created_at as createdAt,
+			updated_at as updatedAt
 		FROM
 			` + module.DBSchema + `.categories
 		WHERE
@@ -89,11 +89,11 @@ func (re *CategoryPostgres) Fetch(ctx context.Context, params mrstorage.SqlSelec
 		err = cursor.Scan(
 			&row.ID,
 			&row.TagVersion,
-			&row.CreatedAt,
-			&row.UpdatedAt,
 			&row.Caption,
 			&row.ImageMeta,
 			&row.Status,
+			&row.CreatedAt,
+			&row.UpdatedAt,
 		)
 
 		if err != nil {
@@ -134,11 +134,11 @@ func (re *CategoryPostgres) FetchOne(ctx context.Context, rowID uuid.UUID) (enti
 	sql := `
 		SELECT
 			tag_version,
-			created_at,
-			updated_at,
 			category_caption,
 			image_meta,
-			category_status
+			category_status,
+			created_at,
+			updated_at
 		FROM
 			` + module.DBSchema + `.categories
 		WHERE
@@ -154,11 +154,11 @@ func (re *CategoryPostgres) FetchOne(ctx context.Context, rowID uuid.UUID) (enti
 		mrenum.ItemStatusRemoved,
 	).Scan(
 		&row.TagVersion,
-		&row.CreatedAt,
-		&row.UpdatedAt,
 		&row.Caption,
 		&row.ImageMeta,
 		&row.Status,
+		&row.CreatedAt,
+		&row.UpdatedAt,
 	)
 
 	return row, err

@@ -48,11 +48,11 @@ Catalog.Trademarks.AdminAPI.Response.Model.Trademark:
       $ref: "#/components/schemas/Custom.Field.TrademarkID"
     tagVersion:
       $ref: "#/components/schemas/App.Field.TagVersion"
-    createdAt:
-      $ref: "#/components/schemas/App.Field.DateTimeCreatedAt"
-    updatedAt:
-      $ref: "#/components/schemas/App.Field.DateTimeUpdatedAt"
     caption:
       $ref: "#/components/schemas/App.Field.Caption"
     status:
       $ref: "#/components/schemas/App.Enum.Status"
+    createdAt:
+      $ref: "#/components/schemas/App.Field.DateTimeCreatedAt"
+    updatedAt:
+      $ref: "#/components/schemas/App.Field.DateTimeUpdatedAt"

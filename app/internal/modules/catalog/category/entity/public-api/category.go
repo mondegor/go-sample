@@ -10,8 +10,8 @@ const (
 
 type (
 	Category struct { // DB: ps_catalog.categories
-		ID       uuid.UUID `json:"id"`                 // category_id
-		Caption  string    `json:"caption"`            // category_caption
+		ID       uuid.UUID `json:"id"` // category_id
+		Caption  string    `json:"caption"`
 		ImageURL string    `json:"imageUrl,omitempty"` // image_meta.path
 	}
 

@@ -68,10 +68,6 @@ Catalog.Products.AdminAPI.Response.Model.Product:
       $ref: "#/components/schemas/Custom.Field.ProductID"
     tagVersion:
       $ref: "#/components/schemas/App.Field.TagVersion"
-    createdAt:
-      $ref: "#/components/schemas/App.Field.DateTimeCreatedAt"
-    updatedAt:
-      $ref: "#/components/schemas/App.Field.DateTimeUpdatedAt"
     categoryId:
       $ref: "#/components/schemas/Custom.Field.CategoryID"
     article:
@@ -84,3 +80,7 @@ Catalog.Products.AdminAPI.Response.Model.Product:
       $ref: "#/components/schemas/App.Field.Measure.Price"
     status:
       $ref: "#/components/schemas/App.Enum.Status"
+    createdAt:
+      $ref: "#/components/schemas/App.Field.DateTimeCreatedAt"
+    updatedAt:
+      $ref: "#/components/schemas/App.Field.DateTimeUpdatedAt"

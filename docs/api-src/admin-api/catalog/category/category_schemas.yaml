@@ -48,13 +48,13 @@ Catalog.Categories.AdminAPI.Response.Model.Category:
       $ref: "#/components/schemas/Custom.Field.CategoryID"
     tagVersion:
       $ref: "#/components/schemas/App.Field.TagVersion"
-    createdAt:
-      $ref: "#/components/schemas/App.Field.DateTimeCreatedAt"
-    updatedAt:
-      $ref: "#/components/schemas/App.Field.DateTimeUpdatedAt"
     caption:
       $ref: "#/components/schemas/App.Field.Caption"
     imageInfo:
       $ref: "#/components/schemas/App.Response.Model.ImageInfo"
     status:
       $ref: "#/components/schemas/App.Enum.Status"
+    createdAt:
+      $ref: "#/components/schemas/App.Field.DateTimeCreatedAt"
+    updatedAt:
+      $ref: "#/components/schemas/App.Field.DateTimeUpdatedAt"

@@ -13,14 +13,12 @@ const (
 
 type (
 	Trademark struct { // DB: ps_catalog.trademarks
-		ID         mrtype.KeyInt32 `json:"id"`                                   // type_id
-		TagVersion int32           `json:"tagVersion"`                           // tag_version
-		CreatedAt  time.Time       `json:"createdAt" sort:"createdAt"`           // created_at
-		UpdatedAt  *time.Time      `json:"updatedAt,omitempty" sort:"updatedAt"` // updated_at
-
-		Caption string `json:"caption" sort:"caption,default"` // category_caption
-
-		Status mrenum.ItemStatus `json:"status"` // type_status
+		ID         mrtype.KeyInt32   `json:"id"` // trademark_id
+		TagVersion int32             `json:"tagVersion"`
+		Caption    string            `json:"caption" sort:"caption,default"`
+		Status     mrenum.ItemStatus `json:"status"`
+		CreatedAt  time.Time         `json:"createdAt" sort:"createdAt"`
+		UpdatedAt  *time.Time        `json:"updatedAt,omitempty" sort:"updatedAt"`
 	}
 
 	TrademarkParams struct {

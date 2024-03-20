@@ -78,14 +78,14 @@ func (re *ProductPostgres) Fetch(ctx context.Context, params mrstorage.SqlSelect
 		SELECT
 			product_id,
 			tag_version,
-			created_at as createdAt,
-			updated_at as updatedAt,
 			category_id,
 			product_article as article,
 			product_caption as caption,
 			trademark_id,
 			product_price as price,
-			product_status
+			product_status,
+			created_at as createdAt,
+			updated_at as updatedAt
 		FROM
 			` + module.DBSchema + `.products
 		WHERE
@@ -113,14 +113,14 @@ func (re *ProductPostgres) Fetch(ctx context.Context, params mrstorage.SqlSelect
 		err = cursor.Scan(
 			&row.ID,
 			&row.TagVersion,
-			&row.CreatedAt,
-			&row.UpdatedAt,
 			&row.CategoryID,
 			&row.Article,
 			&row.Caption,
 			&row.TrademarkID,
 			&row.Price,
 			&row.Status,
+			&row.CreatedAt,
+			&row.UpdatedAt,
 		)
 
 		if err != nil {
@@ -161,14 +161,14 @@ func (re *ProductPostgres) FetchOne(ctx context.Context, rowID mrtype.KeyInt32) 
 	sql := `
 		SELECT
 			tag_version,
-			created_at,
-			updated_at,
 			category_id,
 			product_article,
 			product_caption,
 			trademark_id,
 			product_price,
-			product_status
+			product_status,
+			created_at,
+			updated_at
 		FROM
 			` + module.DBSchema + `.products
 		WHERE
@@ -184,14 +184,14 @@ func (re *ProductPostgres) FetchOne(ctx context.Context, rowID mrtype.KeyInt32) 
 		mrenum.ItemStatusRemoved,
 	).Scan(
 		&row.TagVersion,
-		&row.CreatedAt,
-		&row.UpdatedAt,
 		&row.CategoryID,
 		&row.Article,
 		&row.Caption,
 		&row.TrademarkID,
 		&row.Price,
 		&row.Status,
+		&row.CreatedAt,
+		&row.UpdatedAt,
 	)
 
 	return row, err

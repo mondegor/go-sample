@@ -1348,16 +1348,16 @@ components:
           $ref: "#/components/schemas/Custom.Field.CategoryID"
         tagVersion:
           $ref: "#/components/schemas/App.Field.TagVersion"
-        createdAt:
-          $ref: "#/components/schemas/App.Field.DateTimeCreatedAt"
-        updatedAt:
-          $ref: "#/components/schemas/App.Field.DateTimeUpdatedAt"
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
         imageInfo:
           $ref: "#/components/schemas/App.Response.Model.ImageInfo"
         status:
           $ref: "#/components/schemas/App.Enum.Status"
+        createdAt:
+          $ref: "#/components/schemas/App.Field.DateTimeCreatedAt"
+        updatedAt:
+          $ref: "#/components/schemas/App.Field.DateTimeUpdatedAt"
 
     Catalog.Products.AdminAPI.Request.Model.CreateProduct:
       description: DTO добавления нового товара каталога
@@ -1429,10 +1429,6 @@ components:
           $ref: "#/components/schemas/Custom.Field.ProductID"
         tagVersion:
           $ref: "#/components/schemas/App.Field.TagVersion"
-        createdAt:
-          $ref: "#/components/schemas/App.Field.DateTimeCreatedAt"
-        updatedAt:
-          $ref: "#/components/schemas/App.Field.DateTimeUpdatedAt"
         categoryId:
           $ref: "#/components/schemas/Custom.Field.CategoryID"
         article:
@@ -1445,6 +1441,10 @@ components:
           $ref: "#/components/schemas/App.Field.Measure.Price"
         status:
           $ref: "#/components/schemas/App.Enum.Status"
+        createdAt:
+          $ref: "#/components/schemas/App.Field.DateTimeCreatedAt"
+        updatedAt:
+          $ref: "#/components/schemas/App.Field.DateTimeUpdatedAt"
 
     Catalog.Trademarks.AdminAPI.Request.Model.CreateTrademark:
       description: DTO добавления новой торговой марки
@@ -1496,14 +1496,14 @@ components:
           $ref: "#/components/schemas/Custom.Field.TrademarkID"
         tagVersion:
           $ref: "#/components/schemas/App.Field.TagVersion"
-        createdAt:
-          $ref: "#/components/schemas/App.Field.DateTimeCreatedAt"
-        updatedAt:
-          $ref: "#/components/schemas/App.Field.DateTimeUpdatedAt"
         caption:
           $ref: "#/components/schemas/App.Field.Caption"
         status:
           $ref: "#/components/schemas/App.Enum.Status"
+        createdAt:
+          $ref: "#/components/schemas/App.Field.DateTimeCreatedAt"
+        updatedAt:
+          $ref: "#/components/schemas/App.Field.DateTimeUpdatedAt"
 
   responses:
     App.ResponseJson.Error400:
