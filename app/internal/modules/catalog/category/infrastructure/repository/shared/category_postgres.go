@@ -9,24 +9,28 @@ import (
 	"github.com/mondegor/go-webcore/mrenum"
 )
 
-// CategoryIsExistsPostgres
-// result: nil - exists, ErrStorageNoRowFound - not exists, error - query error
-func CategoryIsExistsPostgres(ctx context.Context, conn mrstorage.DBConn, rowID uuid.UUID) error {
+// CategoryFetchStatusPostgres
+// result: mrenum.ItemStatus - exists, ErrStorageNoRowFound - not exists, error - query error
+func CategoryFetchStatusPostgres(ctx context.Context, conn mrstorage.DBConn, rowID uuid.UUID) (mrenum.ItemStatus, error) {
 	sql := `
 		SELECT
-			category_id
+			category_status
 		FROM
 			` + module.DBSchema + `.categories
 		WHERE
 			category_id = $1 AND category_status <> $2
 		LIMIT 1;`
 
-	return conn.QueryRow(
+	var status mrenum.ItemStatus
+
+	err := conn.QueryRow(
 		ctx,
 		sql,
 		rowID,
 		mrenum.ItemStatusRemoved,
 	).Scan(
-		&rowID,
+		&status,
 	)
+
+	return status, err
 }

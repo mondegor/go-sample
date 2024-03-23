@@ -1,9 +1,24 @@
 # Go Sample Changelog
 Все изменения сервиса Go Sample будут документироваться на этой странице.
 
+## 2024-03-23
+### Added
+- Добавлены следующие типы ошибок:
+    - `FactoryErrCategoryNotAvailable`;
+    - `FactoryErrTrademarkNotAvailable`;
+
+### Changed
+- В местах использования метода `mrfactory.WithPermission` добавлен `mrfactory.PrepareEachController`;
+- `mrserver.NewMiddlewareHttpHandlerAdapter -> mrserver.MiddlewareHandlerAdapter`;
+- Доработаны функции типа `factory.registerAdminAPIControllers`, заменены на `createAdminAPIControllers`
+  с использованием новой функции `factory.registerControllers`;
+
+### Fixed
+- Удален метод `IsExist` вместо него теперь используется `FetchStatus`;
+
 ## 2024-03-20
 ### Changed
-- Обновлена структура БД (created_at и updated_at перенесены в низ таблиц);
+- Обновлена структура БД (в том числе поля created_at и updated_at размещены внизу таблицы);
 - Поле `Product.Price` теперь является указателем для возможности записи в
   БД нулевых значений;
 - В `factory.NewRestServer` создание модулей вынесено в методы подобные этому:

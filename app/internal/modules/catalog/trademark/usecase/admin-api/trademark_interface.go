@@ -24,8 +24,7 @@ type (
 		Fetch(ctx context.Context, params mrstorage.SqlSelectParams) ([]entity.Trademark, error)
 		FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPart) (int64, error)
 		FetchOne(ctx context.Context, rowID mrtype.KeyInt32) (entity.Trademark, error)
-		FetchStatus(ctx context.Context, row entity.Trademark) (mrenum.ItemStatus, error)
-		IsExists(ctx context.Context, rowID mrtype.KeyInt32) error
+		FetchStatus(ctx context.Context, rowID mrtype.KeyInt32) (mrenum.ItemStatus, error)
 		Insert(ctx context.Context, row entity.Trademark) (mrtype.KeyInt32, error)
 		Update(ctx context.Context, row entity.Trademark) (int32, error)
 		UpdateStatus(ctx context.Context, row entity.Trademark) (int32, error)

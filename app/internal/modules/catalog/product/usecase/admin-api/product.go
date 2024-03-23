@@ -115,7 +115,9 @@ func (uc *Product) Store(ctx context.Context, item entity.Product) error {
 		return mrcore.FactoryErrUseCaseEntityVersionInvalid.New()
 	}
 
-	if err := uc.storage.IsExists(ctx, item.ID); err != nil {
+	// предварительная проверка существования записи нужна для того,
+	// чтобы при Update быть уверенным, что отсутствие записи из-за VersionInvalid
+	if _, err := uc.storage.FetchStatus(ctx, item.ID); err != nil {
 		return uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, item.ID)
 	}
 
@@ -147,7 +149,7 @@ func (uc *Product) ChangeStatus(ctx context.Context, item entity.Product) error 
 		return mrcore.FactoryErrUseCaseEntityVersionInvalid.New()
 	}
 
-	currentStatus, err := uc.storage.FetchStatus(ctx, item)
+	currentStatus, err := uc.storage.FetchStatus(ctx, item.ID)
 
 	if err != nil {
 		return uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, item.ID)

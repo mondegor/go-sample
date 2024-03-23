@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/mondegor/go-storage/mrstorage"
+	"github.com/mondegor/go-webcore/mrenum"
 )
 
 type (
@@ -22,8 +23,8 @@ func NewCategoryPostgres(
 	}
 }
 
-// IsExists
-// result: nil - exists, ErrStorageNoRowFound - not exists, error - query error
-func (re *CategoryPostgres) IsExists(ctx context.Context, rowID uuid.UUID) error {
-	return repository_shared.CategoryIsExistsPostgres(ctx, re.client, rowID)
+// FetchStatus
+// result: mrenum.ItemStatus - exists, ErrStorageNoRowFound - not exists, error - query error
+func (re *CategoryPostgres) FetchStatus(ctx context.Context, rowID uuid.UUID) (mrenum.ItemStatus, error) {
+	return repository_shared.CategoryFetchStatusPostgres(ctx, re.client, rowID)
 }

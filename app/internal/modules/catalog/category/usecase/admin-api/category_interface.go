@@ -24,8 +24,7 @@ type (
 		Fetch(ctx context.Context, params mrstorage.SqlSelectParams) ([]entity.Category, error)
 		FetchTotal(ctx context.Context, where mrstorage.SqlBuilderPart) (int64, error)
 		FetchOne(ctx context.Context, rowID uuid.UUID) (entity.Category, error)
-		FetchStatus(ctx context.Context, row entity.Category) (mrenum.ItemStatus, error)
-		IsExists(ctx context.Context, rowID uuid.UUID) error
+		FetchStatus(ctx context.Context, rowID uuid.UUID) (mrenum.ItemStatus, error)
 		Insert(ctx context.Context, row entity.Category) (uuid.UUID, error)
 		Update(ctx context.Context, row entity.Category) (int32, error)
 		UpdateStatus(ctx context.Context, row entity.Category) (int32, error)

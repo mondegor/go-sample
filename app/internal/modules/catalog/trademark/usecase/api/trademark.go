@@ -6,6 +6,7 @@ import (
 
 	"github.com/mondegor/go-sysmess/mrmsg"
 	"github.com/mondegor/go-webcore/mrcore"
+	"github.com/mondegor/go-webcore/mrenum"
 	"github.com/mondegor/go-webcore/mrlog"
 	"github.com/mondegor/go-webcore/mrtype"
 )
@@ -38,12 +39,14 @@ func (uc *Trademark) CheckingAvailability(ctx context.Context, itemID mrtype.Key
 		return catalog.FactoryErrTrademarkRequired.New()
 	}
 
-	if err := uc.storage.IsExists(ctx, itemID); err != nil {
+	if status, err := uc.storage.FetchStatus(ctx, itemID); err != nil {
 		if uc.usecaseHelper.IsNotFoundError(err) {
 			return catalog.FactoryErrTrademarkNotFound.New(itemID)
 		}
 
 		return uc.usecaseHelper.WrapErrorFailed(err, trademarkAPIName)
+	} else if status != mrenum.ItemStatusEnabled {
+		return catalog.FactoryErrTrademarkNotAvailable.New(itemID)
 	}
 
 	return nil

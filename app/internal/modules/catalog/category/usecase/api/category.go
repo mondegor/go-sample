@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/mondegor/go-sysmess/mrmsg"
 	"github.com/mondegor/go-webcore/mrcore"
+	"github.com/mondegor/go-webcore/mrenum"
 	"github.com/mondegor/go-webcore/mrlog"
 )
 
@@ -38,12 +39,14 @@ func (uc *Category) CheckingAvailability(ctx context.Context, itemID uuid.UUID) 
 		return catalog.FactoryErrCategoryRequired.New()
 	}
 
-	if err := uc.storage.IsExists(ctx, itemID); err != nil {
+	if status, err := uc.storage.FetchStatus(ctx, itemID); err != nil {
 		if uc.usecaseHelper.IsNotFoundError(err) {
 			return catalog.FactoryErrCategoryNotFound.New(itemID)
 		}
 
 		return uc.usecaseHelper.WrapErrorFailed(err, categoryAPIName)
+	} else if status != mrenum.ItemStatusEnabled {
+		return catalog.FactoryErrCategoryNotAvailable.New(itemID)
 	}
 
 	return nil

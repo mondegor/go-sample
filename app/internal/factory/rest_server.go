@@ -35,18 +35,13 @@ func NewRestServer(ctx context.Context, opts app.Options) (*mrserver.ServerAdapt
 		return nil, err
 	}
 
-	err = registerAdminAPIControllers(
+	err = createAdminAPIControllers(
 		ctx,
 		opts,
-		func(list []mrserver.HttpController, err error) error {
-			if err == nil {
-				router.Register(
-					mrfactory.WithMiddlewareCheckAccess(ctx, list, sectionAdminAPI, opts.AccessControl)...,
-				)
-			}
-
-			return err
-		},
+		registerControllers(
+			router,
+			mrfactory.WithMiddlewareCheckAccess(ctx, sectionAdminAPI, opts.AccessControl),
+		),
 	)
 
 	if err != nil {
@@ -60,18 +55,13 @@ func NewRestServer(ctx context.Context, opts app.Options) (*mrserver.ServerAdapt
 		return nil, err
 	}
 
-	err = registerPublicAPIControllers(
+	err = createPublicAPIControllers(
 		ctx,
 		opts,
-		func(list []mrserver.HttpController, err error) error {
-			if err == nil {
-				router.Register(
-					mrfactory.WithMiddlewareCheckAccess(ctx, list, sectionPublicAPI, opts.AccessControl)...,
-				)
-			}
-
-			return err
-		},
+		registerControllers(
+			router,
+			mrfactory.WithMiddlewareCheckAccess(ctx, sectionPublicAPI, opts.AccessControl),
+		),
 	)
 
 	if err != nil {
@@ -99,28 +89,42 @@ func NewRestServer(ctx context.Context, opts app.Options) (*mrserver.ServerAdapt
 	), nil
 }
 
-func registerAdminAPIControllers(ctx context.Context, opts app.Options, registerFunc func([]mrserver.HttpController, error) error) error {
-	if err := registerFunc(factory_catalog_category_adm.CreateModule(ctx, opts.CatalogCategoryModule)); err != nil {
+func registerControllers(router mrserver.HttpRouter, operations ...mrfactory.PrepareHandlerFunc) mrfactory.ApplyEachControllerFunc {
+	return func(list []mrserver.HttpController, err error) error {
+		if err != nil {
+			return err
+		}
+
+		router.Register(
+			mrfactory.PrepareEachController(list, operations...)...,
+		)
+
+		return nil
+	}
+}
+
+func createAdminAPIControllers(ctx context.Context, opts app.Options, register mrfactory.ApplyEachControllerFunc) error {
+	if err := register(factory_catalog_category_adm.CreateModule(ctx, opts.CatalogCategoryModule)); err != nil {
 		return err
 	}
 
-	if err := registerFunc(factory_catalog_product_adm.CreateModule(ctx, opts.CatalogProductModule)); err != nil {
+	if err := register(factory_catalog_product_adm.CreateModule(ctx, opts.CatalogProductModule)); err != nil {
 		return err
 	}
 
-	if err := registerFunc(factory_catalog_trademark_adm.CreateModule(ctx, opts.CatalogTrademarkModule)); err != nil {
+	if err := register(factory_catalog_trademark_adm.CreateModule(ctx, opts.CatalogTrademarkModule)); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func registerPublicAPIControllers(ctx context.Context, opts app.Options, registerFunc func([]mrserver.HttpController, error) error) error {
-	if err := registerFunc(factory_catalog_category_pub.CreateModule(ctx, opts.CatalogCategoryModule)); err != nil {
+func createPublicAPIControllers(ctx context.Context, opts app.Options, register mrfactory.ApplyEachControllerFunc) error {
+	if err := register(factory_catalog_category_pub.CreateModule(ctx, opts.CatalogCategoryModule)); err != nil {
 		return err
 	}
 
-	if err := registerFunc(factory_filestation_pub.CreateModule(ctx, opts.FileStationModule)); err != nil {
+	if err := register(factory_filestation_pub.CreateModule(ctx, opts.FileStationModule)); err != nil {
 		return err
 	}
 

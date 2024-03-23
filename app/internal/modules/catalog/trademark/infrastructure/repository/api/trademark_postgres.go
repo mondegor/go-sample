@@ -5,6 +5,7 @@ import (
 	repository_shared "go-sample/internal/modules/catalog/trademark/infrastructure/repository/shared"
 
 	"github.com/mondegor/go-storage/mrstorage"
+	"github.com/mondegor/go-webcore/mrenum"
 	"github.com/mondegor/go-webcore/mrtype"
 )
 
@@ -22,8 +23,8 @@ func NewTrademarkPostgres(
 	}
 }
 
-// IsExists
-// result: nil - exists, ErrStorageNoRowFound - not exists, error - query error
-func (re *TrademarkPostgres) IsExists(ctx context.Context, rowID mrtype.KeyInt32) error {
-	return repository_shared.TrademarkIsExistsPostgres(ctx, re.client, rowID)
+// FetchStatus
+// result: mrenum.ItemStatus - exists, ErrStorageNoRowFound - not exists, error - query error
+func (re *TrademarkPostgres) FetchStatus(ctx context.Context, rowID mrtype.KeyInt32) (mrenum.ItemStatus, error) {
+	return repository_shared.TrademarkFetchStatusPostgres(ctx, re.client, rowID)
 }

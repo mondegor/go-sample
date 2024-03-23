@@ -9,24 +9,28 @@ import (
 	"github.com/mondegor/go-webcore/mrtype"
 )
 
-// TrademarkIsExistsPostgres
-// result: nil - exists, ErrStorageNoRowFound - not exists, error - query error
-func TrademarkIsExistsPostgres(ctx context.Context, conn mrstorage.DBConn, rowID mrtype.KeyInt32) error {
+// TrademarkFetchStatusPostgres
+// result: mrenum.ItemStatus - exists, ErrStorageNoRowFound - not exists, error - query error
+func TrademarkFetchStatusPostgres(ctx context.Context, conn mrstorage.DBConn, rowID mrtype.KeyInt32) (mrenum.ItemStatus, error) {
 	sql := `
 		SELECT
-			1
+			trademark_status
 		FROM
 			` + module.DBSchema + `.trademarks
 		WHERE
 			trademark_id = $1 AND trademark_status <> $2
 		LIMIT 1;`
 
-	return conn.QueryRow(
+	var status mrenum.ItemStatus
+
+	err := conn.QueryRow(
 		ctx,
 		sql,
 		rowID,
 		mrenum.ItemStatusRemoved,
 	).Scan(
-		&rowID,
+		&status,
 	)
+
+	return status, err
 }

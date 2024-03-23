@@ -164,34 +164,10 @@ func (re *CategoryPostgres) FetchOne(ctx context.Context, rowID uuid.UUID) (enti
 	return row, err
 }
 
-func (re *CategoryPostgres) FetchStatus(ctx context.Context, row entity.Category) (mrenum.ItemStatus, error) {
-	sql := `
-		SELECT
-			category_status
-		FROM
-			` + module.DBSchema + `.categories
-		WHERE
-			category_id = $1 AND category_status <> $2
-		LIMIT 1;`
-
-	var status mrenum.ItemStatus
-
-	err := re.client.QueryRow(
-		ctx,
-		sql,
-		row.ID,
-		mrenum.ItemStatusRemoved,
-	).Scan(
-		&status,
-	)
-
-	return status, err
-}
-
-// IsExists
-// result: nil - exists, ErrStorageNoRowFound - not exists, error - query error
-func (re *CategoryPostgres) IsExists(ctx context.Context, rowID uuid.UUID) error {
-	return repository_shared.CategoryIsExistsPostgres(ctx, re.client, rowID)
+// FetchStatus
+// result: mrenum.ItemStatus - exists, ErrStorageNoRowFound - not exists, error - query error
+func (re *CategoryPostgres) FetchStatus(ctx context.Context, rowID uuid.UUID) (mrenum.ItemStatus, error) {
+	return repository_shared.CategoryFetchStatusPostgres(ctx, re.client, rowID)
 }
 
 func (re *CategoryPostgres) Insert(ctx context.Context, row entity.Category) (uuid.UUID, error) {

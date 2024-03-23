@@ -88,13 +88,11 @@ func (uc *CategoryImage) StoreFile(ctx context.Context, categoryID uuid.UUID, im
 		return err
 	}
 
-	unlock, err := uc.locker.Lock(ctx, uc.getLockKey(categoryID))
-
-	if err != nil {
+	if unlock, err := uc.locker.Lock(ctx, uc.getLockKey(categoryID)); err != nil {
 		return uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameCategoryImage)
+	} else {
+		defer unlock()
 	}
-
-	defer unlock()
 
 	oldImageMeta, err := uc.storage.FetchMeta(ctx, categoryID)
 
@@ -134,13 +132,11 @@ func (uc *CategoryImage) RemoveFile(ctx context.Context, categoryID uuid.UUID) e
 		return mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 
-	unlock, err := uc.locker.Lock(ctx, uc.getLockKey(categoryID))
-
-	if err != nil {
+	if unlock, err := uc.locker.Lock(ctx, uc.getLockKey(categoryID)); err != nil {
 		return uc.usecaseHelper.WrapErrorFailed(err, entity.ModelNameCategoryImage)
+	} else {
+		defer unlock()
 	}
-
-	defer unlock()
 
 	imageMeta, err := uc.storage.FetchMeta(ctx, categoryID)
 

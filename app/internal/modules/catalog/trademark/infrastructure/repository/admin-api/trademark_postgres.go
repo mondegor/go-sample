@@ -160,34 +160,10 @@ func (re *TrademarkPostgres) FetchOne(ctx context.Context, rowID mrtype.KeyInt32
 	return row, err
 }
 
-func (re *TrademarkPostgres) FetchStatus(ctx context.Context, row entity.Trademark) (mrenum.ItemStatus, error) {
-	sql := `
-		SELECT
-			trademark_status
-		FROM
-			` + module.DBSchema + `.trademarks
-		WHERE
-			trademark_id = $1 AND trademark_status <> $2
-		LIMIT 1;`
-
-	var status mrenum.ItemStatus
-
-	err := re.client.QueryRow(
-		ctx,
-		sql,
-		row.ID,
-		mrenum.ItemStatusRemoved,
-	).Scan(
-		&status,
-	)
-
-	return status, err
-}
-
-// IsExists
-// result: nil - exists, ErrStorageNoRowFound - not exists, error - query error
-func (re *TrademarkPostgres) IsExists(ctx context.Context, rowID mrtype.KeyInt32) error {
-	return repository_shared.TrademarkIsExistsPostgres(ctx, re.client, rowID)
+// FetchStatus
+// result: mrenum.ItemStatus - exists, ErrStorageNoRowFound - not exists, error - query error
+func (re *TrademarkPostgres) FetchStatus(ctx context.Context, rowID mrtype.KeyInt32) (mrenum.ItemStatus, error) {
+	return repository_shared.TrademarkFetchStatusPostgres(ctx, re.client, rowID)
 }
 
 func (re *TrademarkPostgres) Insert(ctx context.Context, row entity.Trademark) (mrtype.KeyInt32, error) {
