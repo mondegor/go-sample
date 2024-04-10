@@ -1,6 +1,24 @@
 # Go Sample Changelog
 Все изменения сервиса Go Sample будут документироваться на этой странице.
 
+## 2024-04-10
+### Added
+- Добавлена поддержка роутера `chi`;
+- Добавлен `MiddlewareRecoverHandler` и обработчик `mrresp.HandlerGetFatalErrorAsJson`;
+- Добавлен обработчик `mrresp.HandlerGetStatInfoAsJson` (`/v1/stat-info`) для фиксации и
+  отображения статистики по запросам;
+
+### Changed
+- Изменение формата параметров в URL для роутера: `/v1/sample/:id -> /v1/sample/{id}`,
+  такого вида параметры совместимы с `chi` роутером;
+- Переименован пакет: `mrresponse` -> `mrresp`;
+- Заменена строка `*path` в URL получения файлов на константу `mrserver.VarRestOfURL`;
+- Переработан механизм `soft delete`, добавлено поле `deleted_at`;
+
+### Removed
+- Удалён статус `ItemStatusRemoved`, теперь удаление контролируется через
+  отдельное поле `deleted_at`;
+
 ## 2024-03-23
 ### Added
 - Добавлены следующие типы ошибок:
@@ -13,7 +31,7 @@
 - Доработаны функции типа `factory.registerAdminAPIControllers`, заменены на `createAdminAPIControllers`
   с использованием новой функции `factory.registerControllers`;
 
-### Fixed
+### Removed
 - Удален метод `IsExist` вместо него теперь используется `FetchStatus`;
 
 ## 2024-03-20

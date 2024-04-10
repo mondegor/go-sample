@@ -18,8 +18,8 @@ import (
 
 const (
 	categoryListURL             = "/v1/catalog/categories"
-	categoryItemURL             = "/v1/catalog/categories/:id"
-	categoryItemChangeStatusURL = "/v1/catalog/categories/:id/status"
+	categoryItemURL             = "/v1/catalog/categories/{id}"
+	categoryItemChangeStatusURL = "/v1/catalog/categories/{id}/status"
 )
 
 type (

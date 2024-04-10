@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	categoryItemImageURL = "/v1/catalog/categories/:id/image"
+	categoryItemImageURL = "/v1/catalog/categories/{id}/image"
 )
 
 type (

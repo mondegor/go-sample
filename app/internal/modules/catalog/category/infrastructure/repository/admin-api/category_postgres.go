@@ -33,7 +33,7 @@ func (re *CategoryPostgres) NewSelectParams(params entity.CategoryParams) mrstor
 	return mrstorage.SqlSelectParams{
 		Where: re.sqlSelect.Where(func(w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
 			return w.JoinAnd(
-				w.NotEqual("category_status", mrenum.ItemStatusRemoved),
+				w.Expr("deleted_at IS NULL"),
 				w.FilterLike("UPPER(category_caption)", strings.ToUpper(params.Filter.SearchText)),
 				w.FilterAnyOf("category_status", params.Filter.Statuses),
 			)
@@ -142,7 +142,7 @@ func (re *CategoryPostgres) FetchOne(ctx context.Context, rowID uuid.UUID) (enti
 		FROM
 			` + module.DBSchema + `.categories
 		WHERE
-			category_id = $1 AND category_status <> $2
+			category_id = $1 AND deleted_at IS NULL
 		LIMIT 1;`
 
 	row := entity.Category{ID: rowID}
@@ -151,7 +151,6 @@ func (re *CategoryPostgres) FetchOne(ctx context.Context, rowID uuid.UUID) (enti
 		ctx,
 		sql,
 		rowID,
-		mrenum.ItemStatusRemoved,
 	).Scan(
 		&row.TagVersion,
 		&row.Caption,
@@ -202,9 +201,9 @@ func (re *CategoryPostgres) Update(ctx context.Context, row entity.Category) (in
 		SET
 			tag_version = tag_version + 1,
 			updated_at = NOW(),
-			category_caption = $4
+			category_caption = $3
 		WHERE
-			category_id = $1 AND tag_version = $2 AND category_status <> $3
+			category_id = $1 AND tag_version = $2 AND deleted_at IS NULL
 		RETURNING
 			tag_version;`
 
@@ -215,7 +214,6 @@ func (re *CategoryPostgres) Update(ctx context.Context, row entity.Category) (in
 		sql,
 		row.ID,
 		row.TagVersion,
-		mrenum.ItemStatusRemoved,
 		row.Caption,
 	).Scan(
 		&tagVersion,
@@ -231,9 +229,9 @@ func (re *CategoryPostgres) UpdateStatus(ctx context.Context, row entity.Categor
 		SET
 			tag_version = tag_version + 1,
 			updated_at = NOW(),
-			category_status = $4
+			category_status = $3
 		WHERE
-			category_id = $1 AND tag_version = $2 AND category_status <> $3
+			category_id = $1 AND tag_version = $2 AND deleted_at IS NULL
 		RETURNING
 			tag_version;`
 
@@ -244,7 +242,6 @@ func (re *CategoryPostgres) UpdateStatus(ctx context.Context, row entity.Categor
 		sql,
 		row.ID,
 		row.TagVersion,
-		mrenum.ItemStatusRemoved,
 		row.Status,
 	).Scan(
 		&tagVersion,
@@ -259,15 +256,13 @@ func (re *CategoryPostgres) Delete(ctx context.Context, rowID uuid.UUID) error {
 			` + module.DBSchema + `.categories
 		SET
 			tag_version = tag_version + 1,
-			updated_at = NOW(),
-			category_status = $2
+			deleted_at = NOW()
 		WHERE
-			category_id = $1 AND category_status <> $2;`
+			category_id = $1 AND deleted_at IS NULL;`
 
 	return re.client.Exec(
 		ctx,
 		sql,
 		rowID,
-		mrenum.ItemStatusRemoved,
 	)
 }

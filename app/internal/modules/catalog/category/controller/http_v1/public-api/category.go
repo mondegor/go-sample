@@ -13,7 +13,7 @@ import (
 
 const (
 	categoryURL     = "/v1/catalog/categories"
-	categoryItemURL = "/v1/catalog/categories/:id"
+	categoryItemURL = "/v1/catalog/categories/{id}"
 )
 
 type (

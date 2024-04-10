@@ -41,7 +41,7 @@ func (re *ProductPostgres) NewOrderMeta(categoryID uuid.UUID) mrorderer.EntityMe
 		re.sqlSelect.Where(func(w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
 			return w.JoinAnd(
 				w.Equal("category_id", categoryID),
-				w.NotEqual("product_status", mrenum.ItemStatusRemoved),
+				w.Expr("deleted_at IS NULL"),
 			)
 		}),
 	)
@@ -51,7 +51,7 @@ func (re *ProductPostgres) NewSelectParams(params entity.ProductParams) mrstorag
 	return mrstorage.SqlSelectParams{
 		Where: re.sqlSelect.Where(func(w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
 			return w.JoinAnd(
-				w.NotEqual("product_status", mrenum.ItemStatusRemoved),
+				w.Expr("deleted_at IS NULL"),
 				w.FilterEqualUUID("category_id", params.Filter.CategoryID),
 				w.FilterLikeFields([]string{"UPPER(product_article)", "UPPER(product_caption)"}, strings.ToUpper(params.Filter.SearchText)),
 				w.FilterAnyOf("trademark_id", params.Filter.TrademarkIDs),
@@ -172,7 +172,7 @@ func (re *ProductPostgres) FetchOne(ctx context.Context, rowID mrtype.KeyInt32) 
 		FROM
 			` + module.DBSchema + `.products
 		WHERE
-			product_id = $1 AND product_status <> $2
+			product_id = $1 AND deleted_at IS NULL
 		LIMIT 1;`
 
 	row := entity.Product{ID: rowID}
@@ -181,7 +181,6 @@ func (re *ProductPostgres) FetchOne(ctx context.Context, rowID mrtype.KeyInt32) 
 		ctx,
 		sql,
 		rowID,
-		mrenum.ItemStatusRemoved,
 	).Scan(
 		&row.TagVersion,
 		&row.CategoryID,
@@ -204,7 +203,7 @@ func (re *ProductPostgres) FetchIdByArticle(ctx context.Context, article string)
 		FROM
 			` + module.DBSchema + `.products
 		WHERE
-			product_article = $1
+			product_article = $1 AND deleted_at IS NULL
 		LIMIT 1;`
 
 	var rowID mrtype.KeyInt32
@@ -229,7 +228,7 @@ func (re *ProductPostgres) FetchStatus(ctx context.Context, rowID mrtype.KeyInt3
 		FROM
 			` + module.DBSchema + `.products
 		WHERE
-			product_id = $1 AND product_status <> $2
+			product_id = $1 AND deleted_at IS NULL
 		LIMIT 1;`
 
 	var status mrenum.ItemStatus
@@ -238,7 +237,6 @@ func (re *ProductPostgres) FetchStatus(ctx context.Context, rowID mrtype.KeyInt3
 		ctx,
 		sql,
 		rowID,
-		mrenum.ItemStatusRemoved,
 	).Scan(
 		&status,
 	)
@@ -288,7 +286,6 @@ func (re *ProductPostgres) Update(ctx context.Context, row entity.Product) (int3
 	args := []any{
 		row.ID,
 		row.TagVersion,
-		mrenum.ItemStatusRemoved,
 	}
 
 	setStr, setArgs := set.Param(len(args) + 1).ToSql()
@@ -301,7 +298,7 @@ func (re *ProductPostgres) Update(ctx context.Context, row entity.Product) (int3
 			updated_at = NOW(),
 			` + setStr + `
 		WHERE
-			product_id = $1 AND tag_version = $2 AND product_status <> $3
+			product_id = $1 AND tag_version = $2 AND deleted_at IS NULL
 		RETURNING
 			tag_version;`
 
@@ -325,9 +322,9 @@ func (re *ProductPostgres) UpdateStatus(ctx context.Context, row entity.Product)
 		SET
 			tag_version = tag_version + 1,
 			updated_at = NOW(),
-			product_status = $4
+			product_status = $3
 		WHERE
-			product_id = $1 AND tag_version = $2 AND product_status <> $3
+			product_id = $1 AND tag_version = $2 AND deleted_at IS NULL
 		RETURNING
 			tag_version;`
 
@@ -338,7 +335,6 @@ func (re *ProductPostgres) UpdateStatus(ctx context.Context, row entity.Product)
 		sql,
 		row.ID,
 		row.TagVersion,
-		mrenum.ItemStatusRemoved,
 		row.Status,
 	).Scan(
 		&tagVersion,
@@ -353,17 +349,13 @@ func (re *ProductPostgres) Delete(ctx context.Context, rowID mrtype.KeyInt32) er
 			` + module.DBSchema + `.products
 		SET
 			tag_version = tag_version + 1,
-			product_article = NULL,
-			updated_at = NOW(),
-			order_index = NULL,
-			product_status = $2
+			deleted_at = NOW()
 		WHERE
-			product_id = $1 AND product_status <> $2;`
+			product_id = $1 AND deleted_at IS NULL;`
 
 	return re.client.Exec(
 		ctx,
 		sql,
 		rowID,
-		mrenum.ItemStatusRemoved,
 	)
 }

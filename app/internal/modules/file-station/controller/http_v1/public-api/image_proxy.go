@@ -28,7 +28,7 @@ func NewImageProxy(
 		parser:    parser,
 		sender:    sender,
 		useCase:   useCase,
-		imagesURL: fmt.Sprintf("/%s/*path", strings.Trim(basePath, "/")),
+		imagesURL: fmt.Sprintf("/%s/"+mrserver.VarRestOfURL, strings.Trim(basePath, "/")),
 	}
 }
 
@@ -39,7 +39,7 @@ func (ht *ImageProxy) Handlers() []mrserver.HttpHandler {
 }
 
 func (ht *ImageProxy) Get(w http.ResponseWriter, r *http.Request) error {
-	item, err := ht.useCase.Get(r.Context(), ht.parser.PathParamString(r, "path"))
+	item, err := ht.useCase.Get(r.Context(), ht.parser.PathParamString(r, mrserver.VarRestOfURL))
 
 	if err != nil {
 		return err

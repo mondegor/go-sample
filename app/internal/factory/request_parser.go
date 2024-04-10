@@ -6,8 +6,8 @@ import (
 	"go-sample/internal"
 
 	"github.com/mondegor/go-webcore/mrlog"
+	"github.com/mondegor/go-webcore/mrserver/mrchi"
 	"github.com/mondegor/go-webcore/mrserver/mrjson"
-	"github.com/mondegor/go-webcore/mrserver/mrjulienrouter"
 	"github.com/mondegor/go-webcore/mrserver/mrparser"
 	"github.com/mondegor/go-webcore/mrview/mrplayvalidator"
 
@@ -23,7 +23,9 @@ func CreateRequestParsers(ctx context.Context, cfg config.Config) (app.RequestPa
 		return app.RequestParsers{}, err
 	}
 
-	pathFunc := mrjulienrouter.PathParam
+	// WARNING: функция использует контекст роутера chi,
+	// поэтому её можно менять только при смене самого роутера
+	pathFunc := mrchi.URLPathParam
 
 	return app.RequestParsers{
 		// Bool:      mrparser.NewBool(),

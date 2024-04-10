@@ -33,7 +33,7 @@ func (re *TrademarkPostgres) NewSelectParams(params entity.TrademarkParams) mrst
 	return mrstorage.SqlSelectParams{
 		Where: re.sqlSelect.Where(func(w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
 			return w.JoinAnd(
-				w.NotEqual("trademark_status", mrenum.ItemStatusRemoved),
+				w.Expr("deleted_at IS NULL"),
 				w.FilterLike("UPPER(trademark_caption)", strings.ToUpper(params.Filter.SearchText)),
 				w.FilterAnyOf("trademark_status", params.Filter.Statuses),
 			)
@@ -139,7 +139,7 @@ func (re *TrademarkPostgres) FetchOne(ctx context.Context, rowID mrtype.KeyInt32
 		FROM
 			` + module.DBSchema + `.trademarks
 		WHERE
-			trademark_id = $1 AND trademark_status <> $2
+			trademark_id = $1 AND deleted_at IS NULL
 		LIMIT 1;`
 
 	row := entity.Trademark{ID: rowID}
@@ -148,7 +148,6 @@ func (re *TrademarkPostgres) FetchOne(ctx context.Context, rowID mrtype.KeyInt32
 		ctx,
 		sql,
 		rowID,
-		mrenum.ItemStatusRemoved,
 	).Scan(
 		&row.TagVersion,
 		&row.Caption,
@@ -197,9 +196,9 @@ func (re *TrademarkPostgres) Update(ctx context.Context, row entity.Trademark) (
 		SET
 			tag_version = tag_version + 1,
 			updated_at = NOW(),
-			trademark_caption = $4
+			trademark_caption = $3
 		WHERE
-			trademark_id = $1 AND tag_version = $2 AND trademark_status <> $3
+			trademark_id = $1 AND tag_version = $2 AND deleted_at IS NULL
 		RETURNING
 			tag_version;`
 
@@ -210,7 +209,6 @@ func (re *TrademarkPostgres) Update(ctx context.Context, row entity.Trademark) (
 		sql,
 		row.ID,
 		row.TagVersion,
-		mrenum.ItemStatusRemoved,
 		row.Caption,
 	).Scan(
 		&tagVersion,
@@ -226,9 +224,9 @@ func (re *TrademarkPostgres) UpdateStatus(ctx context.Context, row entity.Tradem
 		SET
 			tag_version = tag_version + 1,
 			updated_at = NOW(),
-			trademark_status = $4
+			trademark_status = $3
 		WHERE
-			trademark_id = $1 AND tag_version = $2 AND trademark_status <> $3
+			trademark_id = $1 AND tag_version = $2 AND deleted_at IS NULL
 		RETURNING
 			tag_version;`
 
@@ -239,7 +237,6 @@ func (re *TrademarkPostgres) UpdateStatus(ctx context.Context, row entity.Tradem
 		sql,
 		row.ID,
 		row.TagVersion,
-		mrenum.ItemStatusRemoved,
 		row.Status,
 	).Scan(
 		&tagVersion,
@@ -254,15 +251,13 @@ func (re *TrademarkPostgres) Delete(ctx context.Context, rowID mrtype.KeyInt32) 
 			` + module.DBSchema + `.trademarks
 		SET
 			tag_version = tag_version + 1,
-			updated_at = NOW(),
-			trademark_status = $2
+			deleted_at = NOW()
 		WHERE
-			trademark_id = $1 AND trademark_status <> $2;`
+			trademark_id = $1 AND deleted_at IS NULL;`
 
 	return re.client.Exec(
 		ctx,
 		sql,
 		rowID,
-		mrenum.ItemStatusRemoved,
 	)
 }

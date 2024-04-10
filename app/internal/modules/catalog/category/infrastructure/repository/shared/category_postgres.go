@@ -18,7 +18,7 @@ func CategoryFetchStatusPostgres(ctx context.Context, conn mrstorage.DBConn, row
 		FROM
 			` + module.DBSchema + `.categories
 		WHERE
-			category_id = $1 AND category_status <> $2
+			category_id = $1 AND deleted_at IS NULL
 		LIMIT 1;`
 
 	var status mrenum.ItemStatus
@@ -27,7 +27,6 @@ func CategoryFetchStatusPostgres(ctx context.Context, conn mrstorage.DBConn, row
 		ctx,
 		sql,
 		rowID,
-		mrenum.ItemStatusRemoved,
 	).Scan(
 		&status,
 	)

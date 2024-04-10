@@ -183,7 +183,17 @@ func (uc *Product) Remove(ctx context.Context, itemID mrtype.KeyInt32) error {
 		return mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 
-	if err := uc.storage.Delete(ctx, itemID); err != nil {
+	ordererAPI, err := uc.getOrdererAPI(ctx, itemID)
+
+	if err != nil {
+		return err
+	}
+
+	if err = ordererAPI.Unlink(ctx, itemID); err != nil {
+		return err
+	}
+
+	if err = uc.storage.Delete(ctx, itemID); err != nil {
 		return uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, itemID)
 	}
 
@@ -197,20 +207,13 @@ func (uc *Product) MoveAfterID(ctx context.Context, itemID mrtype.KeyInt32, afte
 		return mrcore.FactoryErrUseCaseEntityNotFound.New()
 	}
 
-	item, err := uc.storage.FetchOne(ctx, itemID)
+	ordererAPI, err := uc.getOrdererAPI(ctx, itemID)
 
 	if err != nil {
-		return uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, itemID)
+		return err
 	}
 
-	if item.CategoryID == uuid.Nil {
-		return mrcore.FactoryErrInternal.WithAttr(entity.ModelNameProduct, mrmsg.Data{"categoryId": item.CategoryID}).New()
-	}
-
-	meta := uc.storage.NewOrderMeta(item.CategoryID)
-	ordererAPI := uc.ordererAPI.WithMetaData(meta)
-
-	if err := ordererAPI.MoveAfterID(ctx, itemID, afterID); err != nil {
+	if err = ordererAPI.MoveAfterID(ctx, itemID, afterID); err != nil {
 		return err
 	}
 
@@ -255,6 +258,22 @@ func (uc *Product) checkArticle(ctx context.Context, item entity.Product) error 
 	}
 
 	return nil
+}
+
+func (uc *Product) getOrdererAPI(ctx context.Context, itemID mrtype.KeyInt32) (mrorderer.API, error) {
+	item, err := uc.storage.FetchOne(ctx, itemID)
+
+	if err != nil {
+		return nil, uc.usecaseHelper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, itemID)
+	}
+
+	if item.CategoryID == uuid.Nil {
+		return nil, mrcore.FactoryErrInternal.WithAttr(entity.ModelNameProduct, mrmsg.Data{"categoryId": item.CategoryID}).New()
+	}
+
+	meta := uc.storage.NewOrderMeta(item.CategoryID)
+
+	return uc.ordererAPI.WithMetaData(meta), nil
 }
 
 func (uc *Product) emitEvent(ctx context.Context, eventName string, data mrmsg.Data) {

@@ -11,7 +11,7 @@ import (
 	"github.com/mondegor/go-storage/mrpostgres"
 	"github.com/mondegor/go-storage/mrsql"
 	"github.com/mondegor/go-webcore/mrserver"
-	"github.com/mondegor/go-webcore/mrserver/mrresponse"
+	"github.com/mondegor/go-webcore/mrserver/mrresp"
 )
 
 func createUnitCategory(ctx context.Context, opts factory.Options) ([]mrserver.HttpController, error) {
@@ -69,7 +69,7 @@ func newUnitCategoryImage(ctx context.Context, opts factory.Options) (*http_v1.C
 	)
 	controller := http_v1.NewCategoryImage(
 		opts.RequestParser,
-		mrresponse.NewFileSender(opts.ResponseSender),
+		mrresp.NewFileSender(opts.ResponseSender),
 		useCase,
 	)
 

@@ -20,7 +20,7 @@ import (
 	"github.com/mondegor/go-webcore/mrperms"
 	"github.com/mondegor/go-webcore/mrsender"
 	"github.com/mondegor/go-webcore/mrserver/mrparser"
-	"github.com/mondegor/go-webcore/mrserver/mrresponse"
+	"github.com/mondegor/go-webcore/mrserver/mrresp"
 )
 
 type (
@@ -34,7 +34,7 @@ type (
 		Locker           mrlock.Locker
 		Translator       *mrlang.Translator
 		RequestParsers   RequestParsers
-		ResponseSender   *mrresponse.Sender
+		ResponseSender   *mrresp.Sender
 		AccessControl    mrperms.AccessControl
 		ImageURLBuilder  mrlib.BuilderPath
 

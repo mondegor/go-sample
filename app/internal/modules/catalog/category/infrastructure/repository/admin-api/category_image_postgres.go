@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/mondegor/go-storage/mrentity"
 	"github.com/mondegor/go-storage/mrstorage"
-	"github.com/mondegor/go-webcore/mrenum"
 )
 
 type (
@@ -31,7 +30,7 @@ func (re *CategoryImagePostgres) FetchMeta(ctx context.Context, categoryID uuid.
 		FROM
 			` + module.DBSchema + `.categories
 		WHERE
-			category_id = $1 AND category_status <> $2
+			category_id = $1 AND deleted_at IS NULL
 		LIMIT 1;`
 
 	var imageMeta mrentity.ImageMeta
@@ -40,7 +39,6 @@ func (re *CategoryImagePostgres) FetchMeta(ctx context.Context, categoryID uuid.
 		ctx,
 		sql,
 		categoryID,
-		mrenum.ItemStatusRemoved,
 	).Scan(
 		&imageMeta,
 	)
@@ -54,15 +52,14 @@ func (re *CategoryImagePostgres) UpdateMeta(ctx context.Context, categoryID uuid
 			` + module.DBSchema + `.categories
 		SET
 			updated_at = NOW(),
-			image_meta = $3
+			image_meta = $2
 		WHERE
-			category_id = $1 AND category_status <> $2;`
+			category_id = $1 AND deleted_at IS NULL;`
 
 	return re.client.Exec(
 		ctx,
 		sql,
 		categoryID,
-		mrenum.ItemStatusRemoved,
 		meta,
 	)
 }

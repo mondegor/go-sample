@@ -8,7 +8,7 @@ import (
 	"github.com/mondegor/go-storage/mrpostgres"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrsender"
-	"github.com/mondegor/go-webcore/mrserver/mrresponse"
+	"github.com/mondegor/go-webcore/mrserver/mrresp"
 )
 
 type (
@@ -17,7 +17,7 @@ type (
 		UsecaseHelper   *mrcore.UsecaseHelper
 		PostgresAdapter *mrpostgres.ConnAdapter
 		RequestParser   *view_shared.Parser
-		ResponseSender  *mrresponse.Sender
+		ResponseSender  *mrresp.Sender
 
 		CategoryAPI  catalog.CategoryAPI
 		TrademarkAPI catalog.TrademarkAPI

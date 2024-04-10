@@ -10,7 +10,7 @@ import (
 	"github.com/mondegor/go-webcore/mrlib"
 	"github.com/mondegor/go-webcore/mrlock"
 	"github.com/mondegor/go-webcore/mrsender"
-	"github.com/mondegor/go-webcore/mrserver/mrresponse"
+	"github.com/mondegor/go-webcore/mrserver/mrresp"
 )
 
 type (
@@ -20,7 +20,7 @@ type (
 		PostgresAdapter *mrpostgres.ConnAdapter
 		Locker          mrlock.Locker
 		RequestParser   *view_shared.Parser
-		ResponseSender  *mrresponse.Sender
+		ResponseSender  *mrresp.Sender
 
 		UnitCategory UnitCategoryOptions
 

@@ -20,9 +20,9 @@ import (
 
 const (
 	productListURL             = "/v1/catalog/products"
-	productItemURL             = "/v1/catalog/products/:id"
-	productItemChangeStatusURL = "/v1/catalog/products/:id/status"
-	productItemMoveURL         = "/v1/catalog/products/:id/move"
+	productItemURL             = "/v1/catalog/products/{id}"
+	productItemChangeStatusURL = "/v1/catalog/products/{id}/status"
+	productItemMoveURL         = "/v1/catalog/products/{id}/move"
 )
 
 type (
@@ -221,11 +221,13 @@ func (ht *Product) wrapError(err error, r *http.Request) error {
 		return mrerr.NewCustomError("article", err)
 	}
 
-	if catalog.FactoryErrCategoryNotFound.Is(err) {
+	if catalog.FactoryErrCategoryRequired.Is(err) ||
+		catalog.FactoryErrCategoryNotFound.Is(err) {
 		return mrerr.NewCustomError("categoryId", err)
 	}
 
-	if catalog.FactoryErrTrademarkNotFound.Is(err) {
+	if catalog.FactoryErrTrademarkRequired.Is(err) ||
+		catalog.FactoryErrTrademarkNotFound.Is(err) {
 		return mrerr.NewCustomError("trademarkId", err)
 	}
 

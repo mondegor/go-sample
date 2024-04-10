@@ -18,8 +18,8 @@ import (
 
 const (
 	trademarkListURL             = "/v1/catalog/trademarks"
-	trademarkItemURL             = "/v1/catalog/trademarks/:id"
-	trademarkItemChangeStatusURL = "/v1/catalog/trademarks/:id/status"
+	trademarkItemURL             = "/v1/catalog/trademarks/{id}"
+	trademarkItemChangeStatusURL = "/v1/catalog/trademarks/{id}/status"
 )
 
 type (

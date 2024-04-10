@@ -7,7 +7,7 @@ import (
 	usecase "go-sample/internal/modules/file-station/usecase/public-api"
 
 	"github.com/mondegor/go-webcore/mrserver"
-	"github.com/mondegor/go-webcore/mrserver/mrresponse"
+	"github.com/mondegor/go-webcore/mrserver/mrresp"
 )
 
 func createUnitImageProxy(ctx context.Context, opts factory.Options) ([]mrserver.HttpController, error) {
@@ -26,7 +26,7 @@ func newUnitImageProxy(ctx context.Context, opts factory.Options) (*http_v1.Imag
 	useCase := usecase.NewFileProviderAdapter(opts.UnitImageProxy.FileAPI, opts.UsecaseHelper)
 	controller := http_v1.NewImageProxy(
 		opts.RequestParser,
-		mrresponse.NewFileSender(opts.ResponseSender),
+		mrresp.NewFileSender(opts.ResponseSender),
 		useCase,
 		opts.UnitImageProxy.BaseURL,
 	)

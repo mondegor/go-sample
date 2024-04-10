@@ -18,7 +18,7 @@ func TrademarkFetchStatusPostgres(ctx context.Context, conn mrstorage.DBConn, ro
 		FROM
 			` + module.DBSchema + `.trademarks
 		WHERE
-			trademark_id = $1 AND trademark_status <> $2
+			trademark_id = $1 AND deleted_at IS NULL
 		LIMIT 1;`
 
 	var status mrenum.ItemStatus
@@ -27,7 +27,6 @@ func TrademarkFetchStatusPostgres(ctx context.Context, conn mrstorage.DBConn, ro
 		ctx,
 		sql,
 		rowID,
-		mrenum.ItemStatusRemoved,
 	).Scan(
 		&status,
 	)

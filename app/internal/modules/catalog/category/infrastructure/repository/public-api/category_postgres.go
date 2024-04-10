@@ -32,6 +32,7 @@ func (re *CategoryPostgres) NewSelectParams(params entity.CategoryParams) mrstor
 	return mrstorage.SqlSelectParams{
 		Where: re.sqlSelect.Where(func(w mrstorage.SqlBuilderWhere) mrstorage.SqlBuilderPartFunc {
 			return w.JoinAnd(
+				w.Expr("deleted_at IS NULL"),
 				w.Equal("category_status", mrenum.ItemStatusEnabled),
 				w.FilterLike("UPPER(category_caption)", strings.ToUpper(params.Filter.SearchText)),
 			)
@@ -119,7 +120,7 @@ func (re *CategoryPostgres) FetchOne(ctx context.Context, rowID uuid.UUID) (enti
 		FROM
 			` + module.DBSchema + `.categories
 		WHERE
-			category_id = $1 AND category_status = $2
+			category_id = $1 AND category_status = $2 AND deleted_at IS NULL
 		LIMIT 1;`
 
 	row := entity.Category{ID: rowID}

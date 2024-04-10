@@ -10,7 +10,7 @@ import (
 
 const (
 	appName    = "Go Sample Service"
-	appVersion = "v0.11.7"
+	appVersion = "v0.11.8"
 )
 
 type (
