@@ -2,21 +2,39 @@ package factory
 
 import (
 	"context"
+
 	"go-sample/config"
+	"go-sample/internal/app"
 
 	"github.com/mondegor/go-webcore/mrlog"
+	"github.com/mondegor/go-webcore/mrserver"
 	"github.com/mondegor/go-webcore/mrserver/mrjson"
 	"github.com/mondegor/go-webcore/mrserver/mrresp"
 )
 
-func NewResponseSender(ctx context.Context, cfg config.Config) (*mrresp.Sender, error) {
-	mrlog.Ctx(ctx).Info().Msg("Create and init base response sender")
+// CreateResponseSenders - comment func.
+func CreateResponseSenders(ctx context.Context, _ config.Config) (app.ResponseSenders, error) {
+	mrlog.Ctx(ctx).Info().Msg("Create and init base response senders")
 
-	return mrresp.NewSender(mrjson.NewEncoder()), nil
+	sender := mrresp.NewSender(mrjson.NewEncoder())
+
+	return app.ResponseSenders{
+		Sender:     mrresp.NewSender(mrjson.NewEncoder()),
+		FileSender: mrresp.NewFileSender(sender),
+	}, nil
 }
 
-func NewErrorResponseSender(ctx context.Context, cfg config.Config) (*mrresp.ErrorSender, error) {
+// NewErrorResponseSender - comment func.
+func NewErrorResponseSender(ctx context.Context, opts app.Options) (*mrresp.ErrorSender, error) {
 	mrlog.Ctx(ctx).Info().Msg("Create and init error response sender")
 
-	return mrresp.NewErrorSender(mrjson.NewEncoder()), nil
+	return mrresp.NewErrorSender(
+		mrjson.NewEncoder(),
+		opts.ErrorHandler,
+		mrserver.NewHttpErrorStatusGetter(
+			opts.Cfg.Debugging.UnexpectedHttpStatus,
+		),
+		opts.Cfg.Debugging.UnexpectedHttpStatus,
+		opts.Cfg.Debugging.Debug,
+	), nil
 }

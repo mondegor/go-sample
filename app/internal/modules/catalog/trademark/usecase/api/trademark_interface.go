@@ -8,6 +8,7 @@ import (
 )
 
 type (
+	// TrademarkStorage - comment interface.
 	TrademarkStorage interface {
 		FetchStatus(ctx context.Context, rowID mrtype.KeyInt32) (mrenum.ItemStatus, error)
 	}

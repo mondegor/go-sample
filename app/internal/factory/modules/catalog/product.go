@@ -1,17 +1,22 @@
-package factory_catalog
+package catalog
 
 import (
 	"context"
-	"go-sample/internal"
-	view_shared "go-sample/internal/modules/catalog/product/controller/http_v1/shared/view"
+
+	"go-sample/internal/app"
+	view_shared "go-sample/internal/modules/catalog/product/controller/httpv1/shared/view"
 	"go-sample/internal/modules/catalog/product/factory"
+	"go-sample/internal/modules/catalog/product/module"
+
+	"github.com/mondegor/go-webcore/mrcore/mrinit"
 )
 
-func NewProductModuleOptions(ctx context.Context, opts app.Options) (factory.Options, error) {
+// NewProductModuleOptions - comment func.
+func NewProductModuleOptions(_ context.Context, opts app.Options) (factory.Options, error) {
 	return factory.Options{
-		EventEmitter:    opts.EventEmitter,
-		UsecaseHelper:   opts.UsecaseHelper,
-		PostgresAdapter: opts.PostgresAdapter,
+		EventEmitter:  opts.EventEmitter,
+		UsecaseHelper: opts.UsecaseErrorWrapper,
+		DBConnManager: opts.PostgresConnManager,
 		RequestParser: view_shared.NewParser(
 			// opts.RequestParsers.Bool,
 			// opts.RequestParsers.DateTime,
@@ -26,7 +31,7 @@ func NewProductModuleOptions(ctx context.Context, opts app.Options) (factory.Opt
 			// opts.RequestParsers.Image,
 			opts.RequestParsers.ItemStatus,
 		),
-		ResponseSender: opts.ResponseSender,
+		ResponseSender: opts.ResponseSenders.Sender,
 
 		CategoryAPI:  opts.CatalogCategoryAPI,
 		OrdererAPI:   opts.OrdererAPI,
@@ -35,4 +40,9 @@ func NewProductModuleOptions(ctx context.Context, opts app.Options) (factory.Opt
 		PageSizeMax:     opts.Cfg.General.PageSizeMax,
 		PageSizeDefault: opts.Cfg.General.PageSizeDefault,
 	}, nil
+}
+
+// RegisterProductErrors - comment func.
+func RegisterProductErrors(em *mrinit.ErrorManager) {
+	em.RegisterList(mrinit.WrapProtoList(module.Errors()))
 }

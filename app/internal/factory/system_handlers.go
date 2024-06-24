@@ -2,8 +2,9 @@ package factory
 
 import (
 	"context"
-	"go-sample/config"
 	"net/http"
+
+	"go-sample/config"
 
 	"github.com/mondegor/go-webcore/mrlog"
 	"github.com/mondegor/go-webcore/mrperms"
@@ -11,31 +12,27 @@ import (
 	"github.com/mondegor/go-webcore/mrserver/mrresp"
 )
 
-func RegisterSystemHandlers(
-	ctx context.Context,
-	cfg config.Config,
-	router mrserver.HttpRouter,
-	section mrperms.AppSection,
-) error {
+// RegisterSystemHandlers - comment func.
+func RegisterSystemHandlers(ctx context.Context, cfg config.Config, router mrserver.HttpRouter, section *mrperms.AppSection) error {
 	mrlog.Ctx(ctx).Info().Msgf("Init system handlers in section %s", section.Caption())
 
-	router.HandlerFunc(http.MethodGet, section.Path("/"), mrresp.HandlerGetStatusOKAsJson())
-	router.HandlerFunc(http.MethodGet, section.Path("/v1/health"), mrresp.HandlerGetHealth())
-	router.HandlerFunc(http.MethodGet, section.Path("/v1/stat-info"), mrresp.HandlerGetStatInfoAsJson())
+	router.HandlerFunc(http.MethodGet, section.BuildPath("/"), mrresp.HandlerGetStatusOkAsJSON())
+	router.HandlerFunc(http.MethodGet, section.BuildPath("/v1/health"), mrresp.HandlerGetHealth())
 
-	systemInfoFunc, err := mrresp.HandlerGetSystemInfoAsJson(
+	systemInfoFunc, err := mrresp.HandlerGetSystemInfoAsJSON(
 		mrresp.SystemInfoConfig{
-			Name:      cfg.AppName,
-			Version:   cfg.AppVersion,
-			StartedAt: cfg.AppStartedAt,
+			Name:        cfg.AppName,
+			Version:     cfg.AppVersion,
+			Environment: cfg.AppEnvironment,
+			IsDebug:     cfg.Debugging.Debug,
+			StartedAt:   cfg.AppStartedAt,
 		},
 	)
-
 	if err != nil {
 		return err
 	}
 
-	router.HandlerFunc(http.MethodGet, section.Path("/v1/system-info"), systemInfoFunc)
+	router.HandlerFunc(http.MethodGet, section.BuildPath("/v1/system-info"), systemInfoFunc)
 
 	return nil
 }

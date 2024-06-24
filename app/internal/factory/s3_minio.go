@@ -2,13 +2,16 @@ package factory
 
 import (
 	"context"
+
 	"go-sample/config"
 
 	"github.com/mondegor/go-storage/mrminio"
 	"github.com/mondegor/go-storage/mrstorage"
+	"github.com/mondegor/go-webcore/mrlib"
 	"github.com/mondegor/go-webcore/mrlog"
 )
 
+// NewS3Minio - comment func.
 func NewS3Minio(ctx context.Context, cfg config.Config) (*mrminio.ConnAdapter, error) {
 	mrlog.Ctx(ctx).Info().Msg("Create and init S3 minio connection")
 
@@ -20,7 +23,10 @@ func NewS3Minio(ctx context.Context, cfg config.Config) (*mrminio.ConnAdapter, e
 		Password: cfg.S3.Password,
 	}
 
-	conn := mrminio.New(cfg.S3.CreateBuckets)
+	conn := mrminio.New(
+		cfg.S3.CreateBuckets,
+		mrlib.NewMimeTypeList(cfg.MimeTypes), // TODO: можно вынести в общую переменную
+	)
 
 	if err := conn.Connect(ctx, opts); err != nil {
 		return nil, err
@@ -33,6 +39,7 @@ func NewS3Minio(ctx context.Context, cfg config.Config) (*mrminio.ConnAdapter, e
 	return conn, nil
 }
 
+// RegisterS3ImageStorage - comment func.
 func RegisterS3ImageStorage(
 	ctx context.Context,
 	cfg config.Config,
@@ -44,7 +51,6 @@ func RegisterS3ImageStorage(
 		conn,
 		cfg.FileProviders.ImageStorage.BucketName,
 	)
-
 	if err != nil {
 		return err
 	}
@@ -61,7 +67,6 @@ func newS3MinioFileProvider(
 	logger.Info().Msgf("Create and init file provider with bucket '%s'", bucketName)
 
 	created, err := conn.InitBucket(context.Background(), bucketName)
-
 	if err != nil {
 		return nil, err
 	}

@@ -4,13 +4,15 @@ lang_id: 2
 messages:
 
 errors:
-  # Ошибки создаваемые AppErrorFactory
+  # Ошибки создаваемые AppErrorTempl
+
+  errUnexpectedInternal:
+    reason: "Internal server error [problem]"
+    details:
+      - "unexpected error"
 
   errInternal:
     reason: "Internal server error"
-
-  errSystem:
-    reason: "System server error"
 
   errHttpClientUnauthorized: # 401
     reason: "User authorization required"

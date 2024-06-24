@@ -2,7 +2,8 @@ package repository_api
 
 import (
 	"context"
-	repository_shared "go-sample/internal/modules/catalog/category/infrastructure/repository/shared"
+
+	repositoryshared "go-sample/internal/modules/catalog/category/infrastructure/repository/shared"
 
 	"github.com/google/uuid"
 	"github.com/mondegor/go-storage/mrstorage"
@@ -10,21 +11,21 @@ import (
 )
 
 type (
+	// CategoryPostgres - comment struct.
 	CategoryPostgres struct {
-		client mrstorage.DBConn
+		client mrstorage.DBConnManager
 	}
 )
 
-func NewCategoryPostgres(
-	client mrstorage.DBConn,
-) *CategoryPostgres {
+// NewCategoryPostgres - comment func.
+func NewCategoryPostgres(client mrstorage.DBConnManager) *CategoryPostgres {
 	return &CategoryPostgres{
 		client: client,
 	}
 }
 
-// FetchStatus
-// result: mrenum.ItemStatus - exists, ErrStorageNoRowFound - not exists, error - query error
+// FetchStatus - comment method.
+// result: mrenum.ItemStatus - exists, ErrStorageNoRowFound - not exists, error - query error.
 func (re *CategoryPostgres) FetchStatus(ctx context.Context, rowID uuid.UUID) (mrenum.ItemStatus, error) {
-	return repository_shared.CategoryFetchStatusPostgres(ctx, re.client, rowID)
+	return repositoryshared.CategoryFetchStatusPostgres(ctx, re.client, rowID)
 }

@@ -2,12 +2,14 @@ package factory
 
 import (
 	"context"
+
 	"go-sample/config"
 
 	"github.com/mondegor/go-storage/mrredis"
 	"github.com/mondegor/go-webcore/mrlog"
 )
 
+// NewRedis - comment func.
 func NewRedis(ctx context.Context, cfg config.Config) (*mrredis.ConnAdapter, error) {
 	mrlog.Ctx(ctx).Info().Msg("Create and init redis connection")
 

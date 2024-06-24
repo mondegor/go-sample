@@ -2,14 +2,16 @@ package factory
 
 import (
 	"context"
-	"go-sample/config"
 	"strings"
+
+	"go-sample/config"
 
 	"github.com/mondegor/go-webcore/mrlog"
 	"github.com/mondegor/go-webcore/mrperms"
 )
 
-func NewAccessControl(ctx context.Context, cfg config.Config) (mrperms.AccessControl, error) {
+// NewAccessControl - comment func.
+func NewAccessControl(ctx context.Context, cfg config.Config) (*mrperms.RoleAccessControl, error) {
 	logger := mrlog.Ctx(ctx)
 	logger.Info().Msg("Create and init roles and permissions for access control")
 
@@ -22,7 +24,6 @@ func NewAccessControl(ctx context.Context, cfg config.Config) (mrperms.AccessCon
 			Permissions:   cfg.AccessControl.Permissions,
 		},
 	)
-
 	if err != nil {
 		return nil, err
 	}

@@ -2,7 +2,8 @@ package usecase_api
 
 import (
 	"context"
-	"go-sample/pkg/modules/catalog"
+
+	"go-sample/pkg/modules/catalog/api"
 
 	"github.com/google/uuid"
 	"github.com/mondegor/go-sysmess/mrmsg"
@@ -16,37 +17,37 @@ const (
 )
 
 type (
+	// Category - comment struct.
 	Category struct {
-		storage       CategoryStorage
-		usecaseHelper *mrcore.UsecaseHelper
+		storage      CategoryStorage
+		errorWrapper mrcore.UsecaseErrorWrapper
 	}
 )
 
-func NewCategory(
-	storage CategoryStorage,
-	usecaseHelper *mrcore.UsecaseHelper,
-) *Category {
+// NewCategory - comment func.
+func NewCategory(storage CategoryStorage, errorWrapper mrcore.UsecaseErrorWrapper) *Category {
 	return &Category{
-		storage:       storage,
-		usecaseHelper: usecaseHelper,
+		storage:      storage,
+		errorWrapper: errorWrapper,
 	}
 }
 
+// CheckingAvailability - comment method.
 func (uc *Category) CheckingAvailability(ctx context.Context, itemID uuid.UUID) error {
 	uc.debugCmd(ctx, "CheckingAvailability", mrmsg.Data{"id": itemID})
 
 	if itemID == uuid.Nil {
-		return catalog.FactoryErrCategoryRequired.New()
+		return api.ErrCategoryRequired.New()
 	}
 
 	if status, err := uc.storage.FetchStatus(ctx, itemID); err != nil {
-		if uc.usecaseHelper.IsNotFoundError(err) {
-			return catalog.FactoryErrCategoryNotFound.New(itemID)
+		if uc.errorWrapper.IsNotFoundError(err) {
+			return api.ErrCategoryNotFound.New(itemID)
 		}
 
-		return uc.usecaseHelper.WrapErrorFailed(err, categoryAPIName)
+		return uc.errorWrapper.WrapErrorFailed(err, categoryAPIName)
 	} else if status != mrenum.ItemStatusEnabled {
-		return catalog.FactoryErrCategoryNotAvailable.New(itemID)
+		return api.ErrCategoryNotAvailable.New(itemID)
 	}
 
 	return nil

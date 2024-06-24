@@ -2,9 +2,11 @@ package factory
 
 import (
 	"context"
-	"go-sample/config"
-	"go-sample/internal"
 
+	"go-sample/config"
+	"go-sample/internal/app"
+
+	"github.com/mondegor/go-webcore/mrlib"
 	"github.com/mondegor/go-webcore/mrlog"
 	"github.com/mondegor/go-webcore/mrserver/mrchi"
 	"github.com/mondegor/go-webcore/mrserver/mrjson"
@@ -14,11 +16,11 @@ import (
 	"github.com/mondegor/go-webcore/mrview"
 )
 
+// CreateRequestParsers - comment func.
 func CreateRequestParsers(ctx context.Context, cfg config.Config) (app.RequestParsers, error) {
-	mrlog.Ctx(ctx).Info().Msg("Create and init base request parser")
+	mrlog.Ctx(ctx).Info().Msg("Create and init base request parsers")
 
 	validator, err := NewValidator(ctx, cfg)
-
 	if err != nil {
 		return app.RequestParsers{}, err
 	}
@@ -26,6 +28,18 @@ func CreateRequestParsers(ctx context.Context, cfg config.Config) (app.RequestPa
 	// WARNING: функция использует контекст роутера chi,
 	// поэтому её можно менять только при смене самого роутера
 	pathFunc := mrchi.URLPathParam
+
+	registeredMimeTypes := mrlib.NewMimeTypeList(cfg.MimeTypes)
+
+	// jsonMimeTypeList, err := registeredMimeTypes.NewListByExts(".json")
+	// if err != nil {
+	// 	return app.RequestParsers{}, err
+	// }
+
+	imageMimeTypeList, err := registeredMimeTypes.NewListByExts(".jpeg", ".jpg", ".png")
+	if err != nil {
+		return app.RequestParsers{}, err
+	}
 
 	return app.RequestParsers{
 		// Bool:      mrparser.NewBool(),
@@ -43,18 +57,18 @@ func CreateRequestParsers(ctx context.Context, cfg config.Config) (app.RequestPa
 		String:    mrparser.NewString(pathFunc),
 		UUID:      mrparser.NewUUID(pathFunc),
 		Validator: mrparser.NewValidator(mrjson.NewDecoder(), validator),
-		//File: mrparser.NewFile(
-		//	mrparser.FileOptions{
-		//		AllowedExts:             []string{".pdf", ".zip"},
-		//		MinSize:                 512,
-		//		MaxSize:                 10 * 1024 * 1024,
-		//		CheckRequestContentType: true,
-		//	},
-		//),
+		// File: mrparser.NewFile(
+		// 	mrparser.FileOptions{
+		// 		AllowedMimeTypes:        jsonMimeTypeList,
+		// 		MinSize:                 512,
+		// 		MaxSize:                 10 * 1024 * 1024,
+		// 		CheckRequestContentType: true,
+		// 	},
+		// ),
 		Image: mrparser.NewImage(
 			mrparser.ImageOptions{
 				File: mrparser.FileOptions{
-					AllowedExts:             []string{".jpeg", ".jpg", ".png"},
+					AllowedMimeTypes:        imageMimeTypeList,
 					MinSize:                 512,
 					MaxSize:                 256 * 1024,
 					CheckRequestContentType: true,
@@ -67,7 +81,8 @@ func CreateRequestParsers(ctx context.Context, cfg config.Config) (app.RequestPa
 	}, nil
 }
 
-func NewValidator(ctx context.Context, cfg config.Config) (*mrplayvalidator.ValidatorAdapter, error) {
+// NewValidator - comment func.
+func NewValidator(ctx context.Context, _ config.Config) (*mrplayvalidator.ValidatorAdapter, error) {
 	mrlog.Ctx(ctx).Info().Msg("Create and init data validator")
 
 	validator := mrplayvalidator.New()

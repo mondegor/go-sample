@@ -2,15 +2,22 @@ package factory
 
 import (
 	"context"
-	"go-sample/internal"
 
-	"github.com/mondegor/go-components/mrorderer"
+	"go-sample/internal/app"
+
+	sortfactory "github.com/mondegor/go-components/mrsort/factory"
+	"github.com/mondegor/go-components/mrsort/orderer"
 	"github.com/mondegor/go-webcore/mrlog"
 )
 
-func NewOrdererAPI(ctx context.Context, opts app.Options) *mrorderer.Component {
+// NewOrdererAPI - comment func.
+func NewOrdererAPI(ctx context.Context, opts app.Options) *orderer.Component {
 	mrlog.Ctx(ctx).Info().Msg("Create and init orderer component")
-	itemOrdererStorage := mrorderer.NewRepository(opts.PostgresAdapter)
 
-	return mrorderer.NewComponent(itemOrdererStorage, opts.EventEmitter)
+	return sortfactory.NewComponentOrderer(
+		sortfactory.ComponentOptions{
+			DBClient:     opts.PostgresConnManager,
+			EventEmitter: opts.EventEmitter,
+		},
+	)
 }

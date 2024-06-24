@@ -2,7 +2,8 @@ package usecase_api
 
 import (
 	"context"
-	"go-sample/pkg/modules/catalog"
+
+	"go-sample/pkg/modules/catalog/api"
 
 	"github.com/mondegor/go-sysmess/mrmsg"
 	"github.com/mondegor/go-webcore/mrcore"
@@ -16,37 +17,37 @@ const (
 )
 
 type (
+	// Trademark - comment struct.
 	Trademark struct {
-		storage       TrademarkStorage
-		usecaseHelper *mrcore.UsecaseHelper
+		storage      TrademarkStorage
+		errorWrapper mrcore.UsecaseErrorWrapper
 	}
 )
 
-func NewTrademark(
-	storage TrademarkStorage,
-	usecaseHelper *mrcore.UsecaseHelper,
-) *Trademark {
+// NewTrademark - comment func.
+func NewTrademark(storage TrademarkStorage, errorWrapper mrcore.UsecaseErrorWrapper) *Trademark {
 	return &Trademark{
-		storage:       storage,
-		usecaseHelper: usecaseHelper,
+		storage:      storage,
+		errorWrapper: errorWrapper,
 	}
 }
 
+// CheckingAvailability - comment method.
 func (uc *Trademark) CheckingAvailability(ctx context.Context, itemID mrtype.KeyInt32) error {
 	uc.debugCmd(ctx, "CheckingAvailability", mrmsg.Data{"id": itemID})
 
 	if itemID < 1 {
-		return catalog.FactoryErrTrademarkRequired.New()
+		return api.ErrTrademarkRequired.New()
 	}
 
 	if status, err := uc.storage.FetchStatus(ctx, itemID); err != nil {
-		if uc.usecaseHelper.IsNotFoundError(err) {
-			return catalog.FactoryErrTrademarkNotFound.New(itemID)
+		if uc.errorWrapper.IsNotFoundError(err) {
+			return api.ErrTrademarkNotFound.New(itemID)
 		}
 
-		return uc.usecaseHelper.WrapErrorFailed(err, trademarkAPIName)
+		return uc.errorWrapper.WrapErrorFailed(err, trademarkAPIName)
 	} else if status != mrenum.ItemStatusEnabled {
-		return catalog.FactoryErrTrademarkNotAvailable.New(itemID)
+		return api.ErrTrademarkNotAvailable.New(itemID)
 	}
 
 	return nil

@@ -1,29 +1,30 @@
-package repository_shared
+package shared
 
 import (
 	"context"
-	module "go-sample/internal/modules/catalog/trademark"
+
+	"go-sample/internal/modules/catalog/trademark/module"
 
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-webcore/mrenum"
 	"github.com/mondegor/go-webcore/mrtype"
 )
 
-// TrademarkFetchStatusPostgres
-// result: mrenum.ItemStatus - exists, ErrStorageNoRowFound - not exists, error - query error
-func TrademarkFetchStatusPostgres(ctx context.Context, conn mrstorage.DBConn, rowID mrtype.KeyInt32) (mrenum.ItemStatus, error) {
+// TrademarkFetchStatusPostgres - comment func.
+// result: mrenum.ItemStatus - exists, ErrStorageNoRowFound - not exists, error - query error.
+func TrademarkFetchStatusPostgres(ctx context.Context, client mrstorage.DBConnManager, rowID mrtype.KeyInt32) (mrenum.ItemStatus, error) {
 	sql := `
 		SELECT
 			trademark_status
 		FROM
-			` + module.DBSchema + `.trademarks
+			` + module.DBSchema + `.` + module.DBTableNameTrademarks + `
 		WHERE
 			trademark_id = $1 AND deleted_at IS NULL
 		LIMIT 1;`
 
 	var status mrenum.ItemStatus
 
-	err := conn.QueryRow(
+	err := client.Conn(ctx).QueryRow(
 		ctx,
 		sql,
 		rowID,

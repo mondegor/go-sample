@@ -3,43 +3,20 @@ package factory
 import (
 	"go-sample/config"
 
-	"github.com/mondegor/go-sysmess/mrerr"
-	"github.com/mondegor/go-webcore/mrlog"
-	"github.com/mondegor/go-webcore/mrlog/mrzerolog"
+	"github.com/mondegor/go-webcore/mrcore"
+	"github.com/mondegor/go-webcore/mrlog/zerolog"
+	"github.com/mondegor/go-webcore/mrlog/zerolog/factory"
 )
 
-func NewLogger(cfg config.Config) (*mrzerolog.LoggerAdapter, error) {
-	level, err := mrlog.ParseLevel(cfg.Log.Level)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if cfg.Log.TimestampFormat != "" {
-		cfg.Log.TimestampFormat, err = mrlog.ParseDateTimeFormat(cfg.Log.TimestampFormat)
-
-		if err != nil {
-			return nil, err
-		}
-
-		mrzerolog.SetDateTimeFormat(cfg.Log.TimestampFormat)
-	}
-
-	return mrzerolog.New(
-		mrlog.Options{
-			Level:           level,
-			JsonFormat:      cfg.Log.JsonFormat,
-			TimestampFormat: cfg.Log.TimestampFormat,
-			ConsoleColor:    cfg.Log.ConsoleColor,
-
-			// only if log level: Error, Fatal
-			IsAutoCallerOnFunc: func(err error) bool {
-				if appErr, ok := err.(*mrerr.AppError); ok {
-					return !appErr.HasCallStack()
-				}
-
-				return true
-			},
+// NewLogger - comment func.
+func NewLogger(cfg config.Config) (*zerolog.LoggerAdapter, error) {
+	return factory.NewZeroLogAdapter(
+		factory.Options{
+			Level:            cfg.Log.Level,
+			JsonFormat:       cfg.Log.JsonFormat,
+			TimestampFormat:  cfg.Log.TimestampFormat,
+			ConsoleColor:     cfg.Log.ConsoleColor,
+			PrepareErrorFunc: mrcore.PrepareError,
 		},
-	), nil
+	)
 }
