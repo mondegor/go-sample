@@ -1,11 +1,11 @@
-module go-sample
+module github.com/mondegor/go-sample
 
 go 1.21
 
 require (
 	github.com/google/uuid v1.6.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
-	github.com/mondegor/go-components v0.7.1
+	github.com/mondegor/go-components v0.7.2
 	github.com/mondegor/go-storage v0.11.3
 	github.com/mondegor/go-sysmess v0.10.5
 	github.com/mondegor/go-webcore v0.18.3

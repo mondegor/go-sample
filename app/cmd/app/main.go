@@ -4,7 +4,7 @@ import (
 	"flag"
 	"log"
 
-	"go-sample/internal/factory"
+	"github.com/mondegor/go-sample/cmd/factory"
 
 	"github.com/mondegor/go-webcore/mrlib"
 	"github.com/mondegor/go-webcore/mrlog"

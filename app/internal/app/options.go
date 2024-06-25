@@ -3,15 +3,16 @@ package app
 import (
 	"context"
 
-	"go-sample/config"
-	factory_catalog_category "go-sample/internal/modules/catalog/category/factory"
-	factory_catalog_product "go-sample/internal/modules/catalog/product/factory"
-	factory_catalog_trademark "go-sample/internal/modules/catalog/trademark/factory"
-	factory_filestation "go-sample/internal/modules/filestation/factory"
-	"go-sample/pkg/modules/catalog/api"
-
 	"github.com/mondegor/go-components/mrsettings"
 	"github.com/mondegor/go-components/mrsort"
+
+	"github.com/mondegor/go-sample/config"
+	catalogcategory "github.com/mondegor/go-sample/internal/factory/catalog/category"
+	catalogproduct "github.com/mondegor/go-sample/internal/factory/catalog/product"
+	catalogtrademark "github.com/mondegor/go-sample/internal/factory/catalog/trademark"
+	"github.com/mondegor/go-sample/internal/factory/filestation"
+	"github.com/mondegor/go-sample/pkg/catalog/api"
+
 	"github.com/mondegor/go-storage/mrpostgres"
 	"github.com/mondegor/go-storage/mrredis"
 	"github.com/mondegor/go-storage/mrstorage"
@@ -52,17 +53,17 @@ type (
 		ImageURLBuilder     mrpath.PathBuilder
 
 		// API section
-		CatalogCategoryAPI  api.CategoryAPI
-		CatalogTrademarkAPI api.TrademarkAPI
-		OrdererAPI          mrsort.Orderer
-		SettingsGetterAPI   mrsettings.DefaultValueGetter
-		SettingsSetterAPI   mrsettings.Setter
+		CatalogCategoryAvailabilityAPI  api.CategoryAvailability
+		CatalogTrademarkAvailabilityAPI api.TrademarkAvailability
+		OrdererAPI                      mrsort.Orderer
+		SettingsGetterAPI               mrsettings.DefaultValueGetter
+		SettingsSetterAPI               mrsettings.Setter
 
 		// Modules section
-		CatalogCategoryModule  factory_catalog_category.Options
-		CatalogProductModule   factory_catalog_product.Options
-		CatalogTrademarkModule factory_catalog_trademark.Options
-		FileStationModule      factory_filestation.Options
+		CatalogCategoryModule  catalogcategory.Options
+		CatalogProductModule   catalogproduct.Options
+		CatalogTrademarkModule catalogtrademark.Options
+		FileStationModule      filestation.Options
 
 		SchedulerTasks  []mrworker.Task
 		OpenedResources []func(ctx context.Context)
