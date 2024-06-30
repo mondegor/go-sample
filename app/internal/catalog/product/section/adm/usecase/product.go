@@ -34,7 +34,7 @@ type (
 	}
 )
 
-// NewProduct - comment func.
+// NewProduct - создаёт объект Product.
 func NewProduct(
 	storage ProductStorage,
 	categoryAPI api.CategoryAvailability,

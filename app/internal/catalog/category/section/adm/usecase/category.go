@@ -27,7 +27,7 @@ type (
 	}
 )
 
-// NewCategory - comment func.
+// NewCategory - создаёт объект Category.
 func NewCategory(
 	storage CategoryStorage,
 	eventEmitter mrsender.EventEmitter,

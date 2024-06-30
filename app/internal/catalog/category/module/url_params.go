@@ -1,8 +1,8 @@
 package module
 
 const (
-	ParamNameFilterSearchText = "query"    // ParamNameFilterSearchText - comment const
-	ParamNameFilterStatuses   = "statuses" // ParamNameFilterStatuses - comment const
+	ParamNameFilterSearchText = "query"    // ParamNameFilterSearchText - название URL параметра фильтра
+	ParamNameFilterStatuses   = "statuses" // ParamNameFilterStatuses - название URL параметра фильтра
 
-	ParamNameFileCatalogCategoryImage = "categoryImage" // ParamNameFileCatalogCategoryImage - comment const
+	ParamNameFileCatalogCategoryImage = "categoryImage" // ParamNameFileCatalogCategoryImage - название параметра, где будет содержаться загружаемый файл
 )

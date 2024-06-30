@@ -22,7 +22,7 @@ type (
 	}
 )
 
-// NewCategory - comment func.
+// NewCategory - создаёт объект Category.
 func NewCategory(storage CategoryStorage, errorWrapper mrcore.UsecaseErrorWrapper, imgBaseURL mrpath.PathBuilder, dict *mrlang.MultiLangDictionary) *Category {
 	return &Category{
 		storage:      storage,

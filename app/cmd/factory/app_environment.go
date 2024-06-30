@@ -15,7 +15,7 @@ import (
 	"github.com/mondegor/go-webcore/mrsender/mrlogadapter"
 )
 
-// CreateAppEnvironment - comment func.
+// CreateAppEnvironment - создаёт, настраивает и возвращает базовую конфигурацию приложения.
 func CreateAppEnvironment(configPath, logLevel string) (context.Context, app.Options, error) {
 	cfg, err := config.Create(configPath)
 	if err != nil {
@@ -37,7 +37,7 @@ func CreateAppEnvironment(configPath, logLevel string) (context.Context, app.Opt
 	}
 
 	// show head info about started app
-	logger.Info().Msgf("%s, version: %s, environment: %s", cfg.AppName, cfg.AppVersion, cfg.AppEnvironment)
+	logger.Info().Msgf("%s, version: %s, environment: %s", cfg.App.Name, cfg.App.Version, cfg.App.Environment)
 
 	if cfg.Debugging.Debug {
 		logger.Info().Msg("DEBUG MODE: ON")
@@ -124,18 +124,18 @@ func InitAppEnvironment(ctx context.Context, opts app.Options) (app.Options, err
 	catalog.RegisterTrademarkErrors(opts.ErrorManager)
 
 	// Shared APIs init section (!!! only after init opts)
-	if opts.CatalogCategoryAvailabilityAPI, err = catalog.NewCategoryAPI(ctx, opts); err != nil {
+	if opts.CatalogCategoryAvailabilityAPI, err = catalog.NewCategoryAvailabilityAPI(ctx, opts); err != nil {
 		return opts, err
 	}
 
-	if opts.CatalogTrademarkAvailabilityAPI, err = catalog.NewTrademarkAPI(ctx, opts); err != nil {
+	if opts.CatalogTrademarkAvailabilityAPI, err = catalog.NewTrademarkAvailabilityAPI(ctx, opts); err != nil {
 		return opts, err
 	}
 
 	opts.OrdererAPI = NewOrdererAPI(ctx, opts)
 
 	{
-		getter, task := NewSettingsGetter(ctx, opts)
+		getter, task := NewSettingsGetterAndTask(ctx, opts)
 		opts.SettingsGetterAPI = getter
 		opts.SchedulerTasks = append(opts.SchedulerTasks, task)
 	}

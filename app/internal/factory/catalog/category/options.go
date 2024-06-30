@@ -1,8 +1,6 @@
 package category
 
 import (
-	"github.com/mondegor/go-sample/internal/catalog/category/shared/validate"
-
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-sysmess/mrlang"
 	"github.com/mondegor/go-webcore/mrcore"
@@ -10,6 +8,8 @@ import (
 	"github.com/mondegor/go-webcore/mrpath"
 	"github.com/mondegor/go-webcore/mrsender"
 	"github.com/mondegor/go-webcore/mrserver"
+
+	"github.com/mondegor/go-sample/internal/catalog/category/shared/validate"
 )
 
 type (
@@ -19,7 +19,7 @@ type (
 		UsecaseHelper  mrcore.UsecaseErrorWrapper
 		DBConnManager  mrstorage.DBConnManager
 		Locker         mrlock.Locker
-		RequestParser  *validate.Parser
+		RequestParsers RequestParsers
 		ResponseSender mrserver.FileResponseSender
 
 		UnitCategory UnitCategoryOptions
@@ -33,5 +33,12 @@ type (
 		Dictionary      *mrlang.MultiLangDictionary
 		ImageFileAPI    mrstorage.FileProviderAPI
 		ImageURLBuilder mrpath.PathBuilder
+	}
+
+	// RequestParsers - comment struct.
+	RequestParsers struct {
+		// Parser       *pkgvalidate.Parser
+		// ExtendParser *pkgvalidate.ExtendParser
+		ModuleParser *validate.CategoryParser
 	}
 )

@@ -31,7 +31,7 @@ type (
 	}
 )
 
-// NewCategoryImage - comment func.
+// NewCategoryImage - создаёт объект CategoryImage.
 func NewCategoryImage(
 	storage CategoryImageStorage,
 	fileAPI mrstorage.FileProviderAPI,

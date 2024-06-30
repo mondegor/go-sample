@@ -40,7 +40,7 @@ func newUnitCategory(_ context.Context, opts category.Options) (*httpv1.Category
 		opts.UnitCategory.Dictionary,
 	)
 	controller := httpv1.NewCategory(
-		opts.RequestParser,
+		opts.RequestParsers.ModuleParser,
 		opts.ResponseSender,
 		useCase,
 	)

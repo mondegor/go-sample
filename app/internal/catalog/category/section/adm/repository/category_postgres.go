@@ -21,7 +21,7 @@ type (
 	}
 )
 
-// NewCategoryPostgres - comment func.
+// NewCategoryPostgres - создаёт объект CategoryPostgres.
 func NewCategoryPostgres(client mrstorage.DBConnManager, sqlSelect mrstorage.SQLBuilderSelect) *CategoryPostgres {
 	return &CategoryPostgres{
 		client:    client,

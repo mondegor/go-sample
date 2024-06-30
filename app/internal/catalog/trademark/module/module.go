@@ -1,9 +1,9 @@
 package module
 
 const (
-	Name       = "Catalog.Trademark"   // Name - comment const
-	Permission = "modCatalogTrademark" // Permission - comment const
+	Name       = "Catalog.Trademark"   // Name - название модуля
+	Permission = "modCatalogTrademark" // Permission - разрешение модуля
 
-	DBSchema              = "sample_catalog" // DBSchema - comment const
-	DBTableNameTrademarks = "trademarks"     // DBTableNameTrademarks - comment const
+	DBSchema              = "sample_catalog" // DBSchema - схема БД используемая модулем
+	DBTableNameTrademarks = "trademarks"     // DBTableNameTrademarks - таблица БД используемая модулем
 )

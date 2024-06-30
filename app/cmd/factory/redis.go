@@ -9,7 +9,7 @@ import (
 	"github.com/mondegor/go-webcore/mrlog"
 )
 
-// NewRedis - comment func.
+// NewRedis - создаёт объект mrredis.ConnAdapter.
 func NewRedis(ctx context.Context, cfg config.Config) (*mrredis.ConnAdapter, error) {
 	mrlog.Ctx(ctx).Info().Msg("Create and init redis connection")
 

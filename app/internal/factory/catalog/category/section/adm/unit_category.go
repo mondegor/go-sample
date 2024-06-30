@@ -48,7 +48,7 @@ func newUnitCategory(ctx context.Context, opts category.Options) (*httpv1.Catego
 	)
 	useCase := usecase.NewCategory(storage, opts.EventEmitter, opts.UsecaseHelper, opts.UnitCategory.ImageURLBuilder)
 	controller := httpv1.NewCategory(
-		opts.RequestParser,
+		opts.RequestParsers.ModuleParser,
 		opts.ResponseSender,
 		useCase,
 		metaOrderBy,
@@ -67,7 +67,7 @@ func newUnitCategoryImage(_ context.Context, opts category.Options) (*httpv1.Cat
 		opts.UsecaseHelper,
 	)
 	controller := httpv1.NewCategoryImage(
-		opts.RequestParser,
+		opts.RequestParsers.ModuleParser,
 		opts.ResponseSender,
 		useCase,
 	)

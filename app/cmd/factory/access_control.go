@@ -10,7 +10,7 @@ import (
 	"github.com/mondegor/go-webcore/mrperms"
 )
 
-// NewAccessControl - comment func.
+// NewAccessControl - создаёт объект mrperms.RoleAccessControl.
 func NewAccessControl(ctx context.Context, cfg config.Config) (*mrperms.RoleAccessControl, error) {
 	logger := mrlog.Ctx(ctx)
 	logger.Info().Msg("Create and init roles and permissions for access control")

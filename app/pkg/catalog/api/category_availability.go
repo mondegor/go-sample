@@ -8,6 +8,10 @@ import (
 	"github.com/mondegor/go-sysmess/mrerr/mrerrfactory"
 )
 
+const (
+	CategoryAvailabilityName = "Catalog.API.CategoryAvailability" // CategoryAvailabilityName - название API
+)
+
 type (
 	// CategoryAvailability - comment interface.
 	CategoryAvailability interface {

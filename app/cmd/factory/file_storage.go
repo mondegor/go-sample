@@ -12,7 +12,7 @@ import (
 	"github.com/mondegor/go-webcore/mrlog"
 )
 
-// NewFileSystem - comment func.
+// NewFileSystem - создаёт объект mrfilestorage.FileSystem.
 func NewFileSystem(ctx context.Context, cfg config.Config) *mrfilestorage.FileSystem {
 	mrlog.Ctx(ctx).Info().Msg("Create and init file system")
 

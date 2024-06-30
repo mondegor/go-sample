@@ -15,7 +15,7 @@ import (
 	"github.com/mondegor/go-webcore/mrlog"
 )
 
-// NewCategoryModuleOptions - comment func.
+// NewCategoryModuleOptions - создаёт объект category.Options.
 func NewCategoryModuleOptions(_ context.Context, opts app.Options) (category.Options, error) {
 	imageFileAPI, err := opts.FileProviderPool.Provider(
 		opts.Cfg.ModulesSettings.CatalogCategory.Image.FileProvider,
@@ -34,20 +34,14 @@ func NewCategoryModuleOptions(_ context.Context, opts app.Options) (category.Opt
 		UsecaseHelper: opts.UsecaseErrorWrapper,
 		DBConnManager: opts.PostgresConnManager,
 		Locker:        opts.Locker,
-		RequestParser: validate.NewParser(
-			// opts.RequestParsers.Bool,
-			// opts.RequestParsers.DateTime,
-			opts.RequestParsers.Int64,
-			// opts.RequestParsers.KeyInt32,
-			opts.RequestParsers.ListSorter,
-			opts.RequestParsers.ListPager,
-			opts.RequestParsers.String,
-			opts.RequestParsers.UUID,
-			opts.RequestParsers.Validator,
-			// opts.RequestParsers.File,
-			opts.RequestParsers.Image,
-			opts.RequestParsers.ItemStatus,
-		),
+		RequestParsers: category.RequestParsers{
+			// Parser:       opts.RequestParsers.Parser,
+			// ExtendParser: opts.RequestParsers.ExtendParser,
+			ModuleParser: validate.NewCategoryParser(
+				opts.RequestParsers.ExtendParser,
+				opts.RequestParsers.Image,
+			),
+		},
 		ResponseSender: opts.ResponseSenders.FileSender,
 
 		UnitCategory: category.UnitCategoryOptions{
@@ -61,9 +55,9 @@ func NewCategoryModuleOptions(_ context.Context, opts app.Options) (category.Opt
 	}, nil
 }
 
-// NewCategoryAPI - comment func.
-func NewCategoryAPI(ctx context.Context, opts app.Options) (*usecase.Category, error) {
-	mrlog.Ctx(ctx).Info().Msg("Create and init catalog category API")
+// NewCategoryAvailabilityAPI - создаёт объект usecase.Category.
+func NewCategoryAvailabilityAPI(ctx context.Context, opts app.Options) (*usecase.Category, error) {
+	mrlog.Ctx(ctx).Info().Msg("Create and init catalog category availability API")
 
 	return availability.NewCategory(opts.PostgresConnManager, opts.UsecaseErrorWrapper), nil
 }

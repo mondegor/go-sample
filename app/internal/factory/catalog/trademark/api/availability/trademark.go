@@ -8,7 +8,7 @@ import (
 	"github.com/mondegor/go-webcore/mrcore"
 )
 
-// NewTrademark - comment func.
+// NewTrademark - создаёт объект usecase.Trademark.
 func NewTrademark(client mrstorage.DBConnManager, errorWrapper mrcore.UsecaseErrorWrapper) *usecase.Trademark {
 	return usecase.NewTrademark(
 		repository.NewTrademarkPostgres(client),

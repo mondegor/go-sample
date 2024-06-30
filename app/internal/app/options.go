@@ -6,6 +6,8 @@ import (
 	"github.com/mondegor/go-components/mrsettings"
 	"github.com/mondegor/go-components/mrsort"
 
+	"github.com/mondegor/go-sample/pkg/validate"
+
 	"github.com/mondegor/go-sample/config"
 	catalogcategory "github.com/mondegor/go-sample/internal/factory/catalog/category"
 	catalogproduct "github.com/mondegor/go-sample/internal/factory/catalog/product"
@@ -83,6 +85,9 @@ type (
 		Validator  *mrparser.Validator
 		// File       *mrparser.File
 		Image *mrparser.Image
+
+		Parser       *validate.Parser
+		ExtendParser *validate.ExtendParser
 	}
 
 	// ResponseSenders - comment struct.

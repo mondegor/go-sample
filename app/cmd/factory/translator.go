@@ -10,7 +10,7 @@ import (
 	"github.com/mondegor/go-webcore/mrlog"
 )
 
-// NewTranslator - comment func.
+// NewTranslator - создаёт объект mrlang.Translator.
 func NewTranslator(ctx context.Context, cfg config.Config) (*mrlang.Translator, error) {
 	logger := mrlog.Ctx(ctx)
 	logger.Info().Msg("Create and init language translator")

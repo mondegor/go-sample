@@ -12,10 +12,6 @@ import (
 	"github.com/mondegor/go-webcore/mrtype"
 )
 
-const (
-	trademarkName = "Catalog.TrademarkAvailability"
-)
-
 type (
 	// Trademark - comment struct.
 	Trademark struct {
@@ -24,7 +20,7 @@ type (
 	}
 )
 
-// NewTrademark - comment func.
+// NewTrademark - создаёт объект Trademark.
 func NewTrademark(storage TrademarkStorage, errorWrapper mrcore.UsecaseErrorWrapper) *Trademark {
 	return &Trademark{
 		storage:      storage,
@@ -45,7 +41,7 @@ func (uc *Trademark) CheckingAvailability(ctx context.Context, itemID mrtype.Key
 			return api.ErrTrademarkNotFound.New(itemID)
 		}
 
-		return uc.errorWrapper.WrapErrorFailed(err, trademarkName)
+		return uc.errorWrapper.WrapErrorFailed(err, api.TrademarkAvailabilityName)
 	} else if status != mrenum.ItemStatusEnabled {
 		return api.ErrTrademarkNotAvailable.New(itemID)
 	}
@@ -56,7 +52,7 @@ func (uc *Trademark) CheckingAvailability(ctx context.Context, itemID mrtype.Key
 func (uc *Trademark) debugCmd(ctx context.Context, command string, data mrmsg.Data) {
 	mrlog.Ctx(ctx).
 		Debug().
-		Str("storage", trademarkName).
+		Str("storage", api.TrademarkAvailabilityName).
 		Str("cmd", command).
 		Any("data", data).
 		Send()

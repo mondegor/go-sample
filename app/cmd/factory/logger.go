@@ -8,7 +8,7 @@ import (
 	"github.com/mondegor/go-webcore/mrlog/zerolog/factory"
 )
 
-// NewLogger - comment func.
+// NewLogger - создаёт объект zerolog.LoggerAdapter.
 func NewLogger(cfg config.Config) (*zerolog.LoggerAdapter, error) {
 	return factory.NewZeroLogAdapter(
 		factory.Options{

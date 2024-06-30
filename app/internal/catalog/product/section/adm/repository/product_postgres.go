@@ -23,7 +23,7 @@ type (
 	}
 )
 
-// NewProductPostgres - comment func.
+// NewProductPostgres - создаёт объект ProductPostgres.
 func NewProductPostgres(client mrstorage.DBConnManager, sqlSelect mrstorage.SQLBuilderSelect, sqlUpdate mrstorage.SQLBuilderUpdate) *ProductPostgres {
 	return &ProductPostgres{
 		client:    client,

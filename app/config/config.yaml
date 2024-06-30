@@ -1,5 +1,8 @@
 ---
-app_environment: local # dev, prod
+app:
+  name: "Go Sample App"
+  version: v0.0.0 # auto detection
+  environment: local # dev, prod
 
 debugging:
   debug: true
@@ -9,7 +12,6 @@ debugging:
     depth: 3
     show_func_name: true
     upper_bounds:
-      #- github.com/mondegor/go-webcore/mrserver/mrresp.(*FileSender).sendFile
       - github.com/mondegor/go-sysmess/mrerr.(*ProtoAppError).New
       - github.com/mondegor/go-sysmess/mrerr.(*ProtoAppError).Wrap
       - github.com/mondegor/go-webcore/mrcore.PrepareError
@@ -25,8 +27,8 @@ logger:
   console_color: true
 
 sentry:
-  enable: true
-  dsn: http://c759a11d6f1b869408365d5740c357d6@127.0.0.1:9980/2
+  enable: false
+  dsn: http://id@127.0.0.1:9980/1
   traces_sample_rate: 1.0
   flush_timeout: 2s
 

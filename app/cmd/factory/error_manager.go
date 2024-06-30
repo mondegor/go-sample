@@ -11,7 +11,7 @@ import (
 	"github.com/mondegor/go-webcore/mrserver/mrreq/mrreqinit"
 )
 
-// NewErrorManager - comment func.
+// NewErrorManager - создаёт объект mrinit.ErrorManager.
 func NewErrorManager(opts app.Options) *mrinit.ErrorManager {
 	extra := mrerr.ProtoExtra{}
 

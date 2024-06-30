@@ -20,14 +20,14 @@ const (
 type (
 	// CategoryImage - comment struct.
 	CategoryImage struct {
-		parser  validate.RequestParser
+		parser  validate.RequestCategoryParser
 		sender  mrserver.FileResponseSender
 		useCase usecase.CategoryImageUseCase
 	}
 )
 
-// NewCategoryImage - comment func.
-func NewCategoryImage(parser validate.RequestParser, sender mrserver.FileResponseSender, useCase usecase.CategoryImageUseCase) *CategoryImage {
+// NewCategoryImage - создаёт объект CategoryImage.
+func NewCategoryImage(parser validate.RequestCategoryParser, sender mrserver.FileResponseSender, useCase usecase.CategoryImageUseCase) *CategoryImage {
 	return &CategoryImage{
 		parser:  parser,
 		sender:  sender,

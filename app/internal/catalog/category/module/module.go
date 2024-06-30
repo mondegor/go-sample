@@ -1,11 +1,11 @@
 package module
 
 const (
-	Name       = "Catalog.Category"   // Name - comment const
-	Permission = "modCatalogCategory" // Permission - comment const
+	Name       = "Catalog.Category"   // Name - название модуля
+	Permission = "modCatalogCategory" // Permission - разрешение модуля
 
-	DBSchema              = "sample_catalog" // DBSchema - comment const
-	DBTableNameCategories = "categories"     // DBTableNameCategories - comment const
+	DBSchema              = "sample_catalog" // DBSchema - схема БД используемая модулем
+	DBTableNameCategories = "categories"     // DBTableNameCategories - таблица БД используемая модулем
 
-	ImageDir = "catalog/categories" // ImageDir - comment const
+	ImageDir = "catalog/categories" // ImageDir - относительный путь для хранения изображений категорий
 )

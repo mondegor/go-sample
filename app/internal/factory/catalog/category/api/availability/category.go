@@ -8,7 +8,7 @@ import (
 	"github.com/mondegor/go-webcore/mrcore"
 )
 
-// NewCategory - comment func.
+// NewCategory - создаёт объект usecase.Category.
 func NewCategory(client mrstorage.DBConnManager, errorWrapper mrcore.UsecaseErrorWrapper) *usecase.Category {
 	return usecase.NewCategory(
 		repository.NewCategoryPostgres(client),

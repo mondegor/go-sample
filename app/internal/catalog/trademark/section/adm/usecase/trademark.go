@@ -24,7 +24,7 @@ type (
 	}
 )
 
-// NewTrademark - comment func.
+// NewTrademark - создаёт объект Trademark.
 func NewTrademark(storage TrademarkStorage, eventEmitter mrsender.EventEmitter, errorWrapper mrcore.UsecaseErrorWrapper) *Trademark {
 	return &Trademark{
 		storage:      storage,

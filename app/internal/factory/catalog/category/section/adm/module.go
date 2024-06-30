@@ -10,7 +10,7 @@ import (
 	"github.com/mondegor/go-webcore/mrserver"
 )
 
-// CreateModule - comment func.
+// CreateModule - создаются все компоненты модуля и возвращаются к нему контролеры.
 func CreateModule(ctx context.Context, opts category.Options) ([]mrserver.HttpController, error) {
 	var list []mrserver.HttpController
 

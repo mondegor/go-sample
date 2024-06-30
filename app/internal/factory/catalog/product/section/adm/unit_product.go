@@ -59,7 +59,7 @@ func newUnitProduct(ctx context.Context, opts product.Options) (*httpv1.Product,
 		opts.UsecaseHelper,
 	)
 	controller := httpv1.NewProduct(
-		opts.RequestParser,
+		opts.RequestParsers.ExtendParser,
 		opts.ResponseSender,
 		useCase,
 		metaOrderBy,

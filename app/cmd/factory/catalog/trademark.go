@@ -7,7 +7,6 @@ import (
 
 	"github.com/mondegor/go-sample/internal/app"
 	"github.com/mondegor/go-sample/internal/catalog/trademark/api/availability/usecase"
-	"github.com/mondegor/go-sample/internal/catalog/trademark/shared/validate"
 	"github.com/mondegor/go-sample/internal/factory/catalog/trademark"
 	"github.com/mondegor/go-sample/internal/factory/catalog/trademark/api/availability"
 
@@ -15,26 +14,16 @@ import (
 	"github.com/mondegor/go-webcore/mrlog"
 )
 
-// NewTrademarkModuleOptions - comment func.
+// NewTrademarkModuleOptions - создаёт объект trademark.Options.
 func NewTrademarkModuleOptions(_ context.Context, opts app.Options) (trademark.Options, error) {
 	return trademark.Options{
 		EventEmitter:  opts.EventEmitter,
 		UsecaseHelper: opts.UsecaseErrorWrapper,
 		DBConnManager: opts.PostgresConnManager,
-		RequestParser: validate.NewParser(
-			// opts.RequestParsers.Bool,
-			// opts.RequestParsers.DateTime,
-			opts.RequestParsers.Int64,
-			opts.RequestParsers.KeyInt32,
-			opts.RequestParsers.ListSorter,
-			opts.RequestParsers.ListPager,
-			opts.RequestParsers.String,
-			// opts.RequestParsers.UUID,
-			opts.RequestParsers.Validator,
-			// opts.RequestParsers.File,
-			// opts.RequestParsers.Image,
-			opts.RequestParsers.ItemStatus,
-		),
+		RequestParsers: trademark.RequestParsers{
+			Parser:       opts.RequestParsers.Parser,
+			ExtendParser: opts.RequestParsers.ExtendParser,
+		},
 		ResponseSender: opts.ResponseSenders.Sender,
 
 		PageSizeMax:     opts.Cfg.General.PageSizeMax,
@@ -42,9 +31,9 @@ func NewTrademarkModuleOptions(_ context.Context, opts app.Options) (trademark.O
 	}, nil
 }
 
-// NewTrademarkAPI - comment func.
-func NewTrademarkAPI(ctx context.Context, opts app.Options) (*usecase.Trademark, error) {
-	mrlog.Ctx(ctx).Info().Msg("Create and init catalog trademark API")
+// NewTrademarkAvailabilityAPI - создаёт объект usecase.Trademark.
+func NewTrademarkAvailabilityAPI(ctx context.Context, opts app.Options) (*usecase.Trademark, error) {
+	mrlog.Ctx(ctx).Info().Msg("Create and init catalog trademark availability API")
 
 	return availability.NewTrademark(opts.PostgresConnManager, opts.UsecaseErrorWrapper), nil
 }

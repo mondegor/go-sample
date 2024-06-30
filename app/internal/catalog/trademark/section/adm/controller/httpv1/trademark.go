@@ -6,8 +6,8 @@ import (
 	"github.com/mondegor/go-sample/internal/catalog/trademark/module"
 	"github.com/mondegor/go-sample/internal/catalog/trademark/section/adm/entity"
 	"github.com/mondegor/go-sample/internal/catalog/trademark/section/adm/usecase"
-	"github.com/mondegor/go-sample/internal/catalog/trademark/shared/validate"
 	"github.com/mondegor/go-sample/pkg/catalog/api"
+	"github.com/mondegor/go-sample/pkg/validate"
 	"github.com/mondegor/go-sample/pkg/view"
 
 	"github.com/mondegor/go-sysmess/mrerr"
@@ -26,15 +26,20 @@ const (
 type (
 	// Trademark - comment struct.
 	Trademark struct {
-		parser     validate.RequestParser
+		parser     validate.RequestExtendParser
 		sender     mrserver.ResponseSender
 		useCase    usecase.TrademarkUseCase
 		listSorter mrview.ListSorter
 	}
 )
 
-// NewTrademark - comment func.
-func NewTrademark(parser validate.RequestParser, sender mrserver.ResponseSender, useCase usecase.TrademarkUseCase, listSorter mrview.ListSorter) *Trademark {
+// NewTrademark - создаёт объект Trademark.
+func NewTrademark(
+	parser validate.RequestExtendParser,
+	sender mrserver.ResponseSender,
+	useCase usecase.TrademarkUseCase,
+	listSorter mrview.ListSorter,
+) *Trademark {
 	return &Trademark{
 		parser:     parser,
 		sender:     sender,

@@ -15,7 +15,7 @@ import (
 	"github.com/mondegor/go-webcore/mrserver/mrrscors"
 )
 
-// NewRestRouter - comment func.
+// NewRestRouter - создаёт объект mrchi.RouterAdapter.
 func NewRestRouter(ctx context.Context, opts app.Options, translator *mrlang.Translator) (*mrchi.RouterAdapter, error) {
 	logger := mrlog.Ctx(ctx)
 

@@ -5,32 +5,22 @@ import (
 
 	"github.com/mondegor/go-sample/internal/app"
 	"github.com/mondegor/go-sample/internal/catalog/product/module"
-	"github.com/mondegor/go-sample/internal/catalog/product/shared/validate"
+
 	"github.com/mondegor/go-sample/internal/factory/catalog/product"
 
 	"github.com/mondegor/go-webcore/mrcore/mrinit"
 )
 
-// NewProductModuleOptions - comment func.
+// NewProductModuleOptions - создаёт объект product.Options.
 func NewProductModuleOptions(_ context.Context, opts app.Options) (product.Options, error) {
 	return product.Options{
 		EventEmitter:  opts.EventEmitter,
 		UsecaseHelper: opts.UsecaseErrorWrapper,
 		DBConnManager: opts.PostgresConnManager,
-		RequestParser: validate.NewParser(
-			// opts.RequestParsers.Bool,
-			// opts.RequestParsers.DateTime,
-			opts.RequestParsers.Int64,
-			opts.RequestParsers.KeyInt32,
-			opts.RequestParsers.ListSorter,
-			opts.RequestParsers.ListPager,
-			opts.RequestParsers.String,
-			opts.RequestParsers.UUID,
-			opts.RequestParsers.Validator,
-			// opts.RequestParsers.File,
-			// opts.RequestParsers.Image,
-			opts.RequestParsers.ItemStatus,
-		),
+		RequestParsers: product.RequestParsers{
+			Parser:       opts.RequestParsers.Parser,
+			ExtendParser: opts.RequestParsers.ExtendParser,
+		},
 		ResponseSender: opts.ResponseSenders.Sender,
 
 		CategoryAPI:  opts.CatalogCategoryAvailabilityAPI,

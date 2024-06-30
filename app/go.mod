@@ -1,14 +1,14 @@
 module github.com/mondegor/go-sample
 
-go 1.21
+go 1.22
 
 require (
 	github.com/google/uuid v1.6.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
-	github.com/mondegor/go-components v0.7.2
-	github.com/mondegor/go-storage v0.11.3
-	github.com/mondegor/go-sysmess v0.10.5
-	github.com/mondegor/go-webcore v0.18.3
+	github.com/mondegor/go-components v0.7.4
+	github.com/mondegor/go-storage v0.11.5
+	github.com/mondegor/go-sysmess v0.10.6
+	github.com/mondegor/go-webcore v0.19.1
 	github.com/oklog/run v1.1.0
 	github.com/prometheus/client_golang v1.19.1
 )
@@ -22,7 +22,7 @@ require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.4 // indirect
 	github.com/getsentry/sentry-go v0.28.1 // indirect
-	github.com/go-chi/chi/v5 v5.0.14 // indirect
+	github.com/go-chi/chi/v5 v5.1.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.22.0 // indirect
@@ -39,8 +39,9 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
 	github.com/minio/minio-go/v7 v7.0.72 // indirect
+	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
-	github.com/prometheus/common v0.54.0 // indirect
+	github.com/prometheus/common v0.55.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/redis/go-redis/v9 v9.5.3 // indirect
 	github.com/rs/cors v1.11.0 // indirect

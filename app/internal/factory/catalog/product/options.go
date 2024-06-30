@@ -3,7 +3,8 @@ package product
 import (
 	"github.com/mondegor/go-components/mrsort"
 
-	"github.com/mondegor/go-sample/internal/catalog/product/shared/validate"
+	"github.com/mondegor/go-sample/pkg/validate"
+
 	"github.com/mondegor/go-sample/pkg/catalog/api"
 
 	"github.com/mondegor/go-storage/mrstorage"
@@ -18,7 +19,7 @@ type (
 		EventEmitter   mrsender.EventEmitter
 		UsecaseHelper  mrcore.UsecaseErrorWrapper
 		DBConnManager  mrstorage.DBConnManager
-		RequestParser  *validate.Parser
+		RequestParsers RequestParsers
 		ResponseSender mrserver.ResponseSender
 
 		CategoryAPI  api.CategoryAvailability
@@ -27,5 +28,11 @@ type (
 
 		PageSizeMax     uint64
 		PageSizeDefault uint64
+	}
+
+	// RequestParsers - comment struct.
+	RequestParsers struct {
+		Parser       *validate.Parser
+		ExtendParser *validate.ExtendParser
 	}
 )

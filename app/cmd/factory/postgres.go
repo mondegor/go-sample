@@ -11,7 +11,7 @@ import (
 	"github.com/mondegor/go-webcore/mrlog"
 )
 
-// NewPostgres - comment func.
+// NewPostgres - создаёт объект mrpostgres.ConnAdapter.
 func NewPostgres(ctx context.Context, opts app.Options) (*mrpostgres.ConnAdapter, error) {
 	mrlog.Ctx(ctx).Info().Msg("Create and init postgres connection")
 
@@ -48,7 +48,7 @@ func NewPostgres(ctx context.Context, opts app.Options) (*mrpostgres.ConnAdapter
 	return conn, conn.Ping(ctx)
 }
 
-// NewPostgresConnManager - comment func.
+// NewPostgresConnManager - создаёт объект mrpostgres.ConnManager.
 func NewPostgresConnManager(_ context.Context, conn *mrpostgres.ConnAdapter) *mrpostgres.ConnManager {
 	return mrpostgres.NewConnManager(conn)
 }

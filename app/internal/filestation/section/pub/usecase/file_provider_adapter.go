@@ -17,7 +17,7 @@ type (
 	}
 )
 
-// NewFileProviderAdapter - comment func.
+// NewFileProviderAdapter - создаёт объект FileProviderAdapter.
 func NewFileProviderAdapter(fileAPI mrstorage.FileProviderAPI, errorWrapper mrcore.UsecaseErrorWrapper) *FileProviderAdapter {
 	return &FileProviderAdapter{
 		fileAPI:      fileAPI,

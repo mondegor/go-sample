@@ -12,10 +12,6 @@ import (
 	"github.com/mondegor/go-webcore/mrlog"
 )
 
-const (
-	categoryName = "Catalog.CategoryAvailability"
-)
-
 type (
 	// Category - comment struct.
 	Category struct {
@@ -24,7 +20,7 @@ type (
 	}
 )
 
-// NewCategory - comment func.
+// NewCategory - создаёт объект mrcore.UsecaseErrorWrapper.
 func NewCategory(storage CategoryStorage, errorWrapper mrcore.UsecaseErrorWrapper) *Category {
 	return &Category{
 		storage:      storage,
@@ -45,7 +41,7 @@ func (uc *Category) CheckingAvailability(ctx context.Context, itemID uuid.UUID) 
 			return api.ErrCategoryNotFound.New(itemID)
 		}
 
-		return uc.errorWrapper.WrapErrorFailed(err, categoryName)
+		return uc.errorWrapper.WrapErrorFailed(err, api.CategoryAvailabilityName)
 	} else if status != mrenum.ItemStatusEnabled {
 		return api.ErrCategoryNotAvailable.New(itemID)
 	}
@@ -56,7 +52,7 @@ func (uc *Category) CheckingAvailability(ctx context.Context, itemID uuid.UUID) 
 func (uc *Category) debugCmd(ctx context.Context, command string, data mrmsg.Data) {
 	mrlog.Ctx(ctx).
 		Debug().
-		Str("storage", categoryName).
+		Str("storage", api.CategoryAvailabilityName).
 		Str("cmd", command).
 		Any("data", data).
 		Send()

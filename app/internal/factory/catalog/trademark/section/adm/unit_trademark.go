@@ -42,7 +42,7 @@ func newUnitTrademark(ctx context.Context, opts trademark.Options) (*httpv1.Trad
 	)
 	useCase := usecase.NewTrademark(storage, opts.EventEmitter, opts.UsecaseHelper)
 	controller := httpv1.NewTrademark(
-		opts.RequestParser,
+		opts.RequestParsers.ExtendParser,
 		opts.ResponseSender,
 		useCase,
 		metaOrderBy,

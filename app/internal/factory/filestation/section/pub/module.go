@@ -11,7 +11,7 @@ import (
 	"github.com/mondegor/go-sample/internal/filestation/module"
 )
 
-// CreateModule - comment func.
+// CreateModule - создаются все компоненты модуля и возвращаются к нему контролеры.
 func CreateModule(ctx context.Context, opts filestation.Options) ([]mrserver.HttpController, error) {
 	var list []mrserver.HttpController
 

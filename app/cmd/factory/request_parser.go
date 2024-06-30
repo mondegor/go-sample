@@ -5,6 +5,7 @@ import (
 
 	"github.com/mondegor/go-sample/config"
 	"github.com/mondegor/go-sample/internal/app"
+	"github.com/mondegor/go-sample/pkg/validate"
 
 	"github.com/mondegor/go-webcore/mrlib"
 	"github.com/mondegor/go-webcore/mrlog"
@@ -16,7 +17,7 @@ import (
 	"github.com/mondegor/go-webcore/mrview"
 )
 
-// CreateRequestParsers - comment func.
+// CreateRequestParsers - создаются и возвращаются парсеры запросов клиента.
 func CreateRequestParsers(ctx context.Context, cfg config.Config) (app.RequestParsers, error) {
 	mrlog.Ctx(ctx).Info().Msg("Create and init base request parsers")
 
@@ -41,7 +42,7 @@ func CreateRequestParsers(ctx context.Context, cfg config.Config) (app.RequestPa
 		return app.RequestParsers{}, err
 	}
 
-	return app.RequestParsers{
+	parsers := app.RequestParsers{
 		// Bool:      mrparser.NewBool(),
 		// DateTime:  mrparser.NewDateTime(),
 		Int64:      mrparser.NewInt64(pathFunc),
@@ -78,10 +79,27 @@ func CreateRequestParsers(ctx context.Context, cfg config.Config) (app.RequestPa
 				CheckBody: true,
 			},
 		),
-	}, nil
+	}
+
+	parsers.Parser = validate.NewParser(
+		parsers.Int64,
+		parsers.KeyInt32,
+		parsers.String,
+		parsers.UUID,
+		parsers.Validator,
+	)
+
+	parsers.ExtendParser = validate.NewExtendParser(
+		parsers.Parser,
+		parsers.ItemStatus,
+		parsers.ListSorter,
+		parsers.ListPager,
+	)
+
+	return parsers, nil
 }
 
-// NewValidator - comment func.
+// NewValidator - создаёт объект mrplayvalidator.ValidatorAdapter.
 func NewValidator(ctx context.Context, _ config.Config) (*mrplayvalidator.ValidatorAdapter, error) {
 	mrlog.Ctx(ctx).Info().Msg("Create and init data validator")
 

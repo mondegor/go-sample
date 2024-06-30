@@ -19,7 +19,7 @@ const (
 	restServerCaption = "RestServer"
 )
 
-// NewRestServer - comment func.
+// NewRestServer - создаёт объект mrserver.ServerAdapter.
 func NewRestServer(ctx context.Context, opts app.Options) (*mrserver.ServerAdapter, error) {
 	mrlog.Ctx(ctx).Info().Msgf("Create and init '%s'", restServerCaption)
 

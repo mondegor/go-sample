@@ -11,7 +11,7 @@ import (
 	"github.com/mondegor/go-webcore/mrlog"
 )
 
-// NewS3Minio - comment func.
+// NewS3Minio - создаёт объект mrminio.ConnAdapter.
 func NewS3Minio(ctx context.Context, cfg config.Config) (*mrminio.ConnAdapter, error) {
 	mrlog.Ctx(ctx).Info().Msg("Create and init S3 minio connection")
 

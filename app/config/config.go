@@ -5,22 +5,18 @@ import (
 	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/mondegor/go-webcore/mrcore/mrinit"
 	"github.com/mondegor/go-webcore/mrlib"
 )
 
 const (
-	appName    = "Go Sample App"
-	appVersion = "v0.12.1"
+	detectVersion = "v0.0.0"
 )
 
 type (
 	// Config - comment struct.
 	Config struct {
-		AppName         string
-		AppVersion      string
-		AppEnvironment  string `yaml:"app_environment" env:"APPX_ENV"`
-		AppStartedAt    time.Time
-		ConfigPath      string
+		App             `yaml:"app"`
 		Debugging       `yaml:"debugging"`
 		Log             `yaml:"logger"`
 		Sentry          `yaml:"sentry"`
@@ -37,6 +33,15 @@ type (
 		ModulesSettings `yaml:"modules_settings"`
 		MimeTypes       `yaml:"mime_types"`
 		TaskSchedule    `yaml:"task_schedule"`
+	}
+
+	// App - comment struct.
+	App struct {
+		Name        string `yaml:"name" env:"APPX_NAME"`
+		Version     string `yaml:"version" env:"APPX_VER"`
+		Environment string `yaml:"environment" env:"APPX_ENV"`
+		ConfigPath  string
+		StartedAt   time.Time
 	}
 
 	// Debugging - comment struct.
@@ -239,13 +244,9 @@ type (
 	MimeTypes []mrlib.MimeType
 )
 
-// Create - comment func.
+// Create - создаёт, инициализирует и возвращает конфигурацию приложения.
 func Create(filePath string) (Config, error) {
-	cfg := Config{
-		AppName:    appName,
-		AppVersion: appVersion,
-		ConfigPath: filePath,
-	}
+	cfg := Config{}
 
 	if err := cleanenv.ReadConfig(filePath, &cfg); err != nil {
 		return Config{}, fmt.Errorf("error parsing config file '%s': %w", filePath, err)
@@ -255,11 +256,18 @@ func Create(filePath string) (Config, error) {
 		return Config{}, fmt.Errorf("error reading ENV from config file '%s': %w", filePath, err)
 	}
 
+	if cfg.App.Version == detectVersion {
+		if ver := mrinit.Version(); ver != "" {
+			cfg.App.Version = ver
+		}
+	}
+
+	cfg.App.ConfigPath = filePath
+	cfg.App.StartedAt = time.Now().UTC()
+
 	if cfg.Debugging.UnexpectedHttpStatus < 400 || cfg.Debugging.UnexpectedHttpStatus > 599 {
 		return Config{}, fmt.Errorf("unexpected_http_status: min=400, max=599, got=%d", cfg.Debugging.UnexpectedHttpStatus)
 	}
-
-	cfg.AppStartedAt = time.Now().UTC()
 
 	return cfg, nil
 }

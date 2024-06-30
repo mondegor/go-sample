@@ -21,11 +21,11 @@ func RegisterSystemHandlers(ctx context.Context, cfg config.Config, router mrser
 
 	systemInfoFunc, err := mrresp.HandlerGetSystemInfoAsJSON(
 		mrresp.SystemInfoConfig{
-			Name:        cfg.AppName,
-			Version:     cfg.AppVersion,
-			Environment: cfg.AppEnvironment,
+			Name:        cfg.App.Name,
+			Version:     cfg.App.Version,
+			Environment: cfg.App.Environment,
 			IsDebug:     cfg.Debugging.Debug,
-			StartedAt:   cfg.AppStartedAt,
+			StartedAt:   cfg.App.StartedAt,
 		},
 	)
 	if err != nil {

@@ -26,15 +26,20 @@ const (
 type (
 	// Category - comment struct.
 	Category struct {
-		parser     validate.RequestParser
+		parser     validate.RequestCategoryParser
 		sender     mrserver.ResponseSender
 		useCase    usecase.CategoryUseCase
 		listSorter mrview.ListSorter
 	}
 )
 
-// NewCategory - comment func.
-func NewCategory(parser validate.RequestParser, sender mrserver.ResponseSender, useCase usecase.CategoryUseCase, listSorter mrview.ListSorter) *Category {
+// NewCategory - создаёт объект Category.
+func NewCategory(
+	parser validate.RequestCategoryParser,
+	sender mrserver.ResponseSender,
+	useCase usecase.CategoryUseCase,
+	listSorter mrview.ListSorter,
+) *Category {
 	return &Category{
 		parser:     parser,
 		sender:     sender,

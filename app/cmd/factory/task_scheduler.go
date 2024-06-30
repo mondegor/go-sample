@@ -10,7 +10,7 @@ import (
 	"github.com/mondegor/go-webcore/mrworker/mrschedule"
 )
 
-// NewTaskScheduler - comment func.
+// NewTaskScheduler - создаёт объект mrschedule.Scheduler.
 func NewTaskScheduler(ctx context.Context, opts app.Options) (*mrschedule.Scheduler, error) {
 	logger := mrlog.Ctx(ctx)
 	logger.Info().Msg("Create and init scheduler with it's tasks")

@@ -9,7 +9,7 @@ import (
 	"github.com/mondegor/go-webcore/mrlog"
 )
 
-// NewFileProviderPool - comment func.
+// NewFileProviderPool - создаёт объект mrstorage.FileProviderPool.
 func NewFileProviderPool(ctx context.Context, cfg config.Config) (*mrstorage.FileProviderPool, error) {
 	mrlog.Ctx(ctx).Info().Msg("Create and init file provider pool")
 

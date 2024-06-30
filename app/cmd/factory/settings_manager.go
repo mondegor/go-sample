@@ -18,8 +18,8 @@ const (
 	settingsManagerPrimaryKey = "setting_id"
 )
 
-// NewSettingsGetter - comment func.
-func NewSettingsGetter(ctx context.Context, opts app.Options) (*lightgetter.Component, *mrschedule.TaskShell) {
+// NewSettingsGetterAndTask - создаёт объекты: lightgetter.Component и mrschedule.TaskShell.
+func NewSettingsGetterAndTask(ctx context.Context, opts app.Options) (*lightgetter.Component, *mrschedule.TaskShell) {
 	mrlog.Ctx(ctx).Info().Msg("Create and init settings getter")
 
 	getter := mrsettings.NewComponentCacheGetter(
@@ -51,7 +51,7 @@ func NewSettingsGetter(ctx context.Context, opts app.Options) (*lightgetter.Comp
 	return lightgetter.New(getter), task
 }
 
-// NewSettingsSetter - comment func.
+// NewSettingsSetter - создаёт объект setter.Component.
 func NewSettingsSetter(ctx context.Context, opts app.Options) *setter.Component {
 	mrlog.Ctx(ctx).Info().Msg("Create and init settings setter")
 

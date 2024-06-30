@@ -17,7 +17,7 @@ type (
 	}
 )
 
-// NewTrademarkPostgres - comment func.
+// NewTrademarkPostgres - создаёт объект TrademarkPostgres.
 func NewTrademarkPostgres(client mrstorage.DBConnManager) *TrademarkPostgres {
 	return &TrademarkPostgres{
 		client: client,

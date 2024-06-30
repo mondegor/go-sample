@@ -15,7 +15,7 @@ const (
 	prometheusServerCaption = "Prometheus"
 )
 
-// NewPrometheusServer - comment func.
+// NewPrometheusServer - создаёт объект mrserver.ServerAdapter.
 func NewPrometheusServer(ctx context.Context, opts app.Options) (*mrserver.ServerAdapter, error) {
 	mrlog.Ctx(ctx).Info().Msgf("Create and init '%s'", prometheusServerCaption)
 

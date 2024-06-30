@@ -17,7 +17,7 @@ type (
 	}
 )
 
-// NewCategoryImagePostgres - comment func.
+// NewCategoryImagePostgres - создаёт объект CategoryImagePostgres.
 func NewCategoryImagePostgres(client mrstorage.DBConnManager) *CategoryImagePostgres {
 	return &CategoryImagePostgres{
 		client: client,

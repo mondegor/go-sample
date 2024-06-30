@@ -1,9 +1,9 @@
 package module
 
 const (
-	Name       = "Catalog.Product"   // Name - comment const
-	Permission = "modCatalogProduct" // Permission - comment const
+	Name       = "Catalog.Product"   // Name - название модуля
+	Permission = "modCatalogProduct" // Permission - разрешение модуля
 
-	DBSchema            = "sample_catalog" // DBSchema - comment const
-	DBTableNameProducts = "products"       // DBTableNameProducts - comment const
+	DBSchema            = "sample_catalog" // DBSchema - схема БД используемая модулем
+	DBTableNameProducts = "products"       // DBTableNameProducts - таблица БД используемая модулем
 )

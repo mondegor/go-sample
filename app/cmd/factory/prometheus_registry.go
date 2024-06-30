@@ -11,7 +11,7 @@ import (
 
 // go get -u github.com/prometheus/client_golang
 
-// NewPrometheusRegistry - comment func.
+// NewPrometheusRegistry - создаёт объект prometheus.Registry.
 func NewPrometheusRegistry(_ context.Context, _ app.Options) *prometheus.Registry {
 	registry := prometheus.NewRegistry()
 	registry.MustRegister(

@@ -7,7 +7,7 @@ import (
 	"github.com/mondegor/go-sample/internal/factory/filestation"
 )
 
-// NewModuleOptions - comment func.
+// NewModuleOptions - создаёт объект filestation.Options.
 func NewModuleOptions(_ context.Context, opts app.Options) (filestation.Options, error) {
 	fileAPI, err := opts.FileProviderPool.Provider(
 		opts.Cfg.ModulesSettings.FileStation.ImageProxy.FileProvider,

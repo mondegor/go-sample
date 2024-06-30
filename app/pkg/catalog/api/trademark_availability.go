@@ -8,6 +8,10 @@ import (
 	"github.com/mondegor/go-webcore/mrtype"
 )
 
+const (
+	TrademarkAvailabilityName = "Catalog.API.TrademarkAvailability" // TrademarkAvailabilityName - название API
+)
+
 type (
 	// TrademarkAvailability - comment interface.
 	TrademarkAvailability interface {

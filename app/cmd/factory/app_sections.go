@@ -17,7 +17,7 @@ const (
 	sectionPublicAPIBasePath = "/"
 )
 
-// NewAppSectionAdminAPI - comment func.
+// NewAppSectionAdminAPI - создаёт объект mrperms.AppSection.
 func NewAppSectionAdminAPI(ctx context.Context, opts app.Options) *mrperms.AppSection {
 	return mrfactory.NewAppSection(
 		ctx,
@@ -32,7 +32,7 @@ func NewAppSectionAdminAPI(ctx context.Context, opts app.Options) *mrperms.AppSe
 	)
 }
 
-// NewAppSectionPublicAPI - comment func.
+// NewAppSectionPublicAPI - создаёт объект mrperms.AppSection.
 func NewAppSectionPublicAPI(ctx context.Context, opts app.Options) *mrperms.AppSection {
 	return mrfactory.NewAppSection(
 		ctx,

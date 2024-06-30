@@ -10,7 +10,7 @@ import (
 	"github.com/mondegor/go-webcore/mrlog"
 )
 
-// NewOrdererAPI - comment func.
+// NewOrdererAPI - создаёт объект orderer.Component.
 func NewOrdererAPI(ctx context.Context, opts app.Options) *orderer.Component {
 	mrlog.Ctx(ctx).Info().Msg("Create and init orderer component")
 

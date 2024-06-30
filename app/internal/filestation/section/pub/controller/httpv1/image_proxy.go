@@ -20,7 +20,7 @@ type (
 	}
 )
 
-// NewImageProxy - comment func.
+// NewImageProxy - создаёт объект ImageProxy.
 func NewImageProxy(
 	parser mrserver.RequestParserString,
 	sender mrserver.FileResponseSender,

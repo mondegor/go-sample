@@ -12,7 +12,7 @@ import (
 	"github.com/mondegor/go-webcore/mrserver/mrresp"
 )
 
-// CreateResponseSenders - comment func.
+// CreateResponseSenders - создаются и возвращаются компоненты для отправки ответа клиенту.
 func CreateResponseSenders(ctx context.Context, _ config.Config) (app.ResponseSenders, error) {
 	mrlog.Ctx(ctx).Info().Msg("Create and init base response senders")
 
@@ -24,7 +24,7 @@ func CreateResponseSenders(ctx context.Context, _ config.Config) (app.ResponseSe
 	}, nil
 }
 
-// NewErrorResponseSender - comment func.
+// NewErrorResponseSender - создаёт объект mrresp.ErrorSender.
 func NewErrorResponseSender(ctx context.Context, opts app.Options) (*mrresp.ErrorSender, error) {
 	mrlog.Ctx(ctx).Info().Msg("Create and init error response sender")
 
