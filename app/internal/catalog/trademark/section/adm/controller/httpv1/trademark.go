@@ -33,7 +33,7 @@ type (
 	}
 )
 
-// NewTrademark - создаёт объект Trademark.
+// NewTrademark - создаёт контроллер Trademark.
 func NewTrademark(
 	parser validate.RequestExtendParser,
 	sender mrserver.ResponseSender,
@@ -48,7 +48,7 @@ func NewTrademark(
 	}
 }
 
-// Handlers - comment method.
+// Handlers - возвращает обработчики контроллера Trademark.
 func (ht *Trademark) Handlers() []mrserver.HttpHandler {
 	return []mrserver.HttpHandler{
 		{Method: http.MethodGet, URL: trademarkListURL, Func: ht.GetList},

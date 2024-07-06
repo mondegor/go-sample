@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.3
 info:
-  version: v0.1.9
+  version: v0.1.10
   title: Public API go-sample
   license:
     name: Apache-2.0
@@ -356,7 +356,8 @@ components:
       type: object
       required:
         - name
-        - tagVersion
+        - version
+        - environment
         - hostName
         - isDebug
         - logLevel
@@ -372,6 +373,11 @@ components:
           type: string
           maxLength: 16
           example: "v0.1.0"
+        environment:
+          description: Окружение, на котором запущено приложение
+          type: string
+          maxLength: 16
+          example: "prod"
         hostName:
           description: Название хоста, на котором запущено приложение
           type: string

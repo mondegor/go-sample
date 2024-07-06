@@ -37,7 +37,7 @@ type (
 	}
 )
 
-// NewProduct - создаёт объект Product.
+// NewProduct - создаёт контроллер Product.
 func NewProduct(parser validate.RequestExtendParser, sender mrserver.ResponseSender, useCase usecase.ProductUseCase, listSorter mrview.ListSorter) *Product {
 	return &Product{
 		parser:     parser,
@@ -47,7 +47,7 @@ func NewProduct(parser validate.RequestExtendParser, sender mrserver.ResponseSen
 	}
 }
 
-// Handlers - comment method.
+// Handlers - возвращает обработчики контроллера Product.
 func (ht *Product) Handlers() []mrserver.HttpHandler {
 	return []mrserver.HttpHandler{
 		{Method: http.MethodGet, URL: productListURL, Func: ht.GetList},

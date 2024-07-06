@@ -33,7 +33,7 @@ type (
 	}
 )
 
-// NewCategory - создаёт объект Category.
+// NewCategory - создаёт контроллер Category.
 func NewCategory(
 	parser validate.RequestCategoryParser,
 	sender mrserver.ResponseSender,
@@ -48,7 +48,7 @@ func NewCategory(
 	}
 }
 
-// Handlers - comment method.
+// Handlers - возвращает обработчики контроллера Category.
 func (ht *Category) Handlers() []mrserver.HttpHandler {
 	return []mrserver.HttpHandler{
 		{Method: http.MethodGet, URL: categoryListURL, Func: ht.GetList},

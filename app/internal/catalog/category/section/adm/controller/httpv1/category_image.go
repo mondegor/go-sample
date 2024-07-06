@@ -26,7 +26,7 @@ type (
 	}
 )
 
-// NewCategoryImage - создаёт объект CategoryImage.
+// NewCategoryImage - создаёт контроллер CategoryImage.
 func NewCategoryImage(parser validate.RequestCategoryParser, sender mrserver.FileResponseSender, useCase usecase.CategoryImageUseCase) *CategoryImage {
 	return &CategoryImage{
 		parser:  parser,
@@ -35,7 +35,7 @@ func NewCategoryImage(parser validate.RequestCategoryParser, sender mrserver.Fil
 	}
 }
 
-// Handlers - comment method.
+// Handlers - возвращает обработчики контроллера NewCategoryImage.
 func (ht *CategoryImage) Handlers() []mrserver.HttpHandler {
 	return []mrserver.HttpHandler{
 		{Method: http.MethodGet, URL: categoryItemImageURL, Func: ht.GetImage},
