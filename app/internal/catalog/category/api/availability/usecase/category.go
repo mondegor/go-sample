@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 
+	"github.com/mondegor/go-sample/internal/catalog/category/api/availability"
 	"github.com/mondegor/go-sample/pkg/catalog/api"
 
 	"github.com/google/uuid"
@@ -15,13 +16,13 @@ import (
 type (
 	// Category - comment struct.
 	Category struct {
-		storage      CategoryStorage
+		storage      availability.CategoryStorage
 		errorWrapper mrcore.UsecaseErrorWrapper
 	}
 )
 
 // NewCategory - создаёт объект mrcore.UsecaseErrorWrapper.
-func NewCategory(storage CategoryStorage, errorWrapper mrcore.UsecaseErrorWrapper) *Category {
+func NewCategory(storage availability.CategoryStorage, errorWrapper mrcore.UsecaseErrorWrapper) *Category {
 	return &Category{
 		storage:      storage,
 		errorWrapper: errorWrapper,

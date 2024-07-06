@@ -5,6 +5,8 @@ import (
 
 	"github.com/mondegor/go-components/mrsort"
 
+	"github.com/mondegor/go-sample/internal/catalog/product/section/adm"
+
 	"github.com/mondegor/go-sample/internal/catalog/product/module"
 
 	"github.com/mondegor/go-sample/internal/catalog/product/section/adm/entity"
@@ -24,7 +26,7 @@ import (
 type (
 	// Product - comment struct.
 	Product struct {
-		storage      ProductStorage
+		storage      adm.ProductStorage
 		categoryAPI  api.CategoryAvailability
 		trademarkAPI api.TrademarkAvailability
 		ordererAPI   mrsort.Orderer
@@ -36,7 +38,7 @@ type (
 
 // NewProduct - создаёт объект Product.
 func NewProduct(
-	storage ProductStorage,
+	storage adm.ProductStorage,
 	categoryAPI api.CategoryAvailability,
 	trademarkAPI api.TrademarkAvailability,
 	ordererAPI mrsort.Orderer,

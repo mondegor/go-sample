@@ -5,7 +5,7 @@ go 1.22
 require (
 	github.com/google/uuid v1.6.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
-	github.com/mondegor/go-components v0.7.5
+	github.com/mondegor/go-components v0.7.6
 	github.com/mondegor/go-storage v0.11.8
 	github.com/mondegor/go-sysmess v0.10.9
 	github.com/mondegor/go-webcore v0.19.3

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/mondegor/go-sample/internal/catalog/category/module"
+	"github.com/mondegor/go-sample/internal/catalog/category/section/adm"
 	"github.com/mondegor/go-sample/internal/catalog/category/section/adm/entity"
 
 	"github.com/google/uuid"
@@ -23,7 +24,7 @@ import (
 type (
 	// CategoryImage - comment struct.
 	CategoryImage struct {
-		storage      CategoryImageStorage
+		storage      adm.CategoryImageStorage
 		fileAPI      mrstorage.FileProviderAPI
 		locker       mrlock.Locker
 		eventEmitter mrsender.EventEmitter
@@ -33,7 +34,7 @@ type (
 
 // NewCategoryImage - создаёт объект CategoryImage.
 func NewCategoryImage(
-	storage CategoryImageStorage,
+	storage adm.CategoryImageStorage,
 	fileAPI mrstorage.FileProviderAPI,
 	locker mrlock.Locker,
 	eventEmitter mrsender.EventEmitter,

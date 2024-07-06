@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/mondegor/go-sample/internal/catalog/category/module"
-	"github.com/mondegor/go-sample/internal/catalog/category/section/adm/usecase"
+	"github.com/mondegor/go-sample/internal/catalog/category/section/adm"
 	"github.com/mondegor/go-sample/internal/catalog/category/shared/validate"
 
 	"github.com/google/uuid"
@@ -22,12 +22,12 @@ type (
 	CategoryImage struct {
 		parser  validate.RequestCategoryParser
 		sender  mrserver.FileResponseSender
-		useCase usecase.CategoryImageUseCase
+		useCase adm.CategoryImageUseCase
 	}
 )
 
 // NewCategoryImage - создаёт контроллер CategoryImage.
-func NewCategoryImage(parser validate.RequestCategoryParser, sender mrserver.FileResponseSender, useCase usecase.CategoryImageUseCase) *CategoryImage {
+func NewCategoryImage(parser validate.RequestCategoryParser, sender mrserver.FileResponseSender, useCase adm.CategoryImageUseCase) *CategoryImage {
 	return &CategoryImage{
 		parser:  parser,
 		sender:  sender,

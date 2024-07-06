@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/mondegor/go-sample/internal/catalog/category/module"
+	"github.com/mondegor/go-sample/internal/catalog/category/section/pub"
 	"github.com/mondegor/go-sample/internal/catalog/category/section/pub/entity"
-	"github.com/mondegor/go-sample/internal/catalog/category/section/pub/usecase"
 	"github.com/mondegor/go-sample/internal/catalog/category/shared/validate"
 
 	"github.com/google/uuid"
@@ -22,12 +22,12 @@ type (
 	Category struct {
 		parser  validate.RequestCategoryParser
 		sender  mrserver.ResponseSender
-		useCase usecase.CategoryUseCase
+		useCase pub.CategoryUseCase
 	}
 )
 
 // NewCategory - создаёт контроллер Category.
-func NewCategory(parser validate.RequestCategoryParser, sender mrserver.ResponseSender, useCase usecase.CategoryUseCase) *Category {
+func NewCategory(parser validate.RequestCategoryParser, sender mrserver.ResponseSender, useCase pub.CategoryUseCase) *Category {
 	return &Category{
 		parser:  parser,
 		sender:  sender,

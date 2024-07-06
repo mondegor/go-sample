@@ -5,11 +5,12 @@ import (
 
 	"github.com/mondegor/go-components/mrsort"
 
+	"github.com/mondegor/go-sample/internal/catalog/product/section/adm"
+
 	"github.com/mondegor/go-sample/pkg/validate"
 
 	"github.com/mondegor/go-sample/internal/catalog/product/module"
 	"github.com/mondegor/go-sample/internal/catalog/product/section/adm/entity"
-	"github.com/mondegor/go-sample/internal/catalog/product/section/adm/usecase"
 	"github.com/mondegor/go-sample/pkg/catalog/api"
 	"github.com/mondegor/go-sample/pkg/view"
 
@@ -32,13 +33,13 @@ type (
 	Product struct {
 		parser     validate.RequestExtendParser
 		sender     mrserver.ResponseSender
-		useCase    usecase.ProductUseCase
+		useCase    adm.ProductUseCase
 		listSorter mrview.ListSorter
 	}
 )
 
 // NewProduct - создаёт контроллер Product.
-func NewProduct(parser validate.RequestExtendParser, sender mrserver.ResponseSender, useCase usecase.ProductUseCase, listSorter mrview.ListSorter) *Product {
+func NewProduct(parser validate.RequestExtendParser, sender mrserver.ResponseSender, useCase adm.ProductUseCase, listSorter mrview.ListSorter) *Product {
 	return &Product{
 		parser:     parser,
 		sender:     sender,

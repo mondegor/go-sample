@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 
+	"github.com/mondegor/go-sample/internal/catalog/category/section/adm"
 	"github.com/mondegor/go-sample/internal/catalog/category/section/adm/entity"
 
 	"github.com/google/uuid"
@@ -19,7 +20,7 @@ import (
 type (
 	// Category - comment struct.
 	Category struct {
-		storage      CategoryStorage
+		storage      adm.CategoryStorage
 		eventEmitter mrsender.EventEmitter
 		errorWrapper mrcore.UsecaseErrorWrapper
 		imgBaseURL   mrpath.PathBuilder
@@ -29,7 +30,7 @@ type (
 
 // NewCategory - создаёт объект Category.
 func NewCategory(
-	storage CategoryStorage,
+	storage adm.CategoryStorage,
 	eventEmitter mrsender.EventEmitter,
 	errorWrapper mrcore.UsecaseErrorWrapper,
 	imgBaseURL mrpath.PathBuilder,

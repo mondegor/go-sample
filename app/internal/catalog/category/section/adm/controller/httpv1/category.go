@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/mondegor/go-sample/internal/catalog/category/module"
+	"github.com/mondegor/go-sample/internal/catalog/category/section/adm"
 	"github.com/mondegor/go-sample/internal/catalog/category/section/adm/entity"
-	"github.com/mondegor/go-sample/internal/catalog/category/section/adm/usecase"
 	"github.com/mondegor/go-sample/internal/catalog/category/shared/validate"
 	"github.com/mondegor/go-sample/pkg/catalog/api"
 	"github.com/mondegor/go-sample/pkg/view"
@@ -28,7 +28,7 @@ type (
 	Category struct {
 		parser     validate.RequestCategoryParser
 		sender     mrserver.ResponseSender
-		useCase    usecase.CategoryUseCase
+		useCase    adm.CategoryUseCase
 		listSorter mrview.ListSorter
 	}
 )
@@ -37,7 +37,7 @@ type (
 func NewCategory(
 	parser validate.RequestCategoryParser,
 	sender mrserver.ResponseSender,
-	useCase usecase.CategoryUseCase,
+	useCase adm.CategoryUseCase,
 	listSorter mrview.ListSorter,
 ) *Category {
 	return &Category{

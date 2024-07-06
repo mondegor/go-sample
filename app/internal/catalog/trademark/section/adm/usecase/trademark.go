@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 
+	"github.com/mondegor/go-sample/internal/catalog/trademark/section/adm"
 	"github.com/mondegor/go-sample/internal/catalog/trademark/section/adm/entity"
 
 	"github.com/mondegor/go-sysmess/mrmsg"
@@ -17,7 +18,7 @@ import (
 type (
 	// Trademark - comment struct.
 	Trademark struct {
-		storage      TrademarkStorage
+		storage      adm.TrademarkStorage
 		eventEmitter mrsender.EventEmitter
 		errorWrapper mrcore.UsecaseErrorWrapper
 		statusFlow   mrstatus.Flow
@@ -25,7 +26,7 @@ type (
 )
 
 // NewTrademark - создаёт объект Trademark.
-func NewTrademark(storage TrademarkStorage, eventEmitter mrsender.EventEmitter, errorWrapper mrcore.UsecaseErrorWrapper) *Trademark {
+func NewTrademark(storage adm.TrademarkStorage, eventEmitter mrsender.EventEmitter, errorWrapper mrcore.UsecaseErrorWrapper) *Trademark {
 	return &Trademark{
 		storage:      storage,
 		eventEmitter: eventEmitter,

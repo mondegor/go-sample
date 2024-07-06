@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 
+	"github.com/mondegor/go-sample/internal/catalog/category/section/pub"
 	"github.com/mondegor/go-sample/internal/catalog/category/section/pub/entity"
 
 	"github.com/google/uuid"
@@ -15,7 +16,7 @@ import (
 type (
 	// Category - comment struct.
 	Category struct {
-		storage      CategoryStorage
+		storage      pub.CategoryStorage
 		errorWrapper mrcore.UsecaseErrorWrapper
 		imgBaseURL   mrpath.PathBuilder
 		dict         *mrlang.MultiLangDictionary
@@ -23,7 +24,12 @@ type (
 )
 
 // NewCategory - создаёт объект Category.
-func NewCategory(storage CategoryStorage, errorWrapper mrcore.UsecaseErrorWrapper, imgBaseURL mrpath.PathBuilder, dict *mrlang.MultiLangDictionary) *Category {
+func NewCategory(
+	storage pub.CategoryStorage,
+	errorWrapper mrcore.UsecaseErrorWrapper,
+	imgBaseURL mrpath.PathBuilder,
+	dict *mrlang.MultiLangDictionary,
+) *Category {
 	return &Category{
 		storage:      storage,
 		errorWrapper: errorWrapper,

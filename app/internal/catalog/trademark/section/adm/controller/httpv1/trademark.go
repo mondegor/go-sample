@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/mondegor/go-sample/internal/catalog/trademark/module"
+	"github.com/mondegor/go-sample/internal/catalog/trademark/section/adm"
 	"github.com/mondegor/go-sample/internal/catalog/trademark/section/adm/entity"
-	"github.com/mondegor/go-sample/internal/catalog/trademark/section/adm/usecase"
 	"github.com/mondegor/go-sample/pkg/catalog/api"
 	"github.com/mondegor/go-sample/pkg/validate"
 	"github.com/mondegor/go-sample/pkg/view"
@@ -28,7 +28,7 @@ type (
 	Trademark struct {
 		parser     validate.RequestExtendParser
 		sender     mrserver.ResponseSender
-		useCase    usecase.TrademarkUseCase
+		useCase    adm.TrademarkUseCase
 		listSorter mrview.ListSorter
 	}
 )
@@ -37,7 +37,7 @@ type (
 func NewTrademark(
 	parser validate.RequestExtendParser,
 	sender mrserver.ResponseSender,
-	useCase usecase.TrademarkUseCase,
+	useCase adm.TrademarkUseCase,
 	listSorter mrview.ListSorter,
 ) *Trademark {
 	return &Trademark{

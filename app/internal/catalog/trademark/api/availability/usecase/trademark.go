@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 
+	"github.com/mondegor/go-sample/internal/catalog/trademark/api/availability"
 	"github.com/mondegor/go-sample/pkg/catalog/api"
 
 	"github.com/mondegor/go-sysmess/mrmsg"
@@ -15,13 +16,13 @@ import (
 type (
 	// Trademark - comment struct.
 	Trademark struct {
-		storage      TrademarkStorage
+		storage      availability.TrademarkStorage
 		errorWrapper mrcore.UsecaseErrorWrapper
 	}
 )
 
 // NewTrademark - создаёт объект Trademark.
-func NewTrademark(storage TrademarkStorage, errorWrapper mrcore.UsecaseErrorWrapper) *Trademark {
+func NewTrademark(storage availability.TrademarkStorage, errorWrapper mrcore.UsecaseErrorWrapper) *Trademark {
 	return &Trademark{
 		storage:      storage,
 		errorWrapper: errorWrapper,
