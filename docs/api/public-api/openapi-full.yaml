@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.3
 info:
-  version: v0.1.10
+  version: v0.1.11
   title: Public API go-sample
   license:
     name: Apache-2.0
@@ -253,6 +253,7 @@ components:
       required: true
       schema:
         type: integer
+        format: int32
         minimum: 1
       example: 1000
 

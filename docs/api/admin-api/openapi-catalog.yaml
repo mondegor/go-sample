@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.3
 info:
-  version: v0.1.10
+  version: v0.1.11
   title: Private API управления каталогом товаров
   license:
     name: Apache-2.0
@@ -123,7 +123,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/App.Response.Model.SuccessCreatedItemInt32"
+                $ref: "#/components/schemas/App.Response.Model.SuccessCreatedItemUint"
         "400":
           $ref: "#/components/responses/App.ResponseJson.Error400"
         "401":
@@ -461,7 +461,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/App.Response.Model.SuccessCreatedItemInt32"
+                $ref: "#/components/schemas/App.Response.Model.SuccessCreatedItemUint"
         "400":
           $ref: "#/components/responses/App.ResponseJson.Error400"
         "401":
@@ -736,7 +736,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/App.Response.Model.SuccessCreatedItemInt32"
+                $ref: "#/components/schemas/App.Response.Model.SuccessCreatedItemUint"
         "400":
           $ref: "#/components/responses/App.ResponseJson.Error400"
         "401":
@@ -1267,8 +1267,8 @@ components:
           format: date-time
           example: "2023-01-01T12:00:00.000+02:00"
 
-    App.Response.Model.SuccessCreatedItemInt32:
-      description: DTO результата создания записи (int32 ID)
+    App.Response.Model.SuccessCreatedItemUint:
+      description: DTO результата создания записи (int64 ID)
       type: object
       required:
         - id
@@ -1276,8 +1276,7 @@ components:
         id:
           description: Идентификатор созданной записи
           type: integer
-          format: int32
-          example: 2147483647
+          example: 9223372036854775807
 
     Custom.Field.CategoryID:
       description: Идентификатор категории (модуль - Catalog.Category)
