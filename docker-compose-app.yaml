@@ -4,3 +4,5 @@ services:
   web-app: # ${GO_DOCKER_SERVICE}
     depends_on:
       - db-postgres # ${POSTGRES_DOCKER_SERVICE}
+      - db-redis # ${REDIS_DOCKER_SERVICE}
+      - s3-minio # ${MINIO_DOCKER_SERVICE}

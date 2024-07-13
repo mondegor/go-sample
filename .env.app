@@ -1,4 +1,3 @@
-
 # for service config
 # /go-sample/app/config/config.yaml
 
