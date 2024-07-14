@@ -221,7 +221,7 @@ type (
 			// ImageProxy - comment struct.
 			ImageProxy struct {
 				Host         string `yaml:"host" env:"APPX_IMAGE_HOST"`
-				BaseURL      string `yaml:"base_url"`
+				BasePath     string `yaml:"base_path"`
 				FileProvider string `yaml:"file_provider"` // FileProviders.ImageStorage or ImageStorage2
 			} `yaml:"image_proxy"`
 		} `yaml:"file_station"`
