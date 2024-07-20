@@ -1,2 +1,4 @@
+- url: http://api.go-sample.local/adm
+  description: Local Domain
 - url: http://localhost:8080/adm
   description: Local Host
