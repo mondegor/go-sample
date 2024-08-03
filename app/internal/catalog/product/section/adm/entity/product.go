@@ -3,7 +3,7 @@ package entity
 import (
 	"time"
 
-	"github.com/mondegor/go-sample/pkg/entity"
+	"github.com/mondegor/go-sample/pkg/measure"
 
 	"github.com/google/uuid"
 	"github.com/mondegor/go-webcore/mrenum"
@@ -23,7 +23,7 @@ type (
 		Article     string            `json:"article" sort:"article" upd:"product_article"`
 		Caption     string            `json:"caption" sort:"caption,default" upd:"product_caption"`
 		TrademarkID mrtype.KeyInt32   `json:"trademarkId" upd:"trademark_id"`         // trademarks::trademark_id
-		Price       *entity.Money     `json:"price" sort:"price" upd:"product_price"` // coins
+		Price       *measure.Money    `json:"price" sort:"price" upd:"product_price"` // coins
 		Status      mrenum.ItemStatus `json:"status"`
 		CreatedAt   time.Time         `json:"createdAt" sort:"createdAt"`
 		UpdatedAt   *time.Time        `json:"updatedAt,omitempty" sort:"updatedAt"`

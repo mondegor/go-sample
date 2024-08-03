@@ -1,6 +1,6 @@
 [Назад к оглавлению](./README.md)
 
-# REST API документация для Go Sample v0.1.11
+# REST API документация для Go Sample v0.1.12
 - [API документация в формате OpenAPI/Swagger](./api)
     - [AdminAPI](./api/admin-api)
     - [PublicAPI](./api/public-api)

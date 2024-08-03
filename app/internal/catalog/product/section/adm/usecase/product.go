@@ -66,7 +66,7 @@ func (uc *Product) GetList(ctx context.Context, params entity.ProductParams) ([]
 	}
 
 	if total < 1 {
-		return nil, 0, nil
+		return []entity.Product{}, 0, nil
 	}
 
 	items, err := uc.storage.Fetch(ctx, fetchParams)

@@ -1,4 +1,4 @@
-package entity
+package measure
 
 type (
 	// Money - comment type.

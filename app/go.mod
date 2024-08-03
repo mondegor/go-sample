@@ -5,10 +5,10 @@ go 1.22
 require (
 	github.com/google/uuid v1.6.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
-	github.com/mondegor/go-components v0.7.7
-	github.com/mondegor/go-storage v0.11.9
-	github.com/mondegor/go-sysmess v0.10.10
-	github.com/mondegor/go-webcore v0.20.2
+	github.com/mondegor/go-components v0.7.8
+	github.com/mondegor/go-storage v0.11.10
+	github.com/mondegor/go-sysmess v0.10.11
+	github.com/mondegor/go-webcore v0.20.3
 	github.com/oklog/run v1.1.0
 	github.com/prometheus/client_golang v1.19.1
 )
@@ -20,7 +20,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.4 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.5 // indirect
 	github.com/getsentry/sentry-go v0.28.1 // indirect
 	github.com/go-chi/chi/v5 v5.1.0 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
@@ -44,7 +44,7 @@ require (
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.55.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
-	github.com/redis/go-redis/v9 v9.6.0 // indirect
+	github.com/redis/go-redis/v9 v9.6.1 // indirect
 	github.com/rs/cors v1.11.0 // indirect
 	github.com/rs/xid v1.5.0 // indirect
 	github.com/rs/zerolog v1.33.0 // indirect

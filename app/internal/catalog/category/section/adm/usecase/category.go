@@ -54,7 +54,7 @@ func (uc *Category) GetList(ctx context.Context, params entity.CategoryParams) (
 	}
 
 	if total < 1 {
-		return nil, 0, nil
+		return []entity.Category{}, 0, nil
 	}
 
 	items, err := uc.storage.Fetch(ctx, fetchParams)
