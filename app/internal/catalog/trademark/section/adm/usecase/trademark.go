@@ -45,7 +45,7 @@ func (uc *Trademark) GetList(ctx context.Context, params entity.TrademarkParams)
 	}
 
 	if total < 1 {
-		return []entity.Trademark{}, 0, nil
+		return make([]entity.Trademark, 0), 0, nil
 	}
 
 	items, err := uc.storage.Fetch(ctx, fetchParams)
