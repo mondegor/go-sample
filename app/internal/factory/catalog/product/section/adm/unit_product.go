@@ -56,7 +56,7 @@ func newUnitProduct(ctx context.Context, opts product.Options) (*httpv1.Product,
 		opts.TrademarkAPI,
 		opts.OrdererAPI,
 		opts.EventEmitter,
-		opts.UsecaseHelper,
+		opts.UseCaseHelper,
 	)
 	controller := httpv1.NewProduct(
 		opts.RequestParsers.ExtendParser,

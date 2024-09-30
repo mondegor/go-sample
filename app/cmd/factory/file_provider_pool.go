@@ -3,10 +3,10 @@ package factory
 import (
 	"context"
 
-	"github.com/mondegor/go-sample/config"
-
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-webcore/mrlog"
+
+	"github.com/mondegor/go-sample/config"
 )
 
 // NewFileProviderPool - создаёт объект mrstorage.FileProviderPool.
@@ -15,13 +15,10 @@ func NewFileProviderPool(ctx context.Context, cfg config.Config) (*mrstorage.Fil
 
 	pool := mrstorage.NewFileProviderPool()
 
-	// fs, err := NewFileSystem(ctx, cfg)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	//
-	// if err = RegisterFileImageStorage(ctx, cfg, pool, fs); err != nil {
-	// 	return nil, err
+	// fsAdapter := NewFileSystem(ctx, cfg)
+
+	// if err := RegisterFileImageStorage(ctx, cfg, pool, fsAdapter); err != nil {
+	//   return nil, err
 	// }
 
 	minioAdapter, err := NewS3Minio(ctx, cfg)
@@ -33,5 +30,5 @@ func NewFileProviderPool(ctx context.Context, cfg config.Config) (*mrstorage.Fil
 		return nil, err
 	}
 
-	return pool, nil
+	return pool, pool.Ping(ctx)
 }

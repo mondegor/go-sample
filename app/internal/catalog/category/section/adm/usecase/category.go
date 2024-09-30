@@ -22,7 +22,7 @@ type (
 	Category struct {
 		storage      adm.CategoryStorage
 		eventEmitter mrsender.EventEmitter
-		errorWrapper mrcore.UsecaseErrorWrapper
+		errorWrapper mrcore.UseCaseErrorWrapper
 		imgBaseURL   mrpath.PathBuilder
 		statusFlow   mrstatus.Flow
 	}
@@ -32,7 +32,7 @@ type (
 func NewCategory(
 	storage adm.CategoryStorage,
 	eventEmitter mrsender.EventEmitter,
-	errorWrapper mrcore.UsecaseErrorWrapper,
+	errorWrapper mrcore.UseCaseErrorWrapper,
 	imgBaseURL mrpath.PathBuilder,
 ) *Category {
 	return &Category{

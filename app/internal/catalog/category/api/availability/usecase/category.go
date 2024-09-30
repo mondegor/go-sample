@@ -17,12 +17,12 @@ type (
 	// Category - comment struct.
 	Category struct {
 		storage      availability.CategoryStorage
-		errorWrapper mrcore.UsecaseErrorWrapper
+		errorWrapper mrcore.UseCaseErrorWrapper
 	}
 )
 
-// NewCategory - создаёт объект mrcore.UsecaseErrorWrapper.
-func NewCategory(storage availability.CategoryStorage, errorWrapper mrcore.UsecaseErrorWrapper) *Category {
+// NewCategory - создаёт объект mrcore.UseCaseErrorWrapper.
+func NewCategory(storage availability.CategoryStorage, errorWrapper mrcore.UseCaseErrorWrapper) *Category {
 	return &Category{
 		storage:      storage,
 		errorWrapper: errorWrapper,

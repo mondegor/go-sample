@@ -26,7 +26,7 @@ type (
 		Price       *measure.Money    `json:"price" sort:"price" upd:"product_price"` // coins
 		Status      mrenum.ItemStatus `json:"status"`
 		CreatedAt   time.Time         `json:"createdAt" sort:"createdAt"`
-		UpdatedAt   *time.Time        `json:"updatedAt,omitempty" sort:"updatedAt"`
+		UpdatedAt   time.Time         `json:"updatedAt" sort:"updatedAt"`
 	}
 
 	// ProductParams - comment struct.

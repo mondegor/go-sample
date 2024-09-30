@@ -104,8 +104,6 @@ mrcmd_func_openapi_build_pub_file_station() {
     # "${sharedDir}/components/models/App.Response.Model.SuccessCreatedItem.yaml"
     # "${sharedDir}/components/models/App.Response.Model.SuccessCreatedItemUint.yaml"
 
-    # "${sharedDir}/system/schemas.yaml"
-
     "${fileStationDir}/schemas.yaml"
   )
 

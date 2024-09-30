@@ -1,0 +1,27 @@
+---
+- category_id: 166a72b5-b9fa-499c-8140-3627b34acbbe
+  tag_version: 1
+  category_caption: Бытовая техника
+  image_meta:
+  category_status: 2
+  created_at: '2023-02-01 10:15:08.678538 +00:00'
+  updated_at: '2023-02-01 10:15:08.678538 +00:00'
+  deleted_at: NULL
+
+- category_id: 2979b1bb-26ba-4a57-b9ee-fd723b4fa9a0
+  tag_version: 1
+  category_caption: Компьютерная техника
+  image_meta:
+  category_status: 1
+  created_at: '2023-03-01 11:15:16.078388 +00:00'
+  updated_at: '2023-03-01 11:15:16.078388 +00:00'
+  deleted_at: NULL
+
+- category_id: 386555ab-9320-4680-b62d-1ea449550fff
+  tag_version: 1
+  category_caption: Электроника
+  image_meta:
+  category_status: 2
+  created_at: '2023-01-01 09:15:59.981966 +00:00'
+  updated_at: '2023-01-01 09:15:59.981966 +00:00'
+  deleted_at: NULL

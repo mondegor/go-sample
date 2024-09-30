@@ -31,7 +31,7 @@ type (
 		trademarkAPI api.TrademarkAvailability
 		ordererAPI   mrsort.Orderer
 		eventEmitter mrsender.EventEmitter
-		errorWrapper mrcore.UsecaseErrorWrapper
+		errorWrapper mrcore.UseCaseErrorWrapper
 		statusFlow   mrstatus.Flow
 	}
 )
@@ -43,7 +43,7 @@ func NewProduct(
 	trademarkAPI api.TrademarkAvailability,
 	ordererAPI mrsort.Orderer,
 	eventEmitter mrsender.EventEmitter,
-	errorWrapper mrcore.UsecaseErrorWrapper,
+	errorWrapper mrcore.UseCaseErrorWrapper,
 ) *Product {
 	return &Product{
 		storage:      storage,

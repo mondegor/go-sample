@@ -1,6 +1,6 @@
 ---
 privileges:
-  - apiPublic
+  - apiPub
 
 permissions:
   - modCatalogCategory

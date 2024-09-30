@@ -20,15 +20,11 @@ mrcmd_func_openapi_build_pub() {
   )
 
   OPENAPI_TAGS=(
-    "${sharedDir}/system/tags.yaml"
-
     "${catalogCategoryDir}/tags.yaml"
     "${fileStationDir}/tags.yaml"
   )
 
   OPENAPI_PATHS=(
-    "${sharedDir}/system/paths.yaml"
-
     "${catalogCategoryDir}/category_paths.yaml"
     "${fileStationDir}/paths.yaml"
   )
@@ -121,8 +117,6 @@ mrcmd_func_openapi_build_pub() {
     "${sharedDir}/custom/fields/Custom.Field.CategoryID.yaml"
     # "${sharedDir}/custom/fields/Custom.Field.ProductID.yaml"
     # "${sharedDir}/custom/fields/Custom.Field.TrademarkID.yaml"
-
-    "${sharedDir}/system/schemas.yaml"
 
     "${catalogCategoryDir}/category_schemas.yaml"
     "${fileStationDir}/schemas.yaml"

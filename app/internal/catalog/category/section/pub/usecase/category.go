@@ -17,7 +17,7 @@ type (
 	// Category - comment struct.
 	Category struct {
 		storage      pub.CategoryStorage
-		errorWrapper mrcore.UsecaseErrorWrapper
+		errorWrapper mrcore.UseCaseErrorWrapper
 		imgBaseURL   mrpath.PathBuilder
 		dict         *mrlang.MultiLangDictionary
 	}
@@ -26,7 +26,7 @@ type (
 // NewCategory - создаёт объект Category.
 func NewCategory(
 	storage pub.CategoryStorage,
-	errorWrapper mrcore.UsecaseErrorWrapper,
+	errorWrapper mrcore.UseCaseErrorWrapper,
 	imgBaseURL mrpath.PathBuilder,
 	dict *mrlang.MultiLangDictionary,
 ) *Category {

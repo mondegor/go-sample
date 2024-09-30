@@ -25,7 +25,7 @@ func NewSettingsGetterAndTask(ctx context.Context, opts app.Options) (*lightgett
 	getter := mrsettings.NewComponentCacheGetter(
 		opts.PostgresConnManager,
 		mrsql.NewEntityMeta(settingsManagerTableName, settingsManagerPrimaryKey, nil),
-		opts.UsecaseErrorWrapper,
+		opts.UseCaseErrorWrapper,
 		mrsettings.ComponentCacheGetterOptions{},
 	)
 
@@ -59,7 +59,7 @@ func NewSettingsSetter(ctx context.Context, opts app.Options) *setter.Component 
 		opts.PostgresConnManager,
 		mrsql.NewEntityMeta(settingsManagerTableName, settingsManagerPrimaryKey, nil),
 		opts.EventEmitter,
-		opts.UsecaseErrorWrapper,
+		opts.UseCaseErrorWrapper,
 		mrsettings.ComponentSetterOptions{},
 	)
 }

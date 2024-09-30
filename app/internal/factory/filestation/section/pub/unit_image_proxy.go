@@ -23,7 +23,7 @@ func createUnitImageProxy(ctx context.Context, opts filestation.Options) ([]mrse
 }
 
 func newUnitImageProxy(_ context.Context, opts filestation.Options) (*httpv1.ImageProxy, error) { //nolint:unparam
-	useCase := usecase.NewFileProviderAdapter(opts.UnitImageProxy.FileAPI, opts.UsecaseHelper)
+	useCase := usecase.NewFileProviderAdapter(opts.UnitImageProxy.FileAPI, opts.UseCaseHelper)
 	controller := httpv1.NewImageProxy(
 		opts.RequestParser,
 		opts.ResponseSender,

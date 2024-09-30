@@ -28,7 +28,7 @@ type (
 		fileAPI      mrstorage.FileProviderAPI
 		locker       mrlock.Locker
 		eventEmitter mrsender.EventEmitter
-		errorWrapper mrcore.UsecaseErrorWrapper
+		errorWrapper mrcore.UseCaseErrorWrapper
 	}
 )
 
@@ -38,7 +38,7 @@ func NewCategoryImage(
 	fileAPI mrstorage.FileProviderAPI,
 	locker mrlock.Locker,
 	eventEmitter mrsender.EventEmitter,
-	errorWrapper mrcore.UsecaseErrorWrapper,
+	errorWrapper mrcore.UseCaseErrorWrapper,
 ) *CategoryImage {
 	return &CategoryImage{
 		storage:      storage,

@@ -37,17 +37,23 @@ function mrcmd_plugins_openapi_method_exec() {
 
     build-all)
       mrcmd openapi build-adm-all
+      mrcmd openapi build-int-all
       mrcmd openapi build-pub-all
       ;;
 
     build-full)
       mrcmd openapi build-adm
+      mrcmd openapi build-int
       mrcmd openapi build-pub
       ;;
 
     build-adm-all)
       mrcmd openapi build-adm
       mrcmd openapi build-adm-catalog
+      ;;
+
+    build-int-all)
+      mrcmd openapi build-int
       ;;
 
     build-pub-all)
@@ -58,6 +64,10 @@ function mrcmd_plugins_openapi_method_exec() {
 
     build-adm)
       sectionName="admin-api"
+      ;;
+
+    build-int)
+      sectionName="internal-api"
       ;;
 
     build-adm-catalog)
@@ -106,6 +116,7 @@ function mrcmd_plugins_openapi_method_help() {
   echo -e "    build-adm-all             Builds all admin API docs"
   echo -e "    build-adm                 Builds only full admin API docs"
   echo -e "    build-adm-catalog         Builds admin Catalog API docs"
+  echo -e "    build-int-all             Builds internal (system) API docs"
   echo -e "    build-pub-all             Builds all public API docs"
   echo -e "    build-pub                 Builds only full public API docs"
   echo -e "    build-pub-catalog         Builds public Catalog API docs"

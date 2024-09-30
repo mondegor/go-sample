@@ -20,13 +20,13 @@ type (
 	Trademark struct {
 		storage      adm.TrademarkStorage
 		eventEmitter mrsender.EventEmitter
-		errorWrapper mrcore.UsecaseErrorWrapper
+		errorWrapper mrcore.UseCaseErrorWrapper
 		statusFlow   mrstatus.Flow
 	}
 )
 
 // NewTrademark - создаёт объект Trademark.
-func NewTrademark(storage adm.TrademarkStorage, eventEmitter mrsender.EventEmitter, errorWrapper mrcore.UsecaseErrorWrapper) *Trademark {
+func NewTrademark(storage adm.TrademarkStorage, eventEmitter mrsender.EventEmitter, errorWrapper mrcore.UseCaseErrorWrapper) *Trademark {
 	return &Trademark{
 		storage:      storage,
 		eventEmitter: eventEmitter,

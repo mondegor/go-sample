@@ -34,7 +34,6 @@ func NewErrorResponseSender(ctx context.Context, opts app.Options) (*mrresp.Erro
 		mrserver.NewHttpErrorStatusGetter(
 			opts.Cfg.Debugging.UnexpectedHttpStatus,
 		),
-		opts.Cfg.Debugging.UnexpectedHttpStatus,
 		opts.Cfg.Debugging.Debug,
 	), nil
 }

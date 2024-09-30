@@ -121,8 +121,6 @@ mrcmd_func_openapi_build_adm_catalog() {
     "${sharedDir}/custom/fields/Custom.Field.ProductID.yaml"
     "${sharedDir}/custom/fields/Custom.Field.TrademarkID.yaml"
 
-    # "${sharedDir}/system/schemas.yaml"
-
     "${catalogCategoryDir}/category_schemas.yaml"
     "${catalogProductDir}/product_schemas.yaml"
     "${catalogTrademarkDir}/trademark_schemas.yaml"

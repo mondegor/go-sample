@@ -2,6 +2,9 @@ package app
 
 import (
 	"context"
+	"net/http"
+
+	"github.com/mondegor/go-webcore/mrrun"
 
 	"github.com/mondegor/go-components/mrsettings"
 	"github.com/mondegor/go-components/mrsort"
@@ -35,14 +38,16 @@ import (
 type (
 	// Options - comment struct.
 	Options struct {
-		Cfg          config.Config
-		ErrorHandler mrcore.ErrorHandler
-		EventEmitter mrsender.EventEmitter
-
-		Sentry              *mrsentry.Adapter
-		Prometheus          *prometheus.Registry
+		Cfg                 config.Config
+		AppHealth           *mrrun.AppHealth
+		ErrorHandler        mrcore.ErrorHandler
+		EventEmitter        mrsender.EventEmitter
 		ErrorManager        *mrinit.ErrorManager
-		UsecaseErrorWrapper mrcore.UsecaseErrorWrapper
+		UseCaseErrorWrapper mrcore.UseCaseErrorWrapper
+
+		InternalRouter *http.ServeMux
+		Sentry         *mrsentry.Adapter
+		Prometheus     *prometheus.Registry
 
 		PostgresConnManager *mrpostgres.ConnManager
 		RedisAdapter        *mrredis.ConnAdapter

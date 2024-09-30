@@ -14,10 +14,11 @@ func NewRedis(ctx context.Context, cfg config.Config) (*mrredis.ConnAdapter, err
 	mrlog.Ctx(ctx).Info().Msg("Create and init redis connection")
 
 	opts := mrredis.Options{
-		Host:        cfg.Redis.Host,
-		Port:        cfg.Redis.Port,
-		Password:    cfg.Redis.Password,
-		ConnTimeout: cfg.Redis.Timeout,
+		Host:         cfg.Redis.Host,
+		Port:         cfg.Redis.Port,
+		Password:     cfg.Redis.Password,
+		ReadTimeout:  cfg.Redis.ReadTimeout,
+		WriteTimeout: cfg.Redis.WriteTimeout,
 	}
 
 	conn := mrredis.New()

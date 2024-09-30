@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.3
 info:
-  version: v0.1.12
+  version: v0.1.13
   title: Private API управления каталогом товаров
   license:
     name: Apache-2.0
@@ -1104,13 +1104,13 @@ components:
       description: Дата и время создания записи (UTC)
       type: string
       format: date-time
-      example: "2023-01-01T12:00:00.000+02:00"
+      example: "2023-01-01T12:00:00.000+03:00"
 
     App.Field.DateTimeUpdatedAt:
       description: Дата и время обновления записи (UTC)
       type: string
       format: date-time
-      example: "2023-01-01T12:00:00.000+02:00"
+      example: "2023-01-01T12:00:00.000+03:00"
 
     App.Field.ListPager.Total:
       description: Количество записей в БД с учётом указанных в запросе фильтров
@@ -1215,7 +1215,7 @@ components:
           description: Время возникновения ошибки с точностью до миллисекунд (UTC)
           type: string
           format: date-time
-          example: "2023-01-01T12:00:00.000+02:00"
+          example: "2023-01-01T12:00:00.000+03:00"
         errorTraceId:
           description: Идентификатор конкретного возникновения ошибки
           type: string
@@ -1264,12 +1264,12 @@ components:
           description: Дата и время создания изображения (UTC)
           type: string
           format: date-time
-          example: "2023-01-01T12:00:00.000+02:00"
+          example: "2023-01-01T12:00:00.000+03:00"
         updatedAt:
           description: Дата и время последней модификации изображения (UTC)
           type: string
           format: date-time
-          example: "2023-01-01T12:00:00.000+02:00"
+          example: "2023-01-01T12:00:00.000+03:00"
 
     App.Response.Model.SuccessCreatedItemUint:
       description: DTO результата создания записи (int64 ID)
@@ -1344,9 +1344,10 @@ components:
       required:
         - id
         - tagVersion
-        - createdAt
         - caption
         - status
+        - createdAt
+        - updatedAt
       properties:
         id: # categoryId
           $ref: "#/components/schemas/Custom.Field.CategoryID"
@@ -1421,13 +1422,14 @@ components:
       required:
         - id
         - tagVersion
-        - createdAt
         - categoryId
         - article
         - caption
         - trademarkId
         - price
         - status
+        - createdAt
+        - updatedAt
       properties:
         id: # productId
           $ref: "#/components/schemas/Custom.Field.ProductID"
@@ -1492,9 +1494,10 @@ components:
       required:
         - id
         - tagVersion
-        - createdAt
         - caption
         - status
+        - createdAt
+        - updatedAt
       properties:
         id: # trademarkId
           $ref: "#/components/schemas/Custom.Field.TrademarkID"

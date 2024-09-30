@@ -56,13 +56,14 @@ Catalog.Products.AdminAPI.Response.Model.Product:
   required:
     - id
     - tagVersion
-    - createdAt
     - categoryId
     - article
     - caption
     - trademarkId
     - price
     - status
+    - createdAt
+    - updatedAt
   properties:
     id: # productId
       $ref: "#/components/schemas/Custom.Field.ProductID"

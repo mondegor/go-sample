@@ -19,7 +19,8 @@ import (
 
 // CreateRequestParsers - создаются и возвращаются парсеры запросов клиента.
 func CreateRequestParsers(ctx context.Context, cfg config.Config) (app.RequestParsers, error) {
-	mrlog.Ctx(ctx).Info().Msg("Create and init base request parsers")
+	logger := mrlog.Ctx(ctx)
+	logger.Info().Msg("Create and init base request parsers")
 
 	validator, err := NewValidator(ctx, cfg)
 	if err != nil {
@@ -30,14 +31,14 @@ func CreateRequestParsers(ctx context.Context, cfg config.Config) (app.RequestPa
 	// поэтому её можно менять только при смене самого роутера
 	pathFunc := mrchi.URLPathParam
 
-	registeredMimeTypes := mrlib.NewMimeTypeList(cfg.MimeTypes)
+	registeredMimeTypes := mrlib.NewMimeTypeList(logger, cfg.MimeTypes)
 
-	// jsonMimeTypeList, err := registeredMimeTypes.NewListByExts(".json")
+	// jsonMimeTypeList, err := registeredMimeTypes.NewListByExts(logger, ".json")
 	// if err != nil {
 	// 	return app.RequestParsers{}, err
 	// }
 
-	imageMimeTypeList, err := registeredMimeTypes.NewListByExts(".jpeg", ".jpg", ".png")
+	imageMimeTypeList, err := registeredMimeTypes.NewListByExts(logger, ".jpeg", ".jpg", ".png")
 	if err != nil {
 		return app.RequestParsers{}, err
 	}
@@ -59,6 +60,7 @@ func CreateRequestParsers(ctx context.Context, cfg config.Config) (app.RequestPa
 		UUID:      mrparser.NewUUID(pathFunc),
 		Validator: mrparser.NewValidator(mrjson.NewDecoder(), validator),
 		// File: mrparser.NewFile(
+		// 	logger,
 		// 	mrparser.FileOptions{
 		// 		AllowedMimeTypes:        jsonMimeTypeList,
 		// 		MinSize:                 512,
@@ -67,6 +69,7 @@ func CreateRequestParsers(ctx context.Context, cfg config.Config) (app.RequestPa
 		// 	},
 		// ),
 		Image: mrparser.NewImage(
+			logger,
 			mrparser.ImageOptions{
 				File: mrparser.FileOptions{
 					AllowedMimeTypes:        imageMimeTypeList,

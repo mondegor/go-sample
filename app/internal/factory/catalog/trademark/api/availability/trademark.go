@@ -9,7 +9,7 @@ import (
 )
 
 // NewTrademark - создаёт объект usecase.Trademark.
-func NewTrademark(client mrstorage.DBConnManager, errorWrapper mrcore.UsecaseErrorWrapper) *usecase.Trademark {
+func NewTrademark(client mrstorage.DBConnManager, errorWrapper mrcore.UseCaseErrorWrapper) *usecase.Trademark {
 	return usecase.NewTrademark(
 		repository.NewTrademarkPostgres(client),
 		errorWrapper,

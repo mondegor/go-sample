@@ -15,7 +15,7 @@ import (
 func NewProductModuleOptions(_ context.Context, opts app.Options) (product.Options, error) {
 	return product.Options{
 		EventEmitter:  opts.EventEmitter,
-		UsecaseHelper: opts.UsecaseErrorWrapper,
+		UseCaseHelper: opts.UseCaseErrorWrapper,
 		DBConnManager: opts.PostgresConnManager,
 		RequestParsers: product.RequestParsers{
 			Parser:       opts.RequestParsers.Parser,

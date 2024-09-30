@@ -17,7 +17,7 @@ import (
 
 // NewCategoryModuleOptions - создаёт объект category.Options.
 func NewCategoryModuleOptions(_ context.Context, opts app.Options) (category.Options, error) {
-	imageFileAPI, err := opts.FileProviderPool.Provider(
+	imageFileAPI, err := opts.FileProviderPool.ProviderAPI(
 		opts.Cfg.ModulesSettings.CatalogCategory.Image.FileProvider,
 	)
 	if err != nil {
@@ -31,7 +31,7 @@ func NewCategoryModuleOptions(_ context.Context, opts app.Options) (category.Opt
 
 	return category.Options{
 		EventEmitter:  opts.EventEmitter,
-		UsecaseHelper: opts.UsecaseErrorWrapper,
+		UseCaseHelper: opts.UseCaseErrorWrapper,
 		DBConnManager: opts.PostgresConnManager,
 		Locker:        opts.Locker,
 		RequestParsers: category.RequestParsers{
@@ -59,7 +59,7 @@ func NewCategoryModuleOptions(_ context.Context, opts app.Options) (category.Opt
 func NewCategoryAvailabilityAPI(ctx context.Context, opts app.Options) (*usecase.Category, error) {
 	mrlog.Ctx(ctx).Info().Msg("Create and init catalog category availability API")
 
-	return availability.NewCategory(opts.PostgresConnManager, opts.UsecaseErrorWrapper), nil
+	return availability.NewCategory(opts.PostgresConnManager, opts.UseCaseErrorWrapper), nil
 }
 
 // RegisterCategoryErrors - comment func.

@@ -40,9 +40,10 @@ Catalog.Trademarks.AdminAPI.Response.Model.Trademark:
   required:
     - id
     - tagVersion
-    - createdAt
     - caption
     - status
+    - createdAt
+    - updatedAt
   properties:
     id: # trademarkId
       $ref: "#/components/schemas/Custom.Field.TrademarkID"

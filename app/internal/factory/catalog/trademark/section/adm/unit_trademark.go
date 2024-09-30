@@ -40,7 +40,7 @@ func newUnitTrademark(ctx context.Context, opts trademark.Options) (*httpv1.Trad
 			mrpostgres.NewSQLBuilderLimit(opts.PageSizeMax),
 		),
 	)
-	useCase := usecase.NewTrademark(storage, opts.EventEmitter, opts.UsecaseHelper)
+	useCase := usecase.NewTrademark(storage, opts.EventEmitter, opts.UseCaseHelper)
 	controller := httpv1.NewTrademark(
 		opts.RequestParsers.ExtendParser,
 		opts.ResponseSender,

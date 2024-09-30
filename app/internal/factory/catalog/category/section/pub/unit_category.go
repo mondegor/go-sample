@@ -35,7 +35,7 @@ func newUnitCategory(_ context.Context, opts category.Options) (*httpv1.Category
 	)
 	useCase := usecase.NewCategory(
 		storage,
-		opts.UsecaseHelper,
+		opts.UseCaseHelper,
 		opts.UnitCategory.ImageURLBuilder,
 		opts.UnitCategory.Dictionary,
 	)

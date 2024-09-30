@@ -13,7 +13,8 @@ import (
 
 // NewS3Minio - создаёт объект mrminio.ConnAdapter.
 func NewS3Minio(ctx context.Context, cfg config.Config) (*mrminio.ConnAdapter, error) {
-	mrlog.Ctx(ctx).Info().Msg("Create and init S3 minio connection")
+	logger := mrlog.Ctx(ctx)
+	logger.Info().Msg("Create and init S3 minio connection")
 
 	opts := mrminio.Options{
 		Host:     cfg.S3.Host,
@@ -25,14 +26,10 @@ func NewS3Minio(ctx context.Context, cfg config.Config) (*mrminio.ConnAdapter, e
 
 	conn := mrminio.New(
 		cfg.S3.CreateBuckets,
-		mrlib.NewMimeTypeList(cfg.MimeTypes), // TODO: можно вынести в общую переменную
+		mrlib.NewMimeTypeList(logger, cfg.MimeTypes), // TODO: можно вынести в общую переменную
 	)
 
 	if err := conn.Connect(ctx, opts); err != nil {
-		return nil, err
-	}
-
-	if err := conn.Ping(context.Background()); err != nil {
 		return nil, err
 	}
 

@@ -40,9 +40,10 @@ Catalog.Categories.AdminAPI.Response.Model.Category:
   required:
     - id
     - tagVersion
-    - createdAt
     - caption
     - status
+    - createdAt
+    - updatedAt
   properties:
     id: # categoryId
       $ref: "#/components/schemas/Custom.Field.CategoryID"

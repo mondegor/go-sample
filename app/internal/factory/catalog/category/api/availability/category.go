@@ -9,7 +9,7 @@ import (
 )
 
 // NewCategory - создаёт объект usecase.Category.
-func NewCategory(client mrstorage.DBConnManager, errorWrapper mrcore.UsecaseErrorWrapper) *usecase.Category {
+func NewCategory(client mrstorage.DBConnManager, errorWrapper mrcore.UseCaseErrorWrapper) *usecase.Category {
 	return usecase.NewCategory(
 		repository.NewCategoryPostgres(client),
 		errorWrapper,

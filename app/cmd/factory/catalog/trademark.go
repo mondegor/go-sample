@@ -18,7 +18,7 @@ import (
 func NewTrademarkModuleOptions(_ context.Context, opts app.Options) (trademark.Options, error) {
 	return trademark.Options{
 		EventEmitter:  opts.EventEmitter,
-		UsecaseHelper: opts.UsecaseErrorWrapper,
+		UseCaseHelper: opts.UseCaseErrorWrapper,
 		DBConnManager: opts.PostgresConnManager,
 		RequestParsers: trademark.RequestParsers{
 			Parser:       opts.RequestParsers.Parser,
@@ -35,7 +35,7 @@ func NewTrademarkModuleOptions(_ context.Context, opts app.Options) (trademark.O
 func NewTrademarkAvailabilityAPI(ctx context.Context, opts app.Options) (*usecase.Trademark, error) {
 	mrlog.Ctx(ctx).Info().Msg("Create and init catalog trademark availability API")
 
-	return availability.NewTrademark(opts.PostgresConnManager, opts.UsecaseErrorWrapper), nil
+	return availability.NewTrademark(opts.PostgresConnManager, opts.UseCaseErrorWrapper), nil
 }
 
 // RegisterTrademarkErrors - comment func.

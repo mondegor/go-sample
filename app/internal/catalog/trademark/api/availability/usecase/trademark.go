@@ -17,12 +17,12 @@ type (
 	// Trademark - comment struct.
 	Trademark struct {
 		storage      availability.TrademarkStorage
-		errorWrapper mrcore.UsecaseErrorWrapper
+		errorWrapper mrcore.UseCaseErrorWrapper
 	}
 )
 
 // NewTrademark - создаёт объект Trademark.
-func NewTrademark(storage availability.TrademarkStorage, errorWrapper mrcore.UsecaseErrorWrapper) *Trademark {
+func NewTrademark(storage availability.TrademarkStorage, errorWrapper mrcore.UseCaseErrorWrapper) *Trademark {
 	return &Trademark{
 		storage:      storage,
 		errorWrapper: errorWrapper,

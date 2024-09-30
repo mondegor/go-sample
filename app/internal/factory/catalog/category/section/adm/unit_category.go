@@ -46,7 +46,7 @@ func newUnitCategory(ctx context.Context, opts category.Options) (*httpv1.Catego
 			mrpostgres.NewSQLBuilderLimit(opts.PageSizeMax),
 		),
 	)
-	useCase := usecase.NewCategory(storage, opts.EventEmitter, opts.UsecaseHelper, opts.UnitCategory.ImageURLBuilder)
+	useCase := usecase.NewCategory(storage, opts.EventEmitter, opts.UseCaseHelper, opts.UnitCategory.ImageURLBuilder)
 	controller := httpv1.NewCategory(
 		opts.RequestParsers.ModuleParser,
 		opts.ResponseSender,
@@ -64,7 +64,7 @@ func newUnitCategoryImage(_ context.Context, opts category.Options) (*httpv1.Cat
 		opts.UnitCategory.ImageFileAPI,
 		opts.Locker,
 		opts.EventEmitter,
-		opts.UsecaseHelper,
+		opts.UseCaseHelper,
 	)
 	controller := httpv1.NewCategoryImage(
 		opts.RequestParsers.ModuleParser,
