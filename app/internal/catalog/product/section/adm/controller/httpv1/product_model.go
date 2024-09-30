@@ -1,11 +1,11 @@
 package httpv1
 
 import (
-	"github.com/mondegor/go-sample/internal/catalog/product/section/adm/entity"
-	"github.com/mondegor/go-sample/pkg/measure"
-
 	"github.com/google/uuid"
 	"github.com/mondegor/go-webcore/mrtype"
+
+	"github.com/mondegor/go-sample/internal/catalog/product/section/adm/entity"
+	"github.com/mondegor/go-sample/pkg/measure"
 )
 
 type (

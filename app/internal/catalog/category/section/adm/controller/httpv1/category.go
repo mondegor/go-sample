@@ -3,18 +3,18 @@ package httpv1
 import (
 	"net/http"
 
+	"github.com/google/uuid"
+	"github.com/mondegor/go-sysmess/mrerr"
+	"github.com/mondegor/go-webcore/mrcore"
+	"github.com/mondegor/go-webcore/mrserver"
+	"github.com/mondegor/go-webcore/mrview"
+
 	"github.com/mondegor/go-sample/internal/catalog/category/module"
 	"github.com/mondegor/go-sample/internal/catalog/category/section/adm"
 	"github.com/mondegor/go-sample/internal/catalog/category/section/adm/entity"
 	"github.com/mondegor/go-sample/internal/catalog/category/shared/validate"
 	"github.com/mondegor/go-sample/pkg/catalog/api"
 	"github.com/mondegor/go-sample/pkg/view"
-
-	"github.com/google/uuid"
-	"github.com/mondegor/go-sysmess/mrerr"
-	"github.com/mondegor/go-webcore/mrcore"
-	"github.com/mondegor/go-webcore/mrserver"
-	"github.com/mondegor/go-webcore/mrview"
 )
 
 const (

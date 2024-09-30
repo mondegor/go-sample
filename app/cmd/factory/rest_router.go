@@ -5,14 +5,14 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/mondegor/go-sample/internal/app"
-
 	"github.com/mondegor/go-webcore/mrlog"
 	"github.com/mondegor/go-webcore/mrserver"
 	"github.com/mondegor/go-webcore/mrserver/mrchi"
 	"github.com/mondegor/go-webcore/mrserver/mrprometheus"
 	"github.com/mondegor/go-webcore/mrserver/mrresp"
 	"github.com/mondegor/go-webcore/mrserver/mrrscors"
+
+	"github.com/mondegor/go-sample/internal/app"
 )
 
 // NewRestRouter - создаёт объект mrchi.RouterAdapter.

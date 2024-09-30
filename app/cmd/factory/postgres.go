@@ -4,19 +4,17 @@ import (
 	"context"
 	"errors"
 
-	"github.com/mondegor/go-storage/mrmigrate/gomigrate"
-
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file" // используется в migrate.NewWithDatabaseInstance
 	"github.com/jackc/pgx/v5/stdlib"
-
-	"github.com/mondegor/go-sample/internal/app"
-
+	"github.com/mondegor/go-storage/mrmigrate/gomigrate"
 	"github.com/mondegor/go-storage/mrpostgres"
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-storage/mrstorage/mrprometheus"
 	"github.com/mondegor/go-webcore/mrlog"
+
+	"github.com/mondegor/go-sample/internal/app"
 )
 
 // NewPostgres - создаёт объект mrpostgres.ConnAdapter.

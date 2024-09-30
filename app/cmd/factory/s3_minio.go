@@ -3,12 +3,12 @@ package factory
 import (
 	"context"
 
-	"github.com/mondegor/go-sample/config"
-
 	"github.com/mondegor/go-storage/mrminio"
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-webcore/mrlib"
 	"github.com/mondegor/go-webcore/mrlog"
+
+	"github.com/mondegor/go-sample/config"
 )
 
 // NewS3Minio - создаёт объект mrminio.ConnAdapter.

@@ -3,10 +3,10 @@ package factory
 import (
 	"context"
 
-	"github.com/mondegor/go-sample/internal/app"
-
 	"github.com/mondegor/go-webcore/mrlog"
 	"github.com/mondegor/go-webcore/mrserver/mrhttp"
+
+	"github.com/mondegor/go-sample/internal/app"
 )
 
 const (

@@ -3,6 +3,9 @@ package catalog
 import (
 	"context"
 
+	"github.com/mondegor/go-webcore/mrcore/mrinit"
+	"github.com/mondegor/go-webcore/mrlog"
+
 	"github.com/mondegor/go-sample/internal/app"
 	"github.com/mondegor/go-sample/internal/catalog/category/api/availability/usecase"
 	"github.com/mondegor/go-sample/internal/catalog/category/module"
@@ -10,9 +13,6 @@ import (
 	"github.com/mondegor/go-sample/internal/factory/catalog/category"
 	"github.com/mondegor/go-sample/internal/factory/catalog/category/api/availability"
 	"github.com/mondegor/go-sample/pkg/catalog/api"
-
-	"github.com/mondegor/go-webcore/mrcore/mrinit"
-	"github.com/mondegor/go-webcore/mrlog"
 )
 
 // NewCategoryModuleOptions - создаёт объект category.Options.

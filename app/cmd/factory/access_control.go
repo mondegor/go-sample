@@ -4,10 +4,10 @@ import (
 	"context"
 	"strings"
 
-	"github.com/mondegor/go-sample/config"
-
 	"github.com/mondegor/go-webcore/mrlog"
 	"github.com/mondegor/go-webcore/mrperms"
+
+	"github.com/mondegor/go-sample/config"
 )
 
 // NewAccessControl - создаёт объект mrperms.RoleAccessControl.

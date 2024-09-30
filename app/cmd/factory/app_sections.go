@@ -3,10 +3,10 @@ package factory
 import (
 	"context"
 
-	"github.com/mondegor/go-sample/internal/app"
-
 	"github.com/mondegor/go-webcore/mrfactory"
 	"github.com/mondegor/go-webcore/mrperms"
+
+	"github.com/mondegor/go-sample/internal/app"
 )
 
 const (

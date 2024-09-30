@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mondegor/go-sample/config"
-
 	"github.com/mondegor/go-webcore/mrlog"
 	"github.com/mondegor/go-webcore/mrsentry"
+
+	"github.com/mondegor/go-sample/config"
 )
 
 // NewSentry - создаёт объект mrsentry.Adapter.

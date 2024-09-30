@@ -3,10 +3,10 @@ package pub
 import (
 	"context"
 
-	"github.com/mondegor/go-sample/internal/catalog/category/section/pub/entity"
-
 	"github.com/google/uuid"
 	"github.com/mondegor/go-storage/mrstorage"
+
+	"github.com/mondegor/go-sample/internal/catalog/category/section/pub/entity"
 )
 
 type (

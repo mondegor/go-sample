@@ -3,11 +3,11 @@ package adm
 import (
 	"context"
 
-	"github.com/mondegor/go-sample/internal/catalog/category/section/adm/entity"
-
 	"github.com/google/uuid"
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-webcore/mrenum"
+
+	"github.com/mondegor/go-sample/internal/catalog/category/section/adm/entity"
 )
 
 type (

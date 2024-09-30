@@ -3,11 +3,11 @@ package factory
 import (
 	"context"
 
-	"github.com/mondegor/go-sample/internal/app"
-
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	"github.com/mondegor/go-sample/internal/app"
 )
 
 // go get -u github.com/prometheus/client_golang

@@ -3,15 +3,15 @@ package adm
 import (
 	"context"
 
+	"github.com/mondegor/go-storage/mrpostgres"
+	"github.com/mondegor/go-storage/mrsql"
+	"github.com/mondegor/go-webcore/mrserver"
+
 	"github.com/mondegor/go-sample/internal/catalog/product/section/adm/controller/httpv1"
 	"github.com/mondegor/go-sample/internal/catalog/product/section/adm/entity"
 	"github.com/mondegor/go-sample/internal/catalog/product/section/adm/repository"
 	"github.com/mondegor/go-sample/internal/catalog/product/section/adm/usecase"
 	"github.com/mondegor/go-sample/internal/factory/catalog/product"
-
-	"github.com/mondegor/go-storage/mrpostgres"
-	"github.com/mondegor/go-storage/mrsql"
-	"github.com/mondegor/go-webcore/mrserver"
 )
 
 func createUnitProduct(ctx context.Context, opts product.Options) ([]mrserver.HttpController, error) {

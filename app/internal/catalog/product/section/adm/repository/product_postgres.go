@@ -4,14 +4,14 @@ import (
 	"context"
 	"strings"
 
-	"github.com/mondegor/go-sample/internal/catalog/product/module"
-	"github.com/mondegor/go-sample/internal/catalog/product/section/adm/entity"
-
 	"github.com/google/uuid"
 	"github.com/mondegor/go-storage/mrsql"
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-webcore/mrenum"
 	"github.com/mondegor/go-webcore/mrtype"
+
+	"github.com/mondegor/go-sample/internal/catalog/product/module"
+	"github.com/mondegor/go-sample/internal/catalog/product/section/adm/entity"
 )
 
 type (

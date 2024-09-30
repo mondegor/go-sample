@@ -2,15 +2,13 @@ package product
 
 import (
 	"github.com/mondegor/go-components/mrsort"
-
-	"github.com/mondegor/go-sample/pkg/validate"
-
-	"github.com/mondegor/go-sample/pkg/catalog/api"
-
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrsender"
 	"github.com/mondegor/go-webcore/mrserver"
+
+	"github.com/mondegor/go-sample/pkg/catalog/api"
+	"github.com/mondegor/go-sample/pkg/validate"
 )
 
 type (

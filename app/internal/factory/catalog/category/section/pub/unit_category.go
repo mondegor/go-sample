@@ -3,13 +3,13 @@ package pub
 import (
 	"context"
 
+	"github.com/mondegor/go-storage/mrpostgres"
+	"github.com/mondegor/go-webcore/mrserver"
+
 	"github.com/mondegor/go-sample/internal/catalog/category/section/pub/controller/httpv1"
 	"github.com/mondegor/go-sample/internal/catalog/category/section/pub/repository"
 	"github.com/mondegor/go-sample/internal/catalog/category/section/pub/usecase"
 	"github.com/mondegor/go-sample/internal/factory/catalog/category"
-
-	"github.com/mondegor/go-storage/mrpostgres"
-	"github.com/mondegor/go-webcore/mrserver"
 )
 
 func createUnitCategory(ctx context.Context, opts category.Options) ([]mrserver.HttpController, error) {

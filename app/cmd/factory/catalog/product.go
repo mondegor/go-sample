@@ -3,12 +3,11 @@ package catalog
 import (
 	"context"
 
+	"github.com/mondegor/go-webcore/mrcore/mrinit"
+
 	"github.com/mondegor/go-sample/internal/app"
 	"github.com/mondegor/go-sample/internal/catalog/product/module"
-
 	"github.com/mondegor/go-sample/internal/factory/catalog/product"
-
-	"github.com/mondegor/go-webcore/mrcore/mrinit"
 )
 
 // NewProductModuleOptions - создаёт объект product.Options.

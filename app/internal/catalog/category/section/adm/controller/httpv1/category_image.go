@@ -3,14 +3,14 @@ package httpv1
 import (
 	"net/http"
 
-	"github.com/mondegor/go-sample/internal/catalog/category/module"
-	"github.com/mondegor/go-sample/internal/catalog/category/section/adm"
-	"github.com/mondegor/go-sample/internal/catalog/category/shared/validate"
-
 	"github.com/google/uuid"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrserver"
 	"github.com/mondegor/go-webcore/mrserver/mrparser"
+
+	"github.com/mondegor/go-sample/internal/catalog/category/module"
+	"github.com/mondegor/go-sample/internal/catalog/category/section/adm"
+	"github.com/mondegor/go-sample/internal/catalog/category/shared/validate"
 )
 
 const (

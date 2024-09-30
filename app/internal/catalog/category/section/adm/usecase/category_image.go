@@ -6,10 +6,6 @@ import (
 	"path"
 	"time"
 
-	"github.com/mondegor/go-sample/internal/catalog/category/module"
-	"github.com/mondegor/go-sample/internal/catalog/category/section/adm"
-	"github.com/mondegor/go-sample/internal/catalog/category/section/adm/entity"
-
 	"github.com/google/uuid"
 	"github.com/mondegor/go-storage/mrentity"
 	"github.com/mondegor/go-storage/mrstorage"
@@ -19,6 +15,10 @@ import (
 	"github.com/mondegor/go-webcore/mrlog"
 	"github.com/mondegor/go-webcore/mrsender"
 	"github.com/mondegor/go-webcore/mrtype"
+
+	"github.com/mondegor/go-sample/internal/catalog/category/module"
+	"github.com/mondegor/go-sample/internal/catalog/category/section/adm"
+	"github.com/mondegor/go-sample/internal/catalog/category/section/adm/entity"
 )
 
 type (

@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 
-	"github.com/mondegor/go-sample/internal/app"
-
 	"github.com/mondegor/go-webcore/mrlog"
 	"github.com/mondegor/go-webcore/mrworker/mrschedule"
+
+	"github.com/mondegor/go-sample/internal/app"
 )
 
 // NewTaskScheduler - создаёт объект mrschedule.Scheduler.

@@ -3,9 +3,6 @@ package usecase
 import (
 	"context"
 
-	"github.com/mondegor/go-sample/internal/catalog/trademark/section/adm"
-	"github.com/mondegor/go-sample/internal/catalog/trademark/section/adm/entity"
-
 	"github.com/mondegor/go-sysmess/mrmsg"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrenum"
@@ -13,6 +10,9 @@ import (
 	"github.com/mondegor/go-webcore/mrstatus"
 	"github.com/mondegor/go-webcore/mrstatus/mrflow"
 	"github.com/mondegor/go-webcore/mrtype"
+
+	"github.com/mondegor/go-sample/internal/catalog/trademark/section/adm"
+	"github.com/mondegor/go-sample/internal/catalog/trademark/section/adm/entity"
 )
 
 type (

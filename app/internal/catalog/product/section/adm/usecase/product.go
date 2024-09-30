@@ -3,16 +3,8 @@ package usecase
 import (
 	"context"
 
-	"github.com/mondegor/go-components/mrsort"
-
-	"github.com/mondegor/go-sample/internal/catalog/product/section/adm"
-
-	"github.com/mondegor/go-sample/internal/catalog/product/module"
-
-	"github.com/mondegor/go-sample/internal/catalog/product/section/adm/entity"
-	"github.com/mondegor/go-sample/pkg/catalog/api"
-
 	"github.com/google/uuid"
+	"github.com/mondegor/go-components/mrsort"
 	"github.com/mondegor/go-sysmess/mrmsg"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrenum"
@@ -21,6 +13,11 @@ import (
 	"github.com/mondegor/go-webcore/mrstatus"
 	"github.com/mondegor/go-webcore/mrstatus/mrflow"
 	"github.com/mondegor/go-webcore/mrtype"
+
+	"github.com/mondegor/go-sample/internal/catalog/product/module"
+	"github.com/mondegor/go-sample/internal/catalog/product/section/adm"
+	"github.com/mondegor/go-sample/internal/catalog/product/section/adm/entity"
+	"github.com/mondegor/go-sample/pkg/catalog/api"
 )
 
 type (

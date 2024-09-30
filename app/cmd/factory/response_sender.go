@@ -3,13 +3,13 @@ package factory
 import (
 	"context"
 
-	"github.com/mondegor/go-sample/config"
-	"github.com/mondegor/go-sample/internal/app"
-
 	"github.com/mondegor/go-webcore/mrlog"
 	"github.com/mondegor/go-webcore/mrserver"
 	"github.com/mondegor/go-webcore/mrserver/mrjson"
 	"github.com/mondegor/go-webcore/mrserver/mrresp"
+
+	"github.com/mondegor/go-sample/config"
+	"github.com/mondegor/go-sample/internal/app"
 )
 
 // CreateResponseSenders - создаются и возвращаются компоненты для отправки ответа клиенту.

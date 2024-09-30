@@ -3,14 +3,14 @@ package usecase
 import (
 	"context"
 
-	"github.com/mondegor/go-sample/internal/catalog/category/section/pub"
-	"github.com/mondegor/go-sample/internal/catalog/category/section/pub/entity"
-
 	"github.com/google/uuid"
 	"github.com/mondegor/go-sysmess/mrlang"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrlog"
 	"github.com/mondegor/go-webcore/mrpath"
+
+	"github.com/mondegor/go-sample/internal/catalog/category/section/pub"
+	"github.com/mondegor/go-sample/internal/catalog/category/section/pub/entity"
 )
 
 type (

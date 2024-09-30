@@ -3,10 +3,10 @@ package factory
 import (
 	"context"
 
-	"github.com/mondegor/go-sample/config"
-
 	"github.com/mondegor/go-storage/mrredis"
 	"github.com/mondegor/go-webcore/mrlog"
+
+	"github.com/mondegor/go-sample/config"
 )
 
 // NewRedis - создаёт объект mrredis.ConnAdapter.

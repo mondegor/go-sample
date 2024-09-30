@@ -3,13 +3,13 @@ package httpv1
 import (
 	"net/http"
 
+	"github.com/google/uuid"
+	"github.com/mondegor/go-webcore/mrserver"
+
 	"github.com/mondegor/go-sample/internal/catalog/category/module"
 	"github.com/mondegor/go-sample/internal/catalog/category/section/pub"
 	"github.com/mondegor/go-sample/internal/catalog/category/section/pub/entity"
 	"github.com/mondegor/go-sample/internal/catalog/category/shared/validate"
-
-	"github.com/google/uuid"
-	"github.com/mondegor/go-webcore/mrserver"
 )
 
 const (

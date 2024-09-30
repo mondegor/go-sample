@@ -3,11 +3,11 @@ package entity
 import (
 	"time"
 
-	"github.com/mondegor/go-sample/pkg/measure"
-
 	"github.com/google/uuid"
 	"github.com/mondegor/go-webcore/mrenum"
 	"github.com/mondegor/go-webcore/mrtype"
+
+	"github.com/mondegor/go-sample/pkg/measure"
 )
 
 const (

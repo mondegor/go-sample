@@ -3,9 +3,9 @@ package factory
 import (
 	"strings"
 
-	"github.com/mondegor/go-sample/config"
-
 	"github.com/mondegor/go-webcore/mrpath/placeholderpath"
+
+	"github.com/mondegor/go-sample/config"
 )
 
 // NewImageURLBuilder - создаёт объект placeholderpath.Builder.

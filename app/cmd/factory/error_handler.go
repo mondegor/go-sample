@@ -1,10 +1,10 @@
 package factory
 
 import (
-	"github.com/mondegor/go-sample/config"
-
 	"github.com/mondegor/go-webcore/mrcore/mrcoreerr"
 	"github.com/mondegor/go-webcore/mrlog"
+
+	"github.com/mondegor/go-sample/config"
 )
 
 // NewErrorHandler - создаёт объект mrcoreerr.ErrorHandler.

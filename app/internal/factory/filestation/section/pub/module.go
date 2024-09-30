@@ -3,11 +3,10 @@ package pub
 import (
 	"context"
 
-	"github.com/mondegor/go-sample/internal/factory/filestation"
-
 	"github.com/mondegor/go-webcore/mrfactory"
 	"github.com/mondegor/go-webcore/mrserver"
 
+	"github.com/mondegor/go-sample/internal/factory/filestation"
 	"github.com/mondegor/go-sample/internal/filestation/module"
 )
 

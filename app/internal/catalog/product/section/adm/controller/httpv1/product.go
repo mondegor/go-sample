@@ -4,21 +4,18 @@ import (
 	"net/http"
 
 	"github.com/mondegor/go-components/mrsort"
-
-	"github.com/mondegor/go-sample/internal/catalog/product/section/adm"
-
-	"github.com/mondegor/go-sample/pkg/validate"
-
-	"github.com/mondegor/go-sample/internal/catalog/product/module"
-	"github.com/mondegor/go-sample/internal/catalog/product/section/adm/entity"
-	"github.com/mondegor/go-sample/pkg/catalog/api"
-	"github.com/mondegor/go-sample/pkg/view"
-
 	"github.com/mondegor/go-sysmess/mrerr"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrserver"
 	"github.com/mondegor/go-webcore/mrtype"
 	"github.com/mondegor/go-webcore/mrview"
+
+	"github.com/mondegor/go-sample/internal/catalog/product/module"
+	"github.com/mondegor/go-sample/internal/catalog/product/section/adm"
+	"github.com/mondegor/go-sample/internal/catalog/product/section/adm/entity"
+	"github.com/mondegor/go-sample/pkg/catalog/api"
+	"github.com/mondegor/go-sample/pkg/validate"
+	"github.com/mondegor/go-sample/pkg/view"
 )
 
 const (

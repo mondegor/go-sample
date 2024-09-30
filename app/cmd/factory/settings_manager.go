@@ -3,14 +3,14 @@ package factory
 import (
 	"context"
 
-	"github.com/mondegor/go-sample/internal/app"
-
 	"github.com/mondegor/go-components/factory/mrsettings"
 	"github.com/mondegor/go-components/mrsettings/component/lightgetter"
 	"github.com/mondegor/go-components/mrsettings/component/setter"
 	"github.com/mondegor/go-storage/mrsql"
 	"github.com/mondegor/go-webcore/mrlog"
 	"github.com/mondegor/go-webcore/mrworker/mrschedule"
+
+	"github.com/mondegor/go-sample/internal/app"
 )
 
 const (

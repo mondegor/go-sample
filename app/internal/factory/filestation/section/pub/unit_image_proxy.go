@@ -3,11 +3,11 @@ package pub
 import (
 	"context"
 
+	"github.com/mondegor/go-webcore/mrserver"
+
 	"github.com/mondegor/go-sample/internal/factory/filestation"
 	"github.com/mondegor/go-sample/internal/filestation/section/pub/controller/httpv1"
 	"github.com/mondegor/go-sample/internal/filestation/section/pub/usecase"
-
-	"github.com/mondegor/go-webcore/mrserver"
 )
 
 func createUnitImageProxy(ctx context.Context, opts filestation.Options) ([]mrserver.HttpController, error) {

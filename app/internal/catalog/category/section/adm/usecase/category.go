@@ -3,9 +3,6 @@ package usecase
 import (
 	"context"
 
-	"github.com/mondegor/go-sample/internal/catalog/category/section/adm"
-	"github.com/mondegor/go-sample/internal/catalog/category/section/adm/entity"
-
 	"github.com/google/uuid"
 	"github.com/mondegor/go-storage/mrentity"
 	"github.com/mondegor/go-sysmess/mrmsg"
@@ -15,6 +12,9 @@ import (
 	"github.com/mondegor/go-webcore/mrsender"
 	"github.com/mondegor/go-webcore/mrstatus"
 	"github.com/mondegor/go-webcore/mrstatus/mrflow"
+
+	"github.com/mondegor/go-sample/internal/catalog/category/section/adm"
+	"github.com/mondegor/go-sample/internal/catalog/category/section/adm/entity"
 )
 
 type (

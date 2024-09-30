@@ -6,12 +6,11 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/mondegor/go-webcore/mrrun"
-
 	"github.com/mondegor/go-storage/mrredislock"
 	"github.com/mondegor/go-webcore/mrcore/mrcoreerr"
 	"github.com/mondegor/go-webcore/mrlib"
 	"github.com/mondegor/go-webcore/mrlog"
+	"github.com/mondegor/go-webcore/mrrun"
 	"github.com/mondegor/go-webcore/mrsender/mrlogadapter"
 
 	"github.com/mondegor/go-sample/cmd/factory/catalog"

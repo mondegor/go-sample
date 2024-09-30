@@ -3,18 +3,17 @@ package factory
 import (
 	"context"
 
-	"github.com/mondegor/go-sample/config"
-	"github.com/mondegor/go-sample/internal/app"
-	"github.com/mondegor/go-sample/pkg/validate"
-
 	"github.com/mondegor/go-webcore/mrlib"
 	"github.com/mondegor/go-webcore/mrlog"
 	"github.com/mondegor/go-webcore/mrserver/mrchi"
 	"github.com/mondegor/go-webcore/mrserver/mrjson"
 	"github.com/mondegor/go-webcore/mrserver/mrparser"
+	"github.com/mondegor/go-webcore/mrview"
 	"github.com/mondegor/go-webcore/mrview/mrplayvalidator"
 
-	"github.com/mondegor/go-webcore/mrview"
+	"github.com/mondegor/go-sample/config"
+	"github.com/mondegor/go-sample/internal/app"
+	"github.com/mondegor/go-sample/pkg/validate"
 )
 
 // CreateRequestParsers - создаются и возвращаются парсеры запросов клиента.

@@ -3,11 +3,11 @@ package adm
 import (
 	"context"
 
-	"github.com/mondegor/go-sample/internal/catalog/category/module"
-	"github.com/mondegor/go-sample/internal/factory/catalog/category"
-
 	"github.com/mondegor/go-webcore/mrfactory"
 	"github.com/mondegor/go-webcore/mrserver"
+
+	"github.com/mondegor/go-sample/internal/catalog/category/module"
+	"github.com/mondegor/go-sample/internal/factory/catalog/category"
 )
 
 // CreateModule - создаются все компоненты модуля и возвращаются к нему контролеры.

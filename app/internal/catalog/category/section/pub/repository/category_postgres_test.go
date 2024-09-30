@@ -9,12 +9,11 @@ import (
 	"github.com/mondegor/go-storage/mrtests/infra"
 	"github.com/mondegor/go-webcore/mrtests/helpers"
 	"github.com/mondegor/go-webcore/mrtype"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/mondegor/go-sample/internal/catalog/category/section/pub/entity"
 	"github.com/mondegor/go-sample/internal/catalog/category/section/pub/repository"
 	"github.com/mondegor/go-sample/tests"
-
-	"github.com/stretchr/testify/suite"
 )
 
 type CategoryPostgresTestSuite struct {

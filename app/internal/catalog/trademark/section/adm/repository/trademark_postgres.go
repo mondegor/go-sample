@@ -4,13 +4,13 @@ import (
 	"context"
 	"strings"
 
-	"github.com/mondegor/go-sample/internal/catalog/trademark/module"
-	"github.com/mondegor/go-sample/internal/catalog/trademark/section/adm/entity"
-	"github.com/mondegor/go-sample/internal/catalog/trademark/shared/repository"
-
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-webcore/mrenum"
 	"github.com/mondegor/go-webcore/mrtype"
+
+	"github.com/mondegor/go-sample/internal/catalog/trademark/module"
+	"github.com/mondegor/go-sample/internal/catalog/trademark/section/adm/entity"
+	"github.com/mondegor/go-sample/internal/catalog/trademark/shared/repository"
 )
 
 type (
