@@ -1,7 +1,7 @@
 -- --------------------------------------------------------------------------------------------------
 
 CREATE TABLE sample_catalog.settings (
-    setting_id int4 NOT NULL CONSTRAINT pk_settings PRIMARY KEY,
+    setting_id int8 NOT NULL CONSTRAINT pk_settings PRIMARY KEY,
     setting_name character varying(64) NOT NULL,
     setting_type int2 NOT NULL, -- 1=STRING, 2=STRING_LIST, 3=INTEGER, 4=INTEGER_LIST, 5=BOOLEAN
     setting_value character varying(65536) NOT NULL,

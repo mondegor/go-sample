@@ -5,6 +5,6 @@ Catalog.Trademarks.AdminAPI.Request.Path.TrademarkID:
   required: true
   schema:
     type: integer
-    format: int32
+    # format: uint64
     minimum: 1
   example: 1000

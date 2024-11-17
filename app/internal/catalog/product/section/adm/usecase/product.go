@@ -4,15 +4,15 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/mondegor/go-components/mrsort"
+	"github.com/mondegor/go-components/mrordering"
 	"github.com/mondegor/go-sysmess/mrmsg"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrenum"
 	"github.com/mondegor/go-webcore/mrlog"
 	"github.com/mondegor/go-webcore/mrsender"
+	"github.com/mondegor/go-webcore/mrsender/decorator"
 	"github.com/mondegor/go-webcore/mrstatus"
 	"github.com/mondegor/go-webcore/mrstatus/mrflow"
-	"github.com/mondegor/go-webcore/mrtype"
 
 	"github.com/mondegor/go-sample/internal/catalog/product/module"
 	"github.com/mondegor/go-sample/internal/catalog/product/section/adm"
@@ -26,7 +26,7 @@ type (
 		storage      adm.ProductStorage
 		categoryAPI  api.CategoryAvailability
 		trademarkAPI api.TrademarkAvailability
-		ordererAPI   mrsort.Orderer
+		orderingAPI  mrordering.Mover
 		eventEmitter mrsender.EventEmitter
 		errorWrapper mrcore.UseCaseErrorWrapper
 		statusFlow   mrstatus.Flow
@@ -38,7 +38,7 @@ func NewProduct(
 	storage adm.ProductStorage,
 	categoryAPI api.CategoryAvailability,
 	trademarkAPI api.TrademarkAvailability,
-	ordererAPI mrsort.Orderer,
+	orderingAPI mrordering.Mover,
 	eventEmitter mrsender.EventEmitter,
 	errorWrapper mrcore.UseCaseErrorWrapper,
 ) *Product {
@@ -46,37 +46,30 @@ func NewProduct(
 		storage:      storage,
 		categoryAPI:  categoryAPI,
 		trademarkAPI: trademarkAPI,
-		ordererAPI:   ordererAPI,
-		eventEmitter: eventEmitter,
+		orderingAPI:  orderingAPI,
+		eventEmitter: decorator.NewSourceEmitter(eventEmitter, entity.ModelNameProduct),
 		errorWrapper: errorWrapper,
 		statusFlow:   mrflow.ItemStatusFlow(),
 	}
 }
 
 // GetList - comment method.
-func (uc *Product) GetList(ctx context.Context, params entity.ProductParams) ([]entity.Product, int64, error) {
-	fetchParams := uc.storage.NewSelectParams(params)
-
-	total, err := uc.storage.FetchTotal(ctx, fetchParams.Where)
+func (uc *Product) GetList(ctx context.Context, params entity.ProductParams) (items []entity.Product, countItems uint64, err error) {
+	items, countItems, err = uc.storage.FetchWithTotal(ctx, params)
 	if err != nil {
 		return nil, 0, uc.errorWrapper.WrapErrorFailed(err, entity.ModelNameProduct)
 	}
 
-	if total < 1 {
+	if countItems == 0 {
 		return make([]entity.Product, 0), 0, nil
 	}
 
-	items, err := uc.storage.Fetch(ctx, fetchParams)
-	if err != nil {
-		return nil, 0, uc.errorWrapper.WrapErrorFailed(err, entity.ModelNameProduct)
-	}
-
-	return items, total, nil
+	return items, countItems, nil
 }
 
 // GetItem - comment method.
-func (uc *Product) GetItem(ctx context.Context, itemID mrtype.KeyInt32) (entity.Product, error) {
-	if itemID < 1 {
+func (uc *Product) GetItem(ctx context.Context, itemID uint64) (entity.Product, error) {
+	if itemID == 0 {
 		return entity.Product{}, mrcore.ErrUseCaseEntityNotFound.New()
 	}
 
@@ -89,21 +82,21 @@ func (uc *Product) GetItem(ctx context.Context, itemID mrtype.KeyInt32) (entity.
 }
 
 // Create - comment method.
-func (uc *Product) Create(ctx context.Context, item entity.Product) (mrtype.KeyInt32, error) {
-	if err := uc.checkItem(ctx, item); err != nil {
+func (uc *Product) Create(ctx context.Context, item entity.Product) (itemID uint64, err error) {
+	if err = uc.checkItem(ctx, item); err != nil {
 		return 0, err
 	}
 
 	item.Status = mrenum.ItemStatusDraft
 
-	itemID, err := uc.storage.Insert(ctx, item)
+	itemID, err = uc.storage.Insert(ctx, item)
 	if err != nil {
 		return 0, uc.errorWrapper.WrapErrorFailed(err, entity.ModelNameProduct)
 	}
 
-	uc.emitEvent(ctx, "Create", mrmsg.Data{"id": itemID})
+	uc.eventEmitter.Emit(ctx, "Create", mrmsg.Data{"id": itemID})
 
-	if err := uc.getOrdererAPI(item.CategoryID).MoveToLast(ctx, itemID); err != nil {
+	if err = uc.orderingAPI.MoveToLast(ctx, itemID, uc.storage.NewCondition(item.CategoryID)); err != nil {
 		mrlog.Ctx(ctx).Error().Err(err)
 	}
 
@@ -112,11 +105,11 @@ func (uc *Product) Create(ctx context.Context, item entity.Product) (mrtype.KeyI
 
 // Store - comment method.
 func (uc *Product) Store(ctx context.Context, item entity.Product) error {
-	if item.ID < 1 {
+	if item.ID == 0 {
 		return mrcore.ErrUseCaseEntityNotFound.New()
 	}
 
-	if item.TagVersion < 1 {
+	if item.TagVersion == 0 {
 		return mrcore.ErrUseCaseEntityVersionInvalid.New()
 	}
 
@@ -139,18 +132,18 @@ func (uc *Product) Store(ctx context.Context, item entity.Product) error {
 		return uc.errorWrapper.WrapErrorFailed(err, entity.ModelNameProduct)
 	}
 
-	uc.emitEvent(ctx, "Store", mrmsg.Data{"id": item.ID, "ver": tagVersion})
+	uc.eventEmitter.Emit(ctx, "Store", mrmsg.Data{"id": item.ID, "ver": tagVersion})
 
 	return nil
 }
 
 // ChangeStatus - comment method.
 func (uc *Product) ChangeStatus(ctx context.Context, item entity.Product) error {
-	if item.ID < 1 {
+	if item.ID == 0 {
 		return mrcore.ErrUseCaseEntityNotFound.New()
 	}
 
-	if item.TagVersion < 1 {
+	if item.TagVersion == 0 {
 		return mrcore.ErrUseCaseEntityVersionInvalid.New()
 	}
 
@@ -176,14 +169,14 @@ func (uc *Product) ChangeStatus(ctx context.Context, item entity.Product) error 
 		return uc.errorWrapper.WrapErrorFailed(err, entity.ModelNameProduct)
 	}
 
-	uc.emitEvent(ctx, "ChangeStatus", mrmsg.Data{"id": item.ID, "ver": tagVersion, "status": item.Status})
+	uc.eventEmitter.Emit(ctx, "ChangeStatus", mrmsg.Data{"id": item.ID, "ver": tagVersion, "status": item.Status})
 
 	return nil
 }
 
 // Remove - comment method.
-func (uc *Product) Remove(ctx context.Context, itemID mrtype.KeyInt32) error {
-	if itemID < 1 {
+func (uc *Product) Remove(ctx context.Context, itemID uint64) error {
+	if itemID == 0 {
 		return mrcore.ErrUseCaseEntityNotFound.New()
 	}
 
@@ -192,7 +185,7 @@ func (uc *Product) Remove(ctx context.Context, itemID mrtype.KeyInt32) error {
 		return err
 	}
 
-	if err = uc.getOrdererAPI(categoryID).Unlink(ctx, itemID); err != nil {
+	if err = uc.orderingAPI.Unlink(ctx, itemID, uc.storage.NewCondition(categoryID)); err != nil {
 		return err
 	}
 
@@ -200,14 +193,14 @@ func (uc *Product) Remove(ctx context.Context, itemID mrtype.KeyInt32) error {
 		return uc.errorWrapper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, itemID)
 	}
 
-	uc.emitEvent(ctx, "Remove", mrmsg.Data{"id": itemID})
+	uc.eventEmitter.Emit(ctx, "Remove", mrmsg.Data{"id": itemID})
 
 	return nil
 }
 
 // MoveAfterID - comment method.
-func (uc *Product) MoveAfterID(ctx context.Context, itemID, afterID mrtype.KeyInt32) error {
-	if itemID < 1 {
+func (uc *Product) MoveAfterID(ctx context.Context, itemID, afterID uint64) error {
+	if itemID == 0 {
 		return mrcore.ErrUseCaseEntityNotFound.New()
 	}
 
@@ -216,11 +209,11 @@ func (uc *Product) MoveAfterID(ctx context.Context, itemID, afterID mrtype.KeyIn
 		return err
 	}
 
-	if err = uc.getOrdererAPI(categoryID).MoveAfterID(ctx, itemID, afterID); err != nil {
+	if err = uc.orderingAPI.MoveAfterID(ctx, itemID, afterID, uc.storage.NewCondition(categoryID)); err != nil {
 		return err
 	}
 
-	uc.emitEvent(ctx, "Move", mrmsg.Data{"id": itemID, "afterId": afterID})
+	uc.eventEmitter.Emit(ctx, "Move", mrmsg.Data{"id": itemID, "afterId": afterID})
 
 	return nil
 }
@@ -262,13 +255,7 @@ func (uc *Product) checkArticle(ctx context.Context, item entity.Product) error 
 	return nil
 }
 
-func (uc *Product) getOrdererAPI(categoryID uuid.UUID) mrsort.Orderer {
-	meta := uc.storage.NewOrderMeta(categoryID)
-
-	return uc.ordererAPI.WithMetaData(meta)
-}
-
-func (uc *Product) getCategoryID(ctx context.Context, itemID mrtype.KeyInt32) (uuid.UUID, error) {
+func (uc *Product) getCategoryID(ctx context.Context, itemID uint64) (uuid.UUID, error) {
 	item, err := uc.storage.FetchOne(ctx, itemID)
 	if err != nil {
 		return uuid.Nil, uc.errorWrapper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameProduct, itemID)
@@ -279,13 +266,4 @@ func (uc *Product) getCategoryID(ctx context.Context, itemID mrtype.KeyInt32) (u
 	}
 
 	return item.CategoryID, nil
-}
-
-func (uc *Product) emitEvent(ctx context.Context, eventName string, data mrmsg.Data) {
-	uc.eventEmitter.EmitWithSource(
-		ctx,
-		eventName,
-		entity.ModelNameProduct,
-		data,
-	)
 }

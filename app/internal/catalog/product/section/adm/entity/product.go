@@ -17,12 +17,12 @@ const (
 type (
 	// Product - comment struct.
 	Product struct { // DB: ps_catalog.products
-		ID          mrtype.KeyInt32   `json:"id"` // product_id
-		TagVersion  int32             `json:"tagVersion"`
+		ID          uint64            `json:"id"` // product_id
+		TagVersion  uint32            `json:"tagVersion"`
 		CategoryID  uuid.UUID         `json:"categoryId" upd:"category_id"` // categories::category_id
 		Article     string            `json:"article" sort:"article" upd:"product_article"`
 		Caption     string            `json:"caption" sort:"caption,default" upd:"product_caption"`
-		TrademarkID mrtype.KeyInt32   `json:"trademarkId" upd:"trademark_id"`         // trademarks::trademark_id
+		TrademarkID uint64            `json:"trademarkId" upd:"trademark_id"`         // trademarks::trademark_id
 		Price       *measure.Money    `json:"price" sort:"price" upd:"product_price"` // coins
 		Status      mrenum.ItemStatus `json:"status"`
 		CreatedAt   time.Time         `json:"createdAt" sort:"createdAt"`
@@ -40,7 +40,7 @@ type (
 	ProductListFilter struct {
 		CategoryID   uuid.UUID
 		SearchText   string
-		TrademarkIDs []mrtype.KeyInt32
+		TrademarkIDs []uint64
 		Price        mrtype.RangeInt64
 		Statuses     []mrenum.ItemStatus
 	}

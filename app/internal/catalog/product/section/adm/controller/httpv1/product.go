@@ -3,11 +3,10 @@ package httpv1
 import (
 	"net/http"
 
-	"github.com/mondegor/go-components/mrsort"
+	"github.com/mondegor/go-components/mrordering"
 	"github.com/mondegor/go-sysmess/mrerr"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrserver"
-	"github.com/mondegor/go-webcore/mrtype"
 	"github.com/mondegor/go-webcore/mrview"
 
 	"github.com/mondegor/go-sample/internal/catalog/product/module"
@@ -82,7 +81,7 @@ func (ht *Product) listParams(r *http.Request) entity.ProductParams {
 		Filter: entity.ProductListFilter{
 			CategoryID:   ht.parser.FilterUUID(r, module.ParamNameFilterCatalogCategoryID),
 			SearchText:   ht.parser.FilterString(r, module.ParamNameFilterSearchText),
-			TrademarkIDs: ht.parser.FilterKeyInt32List(r, module.ParamNameFilterCatalogTrademarkIDs),
+			TrademarkIDs: ht.parser.FilterUint64List(r, module.ParamNameFilterCatalogTrademarkIDs),
 			Price:        ht.parser.FilterRangeInt64(r, module.ParamNameFilterPriceRange),
 			Statuses:     ht.parser.FilterStatusList(r, module.ParamNameFilterStatuses),
 		},
@@ -200,8 +199,8 @@ func (ht *Product) Move(w http.ResponseWriter, r *http.Request) error {
 	return ht.sender.SendNoContent(w)
 }
 
-func (ht *Product) getItemID(r *http.Request) mrtype.KeyInt32 {
-	return ht.parser.PathKeyInt32(r, "id")
+func (ht *Product) getItemID(r *http.Request) uint64 {
+	return ht.parser.PathParamUint64(r, "id")
 }
 
 func (ht *Product) getRawItemID(r *http.Request) string {
@@ -243,7 +242,7 @@ func (ht *Product) wrapErrorNode(err error, rawItemID string) error {
 		return module.ErrUseCaseProductNotFound.Wrap(err, rawItemID)
 	}
 
-	if mrsort.ErrAfterNodeNotFound.Is(err) {
+	if mrordering.ErrAfterNodeNotFound.Is(err) {
 		return mrerr.NewCustomError("afterNodeId", err)
 	}
 

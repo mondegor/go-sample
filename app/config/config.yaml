@@ -15,9 +15,11 @@ debugging:
       - github.com/mondegor/go-sysmess/mrerr.(*ProtoAppError).New
       - github.com/mondegor/go-sysmess/mrerr.(*ProtoAppError).Wrap
       - github.com/mondegor/go-webcore/mrcore.PrepareError
-      - github.com/mondegor/go-webcore/mrcore/mrcoreerr.(*ErrorHandler).Process
+      - github.com/mondegor/go-webcore/mrcore/mrapp.(*ErrorHandler).Perform
+      - github.com/mondegor/go-webcore/mrcore/mrapp.(*ErrorHandler).PerformWithCommit
       - github.com/mondegor/go-webcore/mrlog/zerolog.(*eventAdapter).Err
       - github.com/mondegor/go-storage/mrpostgres.(*ConnAdapter).Query
+      - github.com/mondegor/go-storage/mrpostgres.(*ConnAdapter).Exec
       - github.com/mondegor/go-storage/mrpostgres.(*queryRows).Scan
 
 logger:
@@ -105,7 +107,7 @@ cors:
     - X-Correlation-Id
     - X-Idempotency-Key
   exposed_headers:
-    - X-Correlation-Id
+    - X-Request-Id
   allow_credentials: true
 
 translation:
@@ -159,19 +161,37 @@ modules_settings:
       base_path: /img/{{path}}
       file_provider: imageStorage # file_providers.image_storage or image_storage2
 
+validation:
+  images:
+    image:
+      max_width: 1920 # pixels
+      max_height: 1080 # pixels
+      check_body: true
+      file:
+        min_size: 512 # 512b
+        max_size: 262144 # 256Kb
+        max_files: 4
+        check_request_content_type: true
+        extensions:
+          - jpeg
+          - jpg
+          - png
+
+  mime_types:
+    - type: "image/gif"
+      ext: gif
+    - type: "image/jpeg"
+      ext: jpeg
+    - type: "image/jpeg"
+      ext: jpe
+    - type: "image/jpeg"
+      ext: jpg
+    - type: "image/png"
+      ext: png
+
 task_schedule:
-  settings_reloader:
-    caption: Settings reloader
+  reload_settings:
+    caption: "Reload settings"
     startup: true
     period: 5m
     timeout: 30s
-
-mime_types:
-  - ext: gif
-    type: image/gif
-  - ext: jpeg
-    type: image/jpeg
-  - ext: jpg
-    type: image/jpeg
-  - ext: png
-    type: image/png

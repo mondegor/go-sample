@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/mondegor/go-storage/mrpostgres"
+	"github.com/mondegor/go-storage/mrpostgres/builder"
 	"github.com/mondegor/go-storage/mrtests/infra"
 	"github.com/mondegor/go-webcore/mrtests/helpers"
 	"github.com/mondegor/go-webcore/mrtype"
@@ -35,10 +35,9 @@ func (ts *CategoryPostgresTestSuite) SetupSuite() {
 
 	ts.repo = repository.NewCategoryPostgres(
 		ts.pgt.ConnManager(),
-		mrpostgres.NewSQLBuilderSelect(
-			mrpostgres.NewSQLBuilderWhere(),
-			mrpostgres.NewSQLBuilderOrderBy(ts.ctx, mrtype.SortParams{}),
-			mrpostgres.NewSQLBuilderLimit(100),
+		builder.NewSQL(
+			builder.WithSQLOrderByDefaultSort(mrtype.SortParams{}),
+			builder.WithSQLLimitMaxSize(100),
 		),
 	)
 }
@@ -66,8 +65,9 @@ func (ts *CategoryPostgresTestSuite) Test_Fetch() {
 	}
 
 	ctx := context.Background()
-	got, err := ts.repo.Fetch(ctx, ts.repo.NewSelectParams(entity.CategoryParams{}))
+	got, gotCount, err := ts.repo.FetchWithTotal(ctx, entity.CategoryParams{})
 
 	ts.Require().NoError(err)
 	ts.Equal(expected, got)
+	ts.Equal(uint64(len(expected)), gotCount)
 }

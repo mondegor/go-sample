@@ -11,7 +11,7 @@ Custom.Request.Query.Filter.CategoryID:
   in: query
   required: false
   schema:
-    type: integer
-    format: int32
+    type: string
+    format: uuid
     nullable: true
-  example: 1
+  example: "de7ad549-0515-4564-bb0c-a9b465b948d9"

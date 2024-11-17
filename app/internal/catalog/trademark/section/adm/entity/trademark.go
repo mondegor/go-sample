@@ -14,8 +14,8 @@ const (
 type (
 	// Trademark - comment struct.
 	Trademark struct { // DB: ps_catalog.trademarks
-		ID         mrtype.KeyInt32   `json:"id"` // trademark_id
-		TagVersion int32             `json:"tagVersion"`
+		ID         uint64            `json:"id"` // trademark_id
+		TagVersion uint32            `json:"tagVersion"`
 		Caption    string            `json:"caption" sort:"caption,default"`
 		Status     mrenum.ItemStatus `json:"status"`
 		CreatedAt  time.Time         `json:"createdAt" sort:"createdAt"`

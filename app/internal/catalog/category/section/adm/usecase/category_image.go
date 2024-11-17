@@ -14,6 +14,7 @@ import (
 	"github.com/mondegor/go-webcore/mrlock"
 	"github.com/mondegor/go-webcore/mrlog"
 	"github.com/mondegor/go-webcore/mrsender"
+	"github.com/mondegor/go-webcore/mrsender/decorator"
 	"github.com/mondegor/go-webcore/mrtype"
 
 	"github.com/mondegor/go-sample/internal/catalog/category/module"
@@ -44,7 +45,7 @@ func NewCategoryImage(
 		storage:      storage,
 		fileAPI:      fileAPI,
 		locker:       locker,
-		eventEmitter: eventEmitter,
+		eventEmitter: decorator.NewSourceEmitter(eventEmitter, entity.ModelNameCategoryImage),
 		errorWrapper: errorWrapper,
 	}
 }
@@ -115,7 +116,7 @@ func (uc *CategoryImage) StoreFile(ctx context.Context, categoryID uuid.UUID, im
 		Width:        image.Width,
 		Height:       image.Height,
 		Size:         image.Size,
-		UpdatedAt:    mrtype.TimeToPointer(time.Now().UTC()),
+		UpdatedAt:    mrtype.CastTimeToPointer(time.Now().UTC()),
 	}
 
 	if err = uc.storage.UpdateMeta(ctx, categoryID, imageMeta); err != nil {
@@ -124,7 +125,7 @@ func (uc *CategoryImage) StoreFile(ctx context.Context, categoryID uuid.UUID, im
 		return uc.errorWrapper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategoryImage, categoryID)
 	}
 
-	uc.emitEvent(ctx, "StoreFile", mrmsg.Data{"categoryId": categoryID, "path": newImagePath, "old-path": oldImageMeta.Path})
+	uc.eventEmitter.Emit(ctx, "StoreFile", mrmsg.Data{"categoryId": categoryID, "path": newImagePath, "old-path": oldImageMeta.Path})
 	uc.removeImageFile(ctx, oldImageMeta.Path, newImagePath)
 
 	return nil
@@ -151,7 +152,7 @@ func (uc *CategoryImage) RemoveFile(ctx context.Context, categoryID uuid.UUID) e
 		return uc.errorWrapper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategoryImage, categoryID)
 	}
 
-	uc.emitEvent(ctx, "RemoveFile", mrmsg.Data{"categoryId": categoryID, "meta": imageMeta})
+	uc.eventEmitter.Emit(ctx, "RemoveFile", mrmsg.Data{"categoryId": categoryID, "meta": imageMeta})
 	uc.removeImageFile(ctx, imageMeta.Path, "")
 
 	return nil
@@ -183,13 +184,4 @@ func (uc *CategoryImage) removeImageFile(ctx context.Context, filePath, prevFile
 	if err := uc.fileAPI.Remove(ctx, filePath); err != nil {
 		mrlog.Ctx(ctx).Error().Err(err)
 	}
-}
-
-func (uc *CategoryImage) emitEvent(ctx context.Context, eventName string, data mrmsg.Data) {
-	uc.eventEmitter.EmitWithSource(
-		ctx,
-		eventName,
-		entity.ModelNameCategoryImage,
-		data,
-	)
 }

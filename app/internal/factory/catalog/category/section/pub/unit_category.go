@@ -3,7 +3,7 @@ package pub
 import (
 	"context"
 
-	"github.com/mondegor/go-storage/mrpostgres"
+	"github.com/mondegor/go-storage/mrpostgres/builder"
 	"github.com/mondegor/go-webcore/mrserver"
 
 	"github.com/mondegor/go-sample/internal/catalog/category/section/pub/controller/httpv1"
@@ -27,15 +27,13 @@ func createUnitCategory(ctx context.Context, opts category.Options) ([]mrserver.
 func newUnitCategory(_ context.Context, opts category.Options) (*httpv1.Category, error) { //nolint:unparam
 	storage := repository.NewCategoryPostgres(
 		opts.DBConnManager,
-		mrpostgres.NewSQLBuilderSelect(
-			mrpostgres.NewSQLBuilderWhere(),
-			nil,
-			mrpostgres.NewSQLBuilderLimit(opts.PageSizeMax),
+		builder.NewSQL(
+			builder.WithSQLLimitMaxSize(opts.PageSizeMax),
 		),
 	)
 	useCase := usecase.NewCategory(
 		storage,
-		opts.UseCaseHelper,
+		opts.UseCaseErrorWrapper,
 		opts.UnitCategory.ImageURLBuilder,
 		opts.UnitCategory.Dictionary,
 	)

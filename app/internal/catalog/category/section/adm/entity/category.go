@@ -18,7 +18,7 @@ type (
 	// Category - comment struct.
 	Category struct { // DB: ps_catalog.categories
 		ID         uuid.UUID         `json:"id"` // category_id
-		TagVersion int32             `json:"tagVersion"`
+		TagVersion uint32            `json:"tagVersion"`
 		Caption    string            `json:"caption" sort:"caption,default"`
 		Status     mrenum.ItemStatus `json:"status"`
 		CreatedAt  time.Time         `json:"createdAt" sort:"createdAt"`

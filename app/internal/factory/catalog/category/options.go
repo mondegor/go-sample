@@ -15,12 +15,12 @@ import (
 type (
 	// Options - comment struct.
 	Options struct {
-		EventEmitter   mrsender.EventEmitter
-		UseCaseHelper  mrcore.UseCaseErrorWrapper
-		DBConnManager  mrstorage.DBConnManager
-		Locker         mrlock.Locker
-		RequestParsers RequestParsers
-		ResponseSender mrserver.FileResponseSender
+		EventEmitter        mrsender.EventEmitter
+		UseCaseErrorWrapper mrcore.UseCaseErrorWrapper
+		DBConnManager       mrstorage.DBConnManager
+		Locker              mrlock.Locker
+		RequestParsers      RequestParsers
+		ResponseSender      mrserver.FileResponseSender
 
 		UnitCategory UnitCategoryOptions
 

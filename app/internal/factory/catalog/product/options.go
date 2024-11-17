@@ -1,7 +1,6 @@
 package product
 
 import (
-	"github.com/mondegor/go-components/mrsort"
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-webcore/mrcore"
 	"github.com/mondegor/go-webcore/mrsender"
@@ -14,15 +13,14 @@ import (
 type (
 	// Options - comment struct.
 	Options struct {
-		EventEmitter   mrsender.EventEmitter
-		UseCaseHelper  mrcore.UseCaseErrorWrapper
-		DBConnManager  mrstorage.DBConnManager
-		RequestParsers RequestParsers
-		ResponseSender mrserver.ResponseSender
+		EventEmitter        mrsender.EventEmitter
+		UseCaseErrorWrapper mrcore.UseCaseErrorWrapper
+		DBConnManager       mrstorage.DBConnManager
+		RequestParsers      RequestParsers
+		ResponseSender      mrserver.ResponseSender
 
 		CategoryAPI  api.CategoryAvailability
 		TrademarkAPI api.TrademarkAvailability
-		OrdererAPI   mrsort.Orderer
 
 		PageSizeMax     uint64
 		PageSizeDefault uint64

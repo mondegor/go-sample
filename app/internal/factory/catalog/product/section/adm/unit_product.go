@@ -3,10 +3,13 @@ package adm
 import (
 	"context"
 
-	"github.com/mondegor/go-storage/mrpostgres"
+	"github.com/mondegor/go-components/factory/mrordering"
+	"github.com/mondegor/go-storage/mrpostgres/builder"
 	"github.com/mondegor/go-storage/mrsql"
+	"github.com/mondegor/go-webcore/mrlog"
 	"github.com/mondegor/go-webcore/mrserver"
 
+	"github.com/mondegor/go-sample/internal/catalog/product/module"
 	"github.com/mondegor/go-sample/internal/catalog/product/section/adm/controller/httpv1"
 	"github.com/mondegor/go-sample/internal/catalog/product/section/adm/entity"
 	"github.com/mondegor/go-sample/internal/catalog/product/section/adm/repository"
@@ -27,42 +30,39 @@ func createUnitProduct(ctx context.Context, opts product.Options) ([]mrserver.Ht
 }
 
 func newUnitProduct(ctx context.Context, opts product.Options) (*httpv1.Product, error) {
-	metaOrderBy, err := mrsql.NewEntityMetaOrderBy(ctx, entity.Product{})
-	if err != nil {
-		return nil, err
-	}
-
-	entityMetaUpdate, err := mrsql.NewEntityMetaUpdate(ctx, entity.Product{})
+	entityMeta, err := mrsql.ParseEntity(mrlog.Ctx(ctx), entity.Product{})
 	if err != nil {
 		return nil, err
 	}
 
 	storage := repository.NewProductPostgres(
 		opts.DBConnManager,
-		mrpostgres.NewSQLBuilderSelect(
-			mrpostgres.NewSQLBuilderWhere(),
-			mrpostgres.NewSQLBuilderOrderBy(ctx, metaOrderBy.DefaultSort()),
-			mrpostgres.NewSQLBuilderLimit(opts.PageSizeMax),
-		),
-		mrpostgres.NewSQLBuilderUpdateWithMeta(
-			entityMetaUpdate,
-			mrpostgres.NewSQLBuilderSet(),
-			nil,
+		builder.NewSQL(
+			builder.WithSQLSetMetaEntity(entityMeta.MetaUpdate()),
+			builder.WithSQLOrderByDefaultSort(entityMeta.MetaOrderBy().DefaultSort()),
+			builder.WithSQLLimitMaxSize(opts.PageSizeMax),
 		),
 	)
 	useCase := usecase.NewProduct(
 		storage,
 		opts.CategoryAPI,
 		opts.TrademarkAPI,
-		opts.OrdererAPI,
+		mrordering.NewComponentMover(
+			opts.DBConnManager,
+			mrsql.DBTableInfo{
+				Name:       module.DBTableNameProducts,
+				PrimaryKey: "product_id",
+			},
+			opts.EventEmitter,
+		),
 		opts.EventEmitter,
-		opts.UseCaseHelper,
+		opts.UseCaseErrorWrapper,
 	)
 	controller := httpv1.NewProduct(
 		opts.RequestParsers.ExtendParser,
 		opts.ResponseSender,
 		useCase,
-		metaOrderBy,
+		entityMeta.MetaOrderBy(),
 	)
 
 	return controller, nil

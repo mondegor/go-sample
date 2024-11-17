@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.3
 info:
-  version: v0.1.13
+  version: v0.1.14
   title: Private API управления каталогом товаров
   license:
     name: Apache-2.0
@@ -15,7 +15,7 @@ info:
 
     #### Ограничения полей
     - required - поле обязательно для заполнения;
-    - omitempty - поле может быть не указано (не будет использоваться методом, в который было передано);
+    - omitempty - поле может не указываться (будет игнорироваться при обновлении записи целиком);
     - unique - уникальное значение поля;
     - min=N - поле должно быть не менее N символов;
     - max=N - поле должно быть не более N символов;
@@ -940,6 +940,7 @@ components:
       required: false
       schema:
         type: integer
+        # format: uint64
         minimum: 0
         maximum: 1024
         default: 0
@@ -952,6 +953,7 @@ components:
       required: false
       schema:
         type: integer
+        # format: uint64
         minimum: 1
         maximum: 1024
         default: 50
@@ -990,6 +992,7 @@ components:
       required: false
       schema:
         type: integer
+        # format: uint64
         maxLength: 10
       example: 100000 # 100 coins
 
@@ -1000,6 +1003,7 @@ components:
       required: false
       schema:
         type: integer
+        # format: uint64
         maxLength: 10
       example: 100000 # 100 coins
 
@@ -1016,10 +1020,10 @@ components:
       in: query
       required: false
       schema:
-        type: integer
-        format: int32
+        type: string
+        format: uuid
         nullable: true
-      example: 1
+      example: "de7ad549-0515-4564-bb0c-a9b465b948d9"
 
     Custom.Request.Query.Filter.TrademarkIDs:
       description: |-
@@ -1055,7 +1059,7 @@ components:
       required: true
       schema:
         type: integer
-        format: int32
+        # format: uint64
         minimum: 1
       example: 1000
 
@@ -1066,7 +1070,7 @@ components:
       required: true
       schema:
         type: integer
-        format: int32
+        # format: uint64
         minimum: 1
       example: 1000
 
@@ -1115,18 +1119,21 @@ components:
     App.Field.ListPager.Total:
       description: Количество записей в БД с учётом указанных в запросе фильтров
       type: integer
+      # format: uint64
       minimum: 0
       example: 584
 
     App.Field.TagVersion:
       description: Текущая версия записи
       type: integer
+      # format: uint32
       minimum: 1
       example: 5
 
     App.Field.Measure.Price:
       description: Цена (10^2)
       type: integer # Money
+      format: int64
       maxLength: 12
       minimum: 0
       example: 8234500 # 82345 coins
@@ -1160,6 +1167,7 @@ components:
             Идентификатор записи, после которой необходимо вставить указанную запись.\
             При afterId = 0 запись вставляется в начало списка.
           type: integer
+          # format: uint64
           example: 7
 
     App.Response.Model.BinaryImage:
@@ -1251,14 +1259,17 @@ components:
         width:
           description: Ширина изображения (px)
           type: integer
+          # format: uint64
           example: 1024
         height:
           description: Высота изображения (px)
           type: integer
+          # format: uint64
           example: 768
         size:
           description: Размер файла изображения в байтах
           type: integer
+          # format: uint64
           example: 7
         createdAt:
           description: Дата и время создания изображения (UTC)
@@ -1280,25 +1291,26 @@ components:
         id:
           description: Идентификатор созданной записи
           type: integer
+          # format: uint64
           example: 9223372036854775807
 
     Custom.Field.CategoryID:
       description: Идентификатор категории (модуль - Catalog.Category)
       type: string
       format: uuid
-      example: "21de1e21-0a4a-47a5-b60d-67c7f78a3278"
+      example: "de7ad549-0515-4564-bb0c-a9b465b948d9"
 
     Custom.Field.ProductID:
       description: Идентификатор продукции (модуль - Catalog.Product)
       type: integer
-      format: int32
+      # format: uint64
       minimum: 1
       example: 2
 
     Custom.Field.TrademarkID:
       description: Идентификатор торговой марки (модуль - Catalog.Trademark)
       type: integer
-      format: int32
+      # format: uint64
       minimum: 1
       example: 2
 

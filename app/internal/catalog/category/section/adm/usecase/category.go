@@ -10,6 +10,7 @@ import (
 	"github.com/mondegor/go-webcore/mrenum"
 	"github.com/mondegor/go-webcore/mrpath"
 	"github.com/mondegor/go-webcore/mrsender"
+	"github.com/mondegor/go-webcore/mrsender/decorator"
 	"github.com/mondegor/go-webcore/mrstatus"
 	"github.com/mondegor/go-webcore/mrstatus/mrflow"
 
@@ -37,7 +38,7 @@ func NewCategory(
 ) *Category {
 	return &Category{
 		storage:      storage,
-		eventEmitter: eventEmitter,
+		eventEmitter: decorator.NewSourceEmitter(eventEmitter, entity.ModelNameCategory),
 		errorWrapper: errorWrapper,
 		imgBaseURL:   imgBaseURL,
 		statusFlow:   mrflow.ItemStatusFlow(),
@@ -45,28 +46,21 @@ func NewCategory(
 }
 
 // GetList - comment method.
-func (uc *Category) GetList(ctx context.Context, params entity.CategoryParams) ([]entity.Category, int64, error) {
-	fetchParams := uc.storage.NewSelectParams(params)
-
-	total, err := uc.storage.FetchTotal(ctx, fetchParams.Where)
+func (uc *Category) GetList(ctx context.Context, params entity.CategoryParams) (items []entity.Category, countItems uint64, err error) {
+	items, countItems, err = uc.storage.FetchWithTotal(ctx, params)
 	if err != nil {
 		return nil, 0, uc.errorWrapper.WrapErrorFailed(err, entity.ModelNameCategory)
 	}
 
-	if total < 1 {
+	if countItems == 0 {
 		return make([]entity.Category, 0), 0, nil
-	}
-
-	items, err := uc.storage.Fetch(ctx, fetchParams)
-	if err != nil {
-		return nil, 0, uc.errorWrapper.WrapErrorFailed(err, entity.ModelNameCategory)
 	}
 
 	for i := range items {
 		uc.prepareItem(&items[i])
 	}
 
-	return items, total, nil
+	return items, countItems, nil
 }
 
 // GetItem - comment method.
@@ -86,15 +80,15 @@ func (uc *Category) GetItem(ctx context.Context, itemID uuid.UUID) (entity.Categ
 }
 
 // Create - comment method.
-func (uc *Category) Create(ctx context.Context, item entity.Category) (uuid.UUID, error) {
+func (uc *Category) Create(ctx context.Context, item entity.Category) (itemID uuid.UUID, err error) {
 	item.Status = mrenum.ItemStatusDraft
 
-	itemID, err := uc.storage.Insert(ctx, item)
+	itemID, err = uc.storage.Insert(ctx, item)
 	if err != nil {
 		return uuid.Nil, uc.errorWrapper.WrapErrorFailed(err, entity.ModelNameCategory)
 	}
 
-	uc.emitEvent(ctx, "Create", mrmsg.Data{"id": itemID})
+	uc.eventEmitter.Emit(ctx, "Create", mrmsg.Data{"id": itemID})
 
 	return itemID, nil
 }
@@ -105,7 +99,7 @@ func (uc *Category) Store(ctx context.Context, item entity.Category) error {
 		return mrcore.ErrUseCaseEntityNotFound.New()
 	}
 
-	if item.TagVersion < 1 {
+	if item.TagVersion == 0 {
 		return mrcore.ErrUseCaseEntityVersionInvalid.New()
 	}
 
@@ -124,7 +118,7 @@ func (uc *Category) Store(ctx context.Context, item entity.Category) error {
 		return uc.errorWrapper.WrapErrorFailed(err, entity.ModelNameCategory)
 	}
 
-	uc.emitEvent(ctx, "Store", mrmsg.Data{"id": item.ID, "ver": tagVersion})
+	uc.eventEmitter.Emit(ctx, "Store", mrmsg.Data{"id": item.ID, "ver": tagVersion})
 
 	return nil
 }
@@ -135,7 +129,7 @@ func (uc *Category) ChangeStatus(ctx context.Context, item entity.Category) erro
 		return mrcore.ErrUseCaseEntityNotFound.New()
 	}
 
-	if item.TagVersion < 1 {
+	if item.TagVersion == 0 {
 		return mrcore.ErrUseCaseEntityVersionInvalid.New()
 	}
 
@@ -161,7 +155,7 @@ func (uc *Category) ChangeStatus(ctx context.Context, item entity.Category) erro
 		return uc.errorWrapper.WrapErrorFailed(err, entity.ModelNameCategory)
 	}
 
-	uc.emitEvent(ctx, "ChangeStatus", mrmsg.Data{"id": item.ID, "ver": tagVersion, "status": item.Status})
+	uc.eventEmitter.Emit(ctx, "ChangeStatus", mrmsg.Data{"id": item.ID, "ver": tagVersion, "status": item.Status})
 
 	return nil
 }
@@ -176,7 +170,7 @@ func (uc *Category) Remove(ctx context.Context, itemID uuid.UUID) error {
 		return uc.errorWrapper.WrapErrorEntityNotFoundOrFailed(err, entity.ModelNameCategory, itemID)
 	}
 
-	uc.emitEvent(ctx, "Remove", mrmsg.Data{"id": itemID})
+	uc.eventEmitter.Emit(ctx, "Remove", mrmsg.Data{"id": itemID})
 
 	return nil
 }
@@ -186,13 +180,4 @@ func (uc *Category) prepareItem(item *entity.Category) {
 		imageInfo.URL = uc.imgBaseURL.BuildPath(imageInfo.Path)
 		item.ImageInfo = imageInfo
 	}
-}
-
-func (uc *Category) emitEvent(ctx context.Context, eventName string, data mrmsg.Data) {
-	uc.eventEmitter.EmitWithSource(
-		ctx,
-		eventName,
-		entity.ModelNameCategory,
-		data,
-	)
 }

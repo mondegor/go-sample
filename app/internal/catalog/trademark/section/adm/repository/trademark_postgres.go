@@ -4,56 +4,86 @@ import (
 	"context"
 	"strings"
 
+	"github.com/mondegor/go-storage/mrpostgres/db"
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-webcore/mrenum"
 	"github.com/mondegor/go-webcore/mrtype"
 
 	"github.com/mondegor/go-sample/internal/catalog/trademark/module"
 	"github.com/mondegor/go-sample/internal/catalog/trademark/section/adm/entity"
-	"github.com/mondegor/go-sample/internal/catalog/trademark/shared/repository"
 )
 
 type (
 	// TrademarkPostgres - comment struct.
 	TrademarkPostgres struct {
-		client    mrstorage.DBConnManager
-		sqlSelect mrstorage.SQLBuilderSelect
+		client          mrstorage.DBConnManager
+		sqlBuilder      mrstorage.SQLBuilder
+		repoStatus      db.FieldWithVersionUpdater[uint64, uint32, mrenum.ItemStatus]
+		repoSoftDeleter db.RowSoftDeleter[uint64]
+		repoTotalRows   db.TotalRowsFetcher[uint64]
 	}
 )
 
 // NewTrademarkPostgres - создаёт объект TrademarkPostgres.
-func NewTrademarkPostgres(client mrstorage.DBConnManager, sqlSelect mrstorage.SQLBuilderSelect) *TrademarkPostgres {
+func NewTrademarkPostgres(client mrstorage.DBConnManager, sqlBuilder mrstorage.SQLBuilder) *TrademarkPostgres {
 	return &TrademarkPostgres{
-		client:    client,
-		sqlSelect: sqlSelect,
+		client:     client,
+		sqlBuilder: sqlBuilder,
+		repoStatus: db.NewFieldWithVersionUpdater[uint64, uint32, mrenum.ItemStatus](
+			client,
+			module.DBTableNameTrademarks,
+			"trademark_id",
+			module.DBFieldTagVersion,
+			"trademark_status",
+			module.DBFieldDeletedAt,
+		),
+		repoSoftDeleter: db.NewRowSoftDeleter[uint64](
+			client,
+			module.DBTableNameTrademarks,
+			"trademark_id",
+			module.DBFieldTagVersion,
+			module.DBFieldDeletedAt,
+		),
+		repoTotalRows: db.NewTotalRowsFetcher[uint64](
+			client,
+			module.DBTableNameTrademarks,
+		),
 	}
 }
 
-// NewSelectParams - comment method.
-func (re *TrademarkPostgres) NewSelectParams(params entity.TrademarkParams) mrstorage.SQLSelectParams {
-	return mrstorage.SQLSelectParams{
-		Where: re.sqlSelect.Where(func(w mrstorage.SQLBuilderWhere) mrstorage.SQLBuilderPartFunc {
-			return w.JoinAnd(
-				w.Expr("deleted_at IS NULL"),
-				w.FilterLike("UPPER(trademark_caption)", strings.ToUpper(params.Filter.SearchText)),
-				w.FilterAnyOf("trademark_status", params.Filter.Statuses),
-			)
-		}),
-		OrderBy: re.sqlSelect.OrderBy(func(s mrstorage.SQLBuilderOrderBy) mrstorage.SQLBuilderPartFunc {
-			return s.Join(
-				s.Field(params.Sorter.FieldName, params.Sorter.Direction),
-				s.Field("trademark_id", mrenum.SortDirectionASC),
-			)
-		}),
-		Limit: re.sqlSelect.Limit(func(p mrstorage.SQLBuilderLimit) mrstorage.SQLBuilderPartFunc {
-			return p.OffsetLimit(params.Pager.Index, params.Pager.Size)
-		}),
+// FetchWithTotal - comment method.
+func (re *TrademarkPostgres) FetchWithTotal(ctx context.Context, params entity.TrademarkParams) (rows []entity.Trademark, countRows uint64, err error) {
+	condition := re.sqlBuilder.Condition().Build(re.fetchCondition(params.Filter))
+
+	total, err := re.repoTotalRows.Fetch(ctx, condition)
+	if err != nil || total == 0 {
+		return nil, 0, err
 	}
+
+	if params.Pager.Size > total {
+		params.Pager.Size = total
+	}
+
+	orderBy := re.sqlBuilder.OrderBy().Build(re.fetchOrderBy(params.Sorter))
+	limit := re.sqlBuilder.Limit().Build(params.Pager.Index, params.Pager.Size)
+
+	rows, err = re.fetch(ctx, condition, orderBy, limit, params.Pager.Size)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return rows, total, nil
 }
 
 // Fetch - comment method.
-func (re *TrademarkPostgres) Fetch(ctx context.Context, params mrstorage.SQLSelectParams) ([]entity.Trademark, error) {
-	whereStr, whereArgs := params.Where.ToSQL()
+func (re *TrademarkPostgres) fetch(
+	ctx context.Context,
+	condition mrstorage.SQLPart,
+	orderBy mrstorage.SQLPart,
+	limit mrstorage.SQLPart,
+	maxRows uint64,
+) ([]entity.Trademark, error) {
+	whereStr, whereArgs := condition.ToSQL()
 
 	sql := `
 		SELECT
@@ -64,11 +94,11 @@ func (re *TrademarkPostgres) Fetch(ctx context.Context, params mrstorage.SQLSele
 			created_at as createdAt,
 			updated_at as updatedAt
 		FROM
-			` + module.DBSchema + `.` + module.DBTableNameTrademarks + `
+			` + module.DBTableNameTrademarks + `
 		WHERE
 			` + whereStr + `
 		ORDER BY
-			` + params.OrderBy.String() + params.Limit.String() + `;`
+			` + orderBy.String() + limit.String() + `;`
 
 	cursor, err := re.client.Conn(ctx).Query(
 		ctx,
@@ -81,7 +111,7 @@ func (re *TrademarkPostgres) Fetch(ctx context.Context, params mrstorage.SQLSele
 
 	defer cursor.Close()
 
-	rows := make([]entity.Trademark, 0)
+	rows := make([]entity.Trademark, 0, maxRows)
 
 	for cursor.Next() {
 		var row entity.Trademark
@@ -104,33 +134,8 @@ func (re *TrademarkPostgres) Fetch(ctx context.Context, params mrstorage.SQLSele
 	return rows, cursor.Err()
 }
 
-// FetchTotal - comment method.
-func (re *TrademarkPostgres) FetchTotal(ctx context.Context, where mrstorage.SQLBuilderPart) (int64, error) {
-	whereStr, whereArgs := where.ToSQL()
-
-	sql := `
-		SELECT
-			COUNT(*)
-		FROM
-			` + module.DBSchema + `.` + module.DBTableNameTrademarks + `
-		WHERE
-			` + whereStr + `;`
-
-	var totalRow int64
-
-	err := re.client.Conn(ctx).QueryRow(
-		ctx,
-		sql,
-		whereArgs...,
-	).Scan(
-		&totalRow,
-	)
-
-	return totalRow, err
-}
-
 // FetchOne - comment method.
-func (re *TrademarkPostgres) FetchOne(ctx context.Context, rowID mrtype.KeyInt32) (entity.Trademark, error) {
+func (re *TrademarkPostgres) FetchOne(ctx context.Context, rowID uint64) (entity.Trademark, error) {
 	sql := `
 		SELECT
 			tag_version,
@@ -139,7 +144,7 @@ func (re *TrademarkPostgres) FetchOne(ctx context.Context, rowID mrtype.KeyInt32
 			created_at,
 			updated_at
 		FROM
-			` + module.DBSchema + `.` + module.DBTableNameTrademarks + `
+			` + module.DBTableNameTrademarks + `
 		WHERE
 			trademark_id = $1 AND deleted_at IS NULL
 		LIMIT 1;`
@@ -163,14 +168,14 @@ func (re *TrademarkPostgres) FetchOne(ctx context.Context, rowID mrtype.KeyInt32
 
 // FetchStatus - comment method.
 // result: mrenum.ItemStatus - exists, ErrStorageNoRowFound - not exists, error - query error.
-func (re *TrademarkPostgres) FetchStatus(ctx context.Context, rowID mrtype.KeyInt32) (mrenum.ItemStatus, error) {
-	return repository.TrademarkFetchStatusPostgres(ctx, re.client, rowID)
+func (re *TrademarkPostgres) FetchStatus(ctx context.Context, rowID uint64) (mrenum.ItemStatus, error) {
+	return re.repoStatus.Fetch(ctx, rowID)
 }
 
 // Insert - comment method.
-func (re *TrademarkPostgres) Insert(ctx context.Context, row entity.Trademark) (mrtype.KeyInt32, error) {
+func (re *TrademarkPostgres) Insert(ctx context.Context, row entity.Trademark) (rowID uint64, err error) {
 	sql := `
-		INSERT INTO ` + module.DBSchema + `.` + module.DBTableNameTrademarks + `
+		INSERT INTO ` + module.DBTableNameTrademarks + `
 			(
 				trademark_caption,
 				trademark_status
@@ -180,7 +185,7 @@ func (re *TrademarkPostgres) Insert(ctx context.Context, row entity.Trademark) (
 		RETURNING
 			trademark_id;`
 
-	err := re.client.Conn(ctx).QueryRow(
+	err = re.client.Conn(ctx).QueryRow(
 		ctx,
 		sql,
 		row.Caption,
@@ -193,10 +198,10 @@ func (re *TrademarkPostgres) Insert(ctx context.Context, row entity.Trademark) (
 }
 
 // Update - comment method.
-func (re *TrademarkPostgres) Update(ctx context.Context, row entity.Trademark) (int32, error) {
+func (re *TrademarkPostgres) Update(ctx context.Context, row entity.Trademark) (tagVersion uint32, err error) {
 	sql := `
 		UPDATE
-			` + module.DBSchema + `.` + module.DBTableNameTrademarks + `
+			` + module.DBTableNameTrademarks + `
 		SET
 			tag_version = tag_version + 1,
 			updated_at = NOW(),
@@ -206,9 +211,7 @@ func (re *TrademarkPostgres) Update(ctx context.Context, row entity.Trademark) (
 		RETURNING
 			tag_version;`
 
-	var tagVersion int32
-
-	err := re.client.Conn(ctx).QueryRow(
+	err = re.client.Conn(ctx).QueryRow(
 		ctx,
 		sql,
 		row.ID,
@@ -222,48 +225,34 @@ func (re *TrademarkPostgres) Update(ctx context.Context, row entity.Trademark) (
 }
 
 // UpdateStatus - comment method.
-func (re *TrademarkPostgres) UpdateStatus(ctx context.Context, row entity.Trademark) (int32, error) {
-	sql := `
-		UPDATE
-			` + module.DBSchema + `.` + module.DBTableNameTrademarks + `
-		SET
-			tag_version = tag_version + 1,
-			updated_at = NOW(),
-			trademark_status = $3
-		WHERE
-			trademark_id = $1 AND tag_version = $2 AND deleted_at IS NULL
-		RETURNING
-			tag_version;`
-
-	var tagVersion int32
-
-	err := re.client.Conn(ctx).QueryRow(
-		ctx,
-		sql,
-		row.ID,
-		row.TagVersion,
-		row.Status,
-	).Scan(
-		&tagVersion,
-	)
-
-	return tagVersion, err
+func (re *TrademarkPostgres) UpdateStatus(ctx context.Context, row entity.Trademark) (tagVersion uint32, err error) {
+	return re.repoStatus.Update(ctx, row.ID, row.TagVersion, row.Status)
 }
 
 // Delete - comment method.
-func (re *TrademarkPostgres) Delete(ctx context.Context, rowID mrtype.KeyInt32) error {
-	sql := `
-		UPDATE
-			` + module.DBSchema + `.` + module.DBTableNameTrademarks + `
-		SET
-			tag_version = tag_version + 1,
-			deleted_at = NOW()
-		WHERE
-			trademark_id = $1 AND deleted_at IS NULL;`
+func (re *TrademarkPostgres) Delete(ctx context.Context, rowID uint64) error {
+	return re.repoSoftDeleter.Delete(ctx, rowID)
+}
 
-	return re.client.Conn(ctx).Exec(
-		ctx,
-		sql,
-		rowID,
+func (re *TrademarkPostgres) fetchCondition(filter entity.TrademarkListFilter) mrstorage.SQLPartFunc {
+	return re.sqlBuilder.Condition().HelpFunc(
+		func(c mrstorage.SQLConditionHelper) mrstorage.SQLPartFunc {
+			return c.JoinAnd(
+				c.Expr("deleted_at IS NULL"),
+				c.FilterLike("UPPER(trademark_caption)", strings.ToUpper(filter.SearchText)),
+				c.FilterAnyOf("trademark_status", filter.Statuses),
+			)
+		},
+	)
+}
+
+func (re *TrademarkPostgres) fetchOrderBy(sorter mrtype.SortParams) mrstorage.SQLPartFunc {
+	return re.sqlBuilder.OrderBy().HelpFunc(
+		func(o mrstorage.SQLOrderByHelper) mrstorage.SQLPartFunc {
+			return o.JoinComma(
+				o.Field(sorter.FieldName, sorter.Direction),
+				o.Field("trademark_id", mrenum.SortDirectionASC),
+			)
+		},
 	)
 }

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/mondegor/go-storage/mrpostgres/db"
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-webcore/mrenum"
 
@@ -15,35 +16,48 @@ import (
 type (
 	// CategoryPostgres - comment struct.
 	CategoryPostgres struct {
-		client    mrstorage.DBConnManager
-		sqlSelect mrstorage.SQLBuilderSelect
+		client        mrstorage.DBConnManager
+		sqlBuilder    mrstorage.SQLBuilder
+		repoTotalRows db.TotalRowsFetcher[uint64]
 	}
 )
 
 // NewCategoryPostgres - создаёт объект CategoryPostgres.
-func NewCategoryPostgres(client mrstorage.DBConnManager, sqlSelect mrstorage.SQLBuilderSelect) *CategoryPostgres {
+func NewCategoryPostgres(client mrstorage.DBConnManager, sqlBuilder mrstorage.SQLBuilder) *CategoryPostgres {
 	return &CategoryPostgres{
-		client:    client,
-		sqlSelect: sqlSelect,
+		client:     client,
+		sqlBuilder: sqlBuilder,
+		repoTotalRows: db.NewTotalRowsFetcher[uint64](
+			client,
+			module.DBTableNameCategories,
+		),
 	}
 }
 
-// NewSelectParams - comment method.
-func (re *CategoryPostgres) NewSelectParams(params entity.CategoryParams) mrstorage.SQLSelectParams {
-	return mrstorage.SQLSelectParams{
-		Where: re.sqlSelect.Where(func(w mrstorage.SQLBuilderWhere) mrstorage.SQLBuilderPartFunc {
-			return w.JoinAnd(
-				w.Expr("deleted_at IS NULL"),
-				w.Equal("category_status", mrenum.ItemStatusEnabled),
-				w.FilterLike("UPPER(category_caption)", strings.ToUpper(params.Filter.SearchText)),
-			)
-		}),
+// FetchWithTotal - comment method.
+func (re *CategoryPostgres) FetchWithTotal(ctx context.Context, params entity.CategoryParams) (rows []entity.Category, countRows uint64, err error) {
+	condition := re.sqlBuilder.Condition().Build(re.fetchCondition(params.Filter))
+
+	total, err := re.repoTotalRows.Fetch(ctx, condition)
+	if err != nil || total == 0 {
+		return nil, 0, err
 	}
+
+	rows, err = re.fetch(ctx, condition, total)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return rows, total, nil
 }
 
 // Fetch - comment method.
-func (re *CategoryPostgres) Fetch(ctx context.Context, params mrstorage.SQLSelectParams) ([]entity.Category, error) {
-	whereStr, whereArgs := params.Where.ToSQL()
+func (re *CategoryPostgres) fetch(
+	ctx context.Context,
+	condition mrstorage.SQLPart,
+	maxRows uint64,
+) ([]entity.Category, error) {
+	whereStr, whereArgs := condition.ToSQL()
 
 	sql := `
 		SELECT
@@ -51,7 +65,7 @@ func (re *CategoryPostgres) Fetch(ctx context.Context, params mrstorage.SQLSelec
 			category_caption,
 			COALESCE(image_meta ->> 'path', '') as image_url
 		FROM
-			` + module.DBSchema + `.` + module.DBTableNameCategories + `
+			` + module.DBTableNameCategories + `
 		WHERE
 			` + whereStr + `
 		ORDER BY
@@ -68,7 +82,7 @@ func (re *CategoryPostgres) Fetch(ctx context.Context, params mrstorage.SQLSelec
 
 	defer cursor.Close()
 
-	rows := make([]entity.Category, 0)
+	rows := make([]entity.Category, 0, maxRows)
 
 	for cursor.Next() {
 		var row entity.Category
@@ -88,31 +102,6 @@ func (re *CategoryPostgres) Fetch(ctx context.Context, params mrstorage.SQLSelec
 	return rows, cursor.Err()
 }
 
-// FetchTotal - comment method.
-func (re *CategoryPostgres) FetchTotal(ctx context.Context, where mrstorage.SQLBuilderPart) (int64, error) {
-	whereStr, whereArgs := where.ToSQL()
-
-	sql := `
-		SELECT
-			COUNT(*)
-		FROM
-			` + module.DBSchema + `.` + module.DBTableNameCategories + `
-		WHERE
-			` + whereStr + `;`
-
-	var totalRow int64
-
-	err := re.client.Conn(ctx).QueryRow(
-		ctx,
-		sql,
-		whereArgs...,
-	).Scan(
-		&totalRow,
-	)
-
-	return totalRow, err
-}
-
 // FetchOne - comment method.
 func (re *CategoryPostgres) FetchOne(ctx context.Context, rowID uuid.UUID) (entity.Category, error) {
 	sql := `
@@ -120,7 +109,7 @@ func (re *CategoryPostgres) FetchOne(ctx context.Context, rowID uuid.UUID) (enti
 			category_caption,
 			COALESCE(image_meta ->> 'path', '') as image_url
 		FROM
-			` + module.DBSchema + `.` + module.DBTableNameCategories + `
+			` + module.DBTableNameCategories + `
 		WHERE
 			category_id = $1 AND category_status = $2 AND deleted_at IS NULL
 		LIMIT 1;`
@@ -138,4 +127,16 @@ func (re *CategoryPostgres) FetchOne(ctx context.Context, rowID uuid.UUID) (enti
 	)
 
 	return row, err
+}
+
+func (re *CategoryPostgres) fetchCondition(filter entity.CategoryListFilter) mrstorage.SQLPartFunc {
+	return re.sqlBuilder.Condition().HelpFunc(
+		func(c mrstorage.SQLConditionHelper) mrstorage.SQLPartFunc {
+			return c.JoinAnd(
+				c.Expr("deleted_at IS NULL"),
+				c.Equal("category_status", mrenum.ItemStatusEnabled),
+				c.FilterLike("UPPER(category_caption)", strings.ToUpper(filter.SearchText)),
+			)
+		},
+	)
 }

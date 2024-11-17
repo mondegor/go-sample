@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/mondegor/go-storage/mrpostgres/db"
 	"github.com/mondegor/go-storage/mrsql"
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-webcore/mrenum"
@@ -17,63 +18,94 @@ import (
 type (
 	// ProductPostgres - comment struct.
 	ProductPostgres struct {
-		client    mrstorage.DBConnManager
-		sqlSelect mrstorage.SQLBuilderSelect
-		sqlUpdate mrstorage.SQLBuilderUpdate
+		client          mrstorage.DBConnManager
+		sqlBuilder      mrstorage.SQLBuilder
+		repoIDByArticle db.FieldFetcher[string, uint64]
+		repoStatus      db.FieldWithVersionUpdater[uint64, uint32, mrenum.ItemStatus]
+		repoSoftDeleter db.RowSoftDeleter[uint64]
+		repoTotalRows   db.TotalRowsFetcher[uint64]
 	}
 )
 
 // NewProductPostgres - создаёт объект ProductPostgres.
-func NewProductPostgres(client mrstorage.DBConnManager, sqlSelect mrstorage.SQLBuilderSelect, sqlUpdate mrstorage.SQLBuilderUpdate) *ProductPostgres {
+func NewProductPostgres(client mrstorage.DBConnManager, sqlBuilder mrstorage.SQLBuilder) *ProductPostgres {
 	return &ProductPostgres{
-		client:    client,
-		sqlSelect: sqlSelect,
-		sqlUpdate: sqlUpdate,
+		client:     client,
+		sqlBuilder: sqlBuilder,
+		repoIDByArticle: db.NewFieldFetcher[string, uint64](
+			client,
+			module.DBTableNameProducts,
+			"product_article",
+			"product_id",
+			module.DBFieldDeletedAt,
+		),
+		repoStatus: db.NewFieldWithVersionUpdater[uint64, uint32, mrenum.ItemStatus](
+			client,
+			module.DBTableNameProducts,
+			"product_id",
+			module.DBFieldTagVersion,
+			"product_status",
+			module.DBFieldDeletedAt,
+		),
+		repoSoftDeleter: db.NewRowSoftDeleter[uint64](
+			client,
+			module.DBTableNameProducts,
+			"product_id",
+			module.DBFieldTagVersion,
+			module.DBFieldDeletedAt,
+		),
+		repoTotalRows: db.NewTotalRowsFetcher[uint64](
+			client,
+			module.DBTableNameProducts,
+		),
 	}
 }
 
-// NewOrderMeta - comment method.
-func (re *ProductPostgres) NewOrderMeta(categoryID uuid.UUID) mrstorage.MetaGetter {
-	return mrsql.NewEntityMeta(
-		module.DBSchema+"."+module.DBTableNameProducts,
-		"product_id",
-		re.sqlSelect.Where(func(w mrstorage.SQLBuilderWhere) mrstorage.SQLBuilderPartFunc {
-			return w.JoinAnd(
-				w.Equal("category_id", categoryID),
-				w.Expr("deleted_at IS NULL"),
+// NewCondition - comment method.
+func (re *ProductPostgres) NewCondition(categoryID uuid.UUID) mrstorage.SQLPartFunc {
+	return re.sqlBuilder.Condition().HelpFunc(
+		func(c mrstorage.SQLConditionHelper) mrstorage.SQLPartFunc {
+			return c.JoinAnd(
+				c.Equal("category_id", categoryID),
+				c.Expr("deleted_at IS NULL"),
 			)
-		}),
+		},
 	)
 }
 
-// NewSelectParams - comment method.
-func (re *ProductPostgres) NewSelectParams(params entity.ProductParams) mrstorage.SQLSelectParams {
-	return mrstorage.SQLSelectParams{
-		Where: re.sqlSelect.Where(func(w mrstorage.SQLBuilderWhere) mrstorage.SQLBuilderPartFunc {
-			return w.JoinAnd(
-				w.Expr("deleted_at IS NULL"),
-				w.FilterEqualUUID("category_id", params.Filter.CategoryID),
-				w.FilterLikeFields([]string{"UPPER(product_article)", "UPPER(product_caption)"}, strings.ToUpper(params.Filter.SearchText)),
-				w.FilterAnyOf("trademark_id", params.Filter.TrademarkIDs),
-				w.FilterRangeInt64("product_price", params.Filter.Price, 0),
-				w.FilterAnyOf("product_status", params.Filter.Statuses),
-			)
-		}),
-		OrderBy: re.sqlSelect.OrderBy(func(s mrstorage.SQLBuilderOrderBy) mrstorage.SQLBuilderPartFunc {
-			return s.Join(
-				s.Field(params.Sorter.FieldName, params.Sorter.Direction),
-				s.Field("product_id", mrenum.SortDirectionASC),
-			)
-		}),
-		Limit: re.sqlSelect.Limit(func(p mrstorage.SQLBuilderLimit) mrstorage.SQLBuilderPartFunc {
-			return p.OffsetLimit(params.Pager.Index, params.Pager.Size)
-		}),
+// FetchWithTotal - comment method.
+func (re *ProductPostgres) FetchWithTotal(ctx context.Context, params entity.ProductParams) (rows []entity.Product, countRows uint64, err error) {
+	condition := re.sqlBuilder.Condition().Build(re.fetchCondition(params.Filter))
+
+	total, err := re.repoTotalRows.Fetch(ctx, condition)
+	if err != nil || total == 0 {
+		return nil, 0, err
 	}
+
+	if params.Pager.Size > total {
+		params.Pager.Size = total
+	}
+
+	orderBy := re.sqlBuilder.OrderBy().Build(re.fetchOrderBy(params.Sorter))
+	limit := re.sqlBuilder.Limit().Build(params.Pager.Index, params.Pager.Size)
+
+	rows, err = re.fetch(ctx, condition, orderBy, limit, params.Pager.Size)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return rows, total, nil
 }
 
 // Fetch - comment method.
-func (re *ProductPostgres) Fetch(ctx context.Context, params mrstorage.SQLSelectParams) ([]entity.Product, error) {
-	whereStr, whereArgs := params.Where.ToSQL()
+func (re *ProductPostgres) fetch(
+	ctx context.Context,
+	condition mrstorage.SQLPart,
+	orderBy mrstorage.SQLPart,
+	limit mrstorage.SQLPart,
+	maxRows uint64,
+) ([]entity.Product, error) {
+	whereStr, whereArgs := condition.ToSQL()
 
 	sql := `
 		SELECT
@@ -88,11 +120,11 @@ func (re *ProductPostgres) Fetch(ctx context.Context, params mrstorage.SQLSelect
 			created_at as createdAt,
 			updated_at as updatedAt
 		FROM
-			` + module.DBSchema + `.` + module.DBTableNameProducts + `
+			` + module.DBTableNameProducts + `
 		WHERE
 			` + whereStr + `
 		ORDER BY
-			` + params.OrderBy.String() + params.Limit.String() + `;`
+			` + orderBy.String() + limit.String() + `;`
 
 	cursor, err := re.client.Conn(ctx).Query(
 		ctx,
@@ -105,7 +137,7 @@ func (re *ProductPostgres) Fetch(ctx context.Context, params mrstorage.SQLSelect
 
 	defer cursor.Close()
 
-	rows := make([]entity.Product, 0)
+	rows := make([]entity.Product, 0, maxRows)
 
 	for cursor.Next() {
 		var row entity.Product
@@ -132,33 +164,8 @@ func (re *ProductPostgres) Fetch(ctx context.Context, params mrstorage.SQLSelect
 	return rows, cursor.Err()
 }
 
-// FetchTotal - comment method.
-func (re *ProductPostgres) FetchTotal(ctx context.Context, where mrstorage.SQLBuilderPart) (int64, error) {
-	whereStr, whereArgs := where.ToSQL()
-
-	sql := `
-		SELECT
-			COUNT(*)
-		FROM
-			` + module.DBSchema + `.` + module.DBTableNameProducts + `
-		WHERE
-			` + whereStr + `;`
-
-	var totalRow int64
-
-	err := re.client.Conn(ctx).QueryRow(
-		ctx,
-		sql,
-		whereArgs...,
-	).Scan(
-		&totalRow,
-	)
-
-	return totalRow, err
-}
-
 // FetchOne - comment method.
-func (re *ProductPostgres) FetchOne(ctx context.Context, rowID mrtype.KeyInt32) (entity.Product, error) {
+func (re *ProductPostgres) FetchOne(ctx context.Context, rowID uint64) (entity.Product, error) {
 	sql := `
 		SELECT
 			tag_version,
@@ -171,7 +178,7 @@ func (re *ProductPostgres) FetchOne(ctx context.Context, rowID mrtype.KeyInt32) 
 			created_at,
 			updated_at
 		FROM
-			` + module.DBSchema + `.` + module.DBTableNameProducts + `
+			` + module.DBTableNameProducts + `
 		WHERE
 			product_id = $1 AND deleted_at IS NULL
 		LIMIT 1;`
@@ -198,58 +205,20 @@ func (re *ProductPostgres) FetchOne(ctx context.Context, rowID mrtype.KeyInt32) 
 }
 
 // FetchIDByArticle - comment method.
-func (re *ProductPostgres) FetchIDByArticle(ctx context.Context, article string) (mrtype.KeyInt32, error) {
-	sql := `
-		SELECT
-			product_id
-		FROM
-			` + module.DBSchema + `.` + module.DBTableNameProducts + `
-		WHERE
-			product_article = $1 AND deleted_at IS NULL
-		LIMIT 1;`
-
-	var rowID mrtype.KeyInt32
-
-	err := re.client.Conn(ctx).QueryRow(
-		ctx,
-		sql,
-		article,
-	).Scan(
-		&rowID,
-	)
-
-	return rowID, err
+func (re *ProductPostgres) FetchIDByArticle(ctx context.Context, article string) (rowID uint64, err error) {
+	return re.repoIDByArticle.Fetch(ctx, article)
 }
 
 // FetchStatus - comment method.
 // result: mrenum.ItemStatus - exists, ErrStorageNoRowFound - not exists, error - query error.
-func (re *ProductPostgres) FetchStatus(ctx context.Context, rowID mrtype.KeyInt32) (mrenum.ItemStatus, error) {
-	sql := `
-		SELECT
-			product_status
-		FROM
-			` + module.DBSchema + `.` + module.DBTableNameProducts + `
-		WHERE
-			product_id = $1 AND deleted_at IS NULL
-		LIMIT 1;`
-
-	var status mrenum.ItemStatus
-
-	err := re.client.Conn(ctx).QueryRow(
-		ctx,
-		sql,
-		rowID,
-	).Scan(
-		&status,
-	)
-
-	return status, err
+func (re *ProductPostgres) FetchStatus(ctx context.Context, rowID uint64) (mrenum.ItemStatus, error) {
+	return re.repoStatus.Fetch(ctx, rowID)
 }
 
 // Insert - comment method.
-func (re *ProductPostgres) Insert(ctx context.Context, row entity.Product) (mrtype.KeyInt32, error) {
+func (re *ProductPostgres) Insert(ctx context.Context, row entity.Product) (rowID uint64, err error) {
 	sql := `
-		INSERT INTO ` + module.DBSchema + `.` + module.DBTableNameProducts + `
+		INSERT INTO ` + module.DBTableNameProducts + `
 			(
 				category_id,
 				product_article,
@@ -263,7 +232,7 @@ func (re *ProductPostgres) Insert(ctx context.Context, row entity.Product) (mrty
 		RETURNING
 			product_id;`
 
-	err := re.client.Conn(ctx).QueryRow(
+	err = re.client.Conn(ctx).QueryRow(
 		ctx,
 		sql,
 		row.CategoryID,
@@ -280,9 +249,8 @@ func (re *ProductPostgres) Insert(ctx context.Context, row entity.Product) (mrty
 }
 
 // Update - comment method.
-func (re *ProductPostgres) Update(ctx context.Context, row entity.Product) (int32, error) {
-	set, err := re.sqlUpdate.SetFromEntity(row)
-
+func (re *ProductPostgres) Update(ctx context.Context, row entity.Product) (tagVersion uint32, err error) {
+	set, err := re.sqlBuilder.Set().BuildEntity(row)
 	if err != nil || set.Empty() {
 		return 0, err
 	}
@@ -292,11 +260,11 @@ func (re *ProductPostgres) Update(ctx context.Context, row entity.Product) (int3
 		row.TagVersion,
 	}
 
-	setStr, setArgs := set.WithParam(len(args) + 1).ToSQL()
+	setStr, setArgs := set.WithStartArg(len(args) + 1).ToSQL()
 
 	sql := `
 		UPDATE
-			` + module.DBSchema + `.` + module.DBTableNameProducts + `
+			` + module.DBTableNameProducts + `
 		SET
 			tag_version = tag_version + 1,
 			updated_at = NOW(),
@@ -305,8 +273,6 @@ func (re *ProductPostgres) Update(ctx context.Context, row entity.Product) (int3
 			product_id = $1 AND tag_version = $2 AND deleted_at IS NULL
 		RETURNING
 			tag_version;`
-
-	var tagVersion int32
 
 	err = re.client.Conn(ctx).QueryRow(
 		ctx,
@@ -320,48 +286,37 @@ func (re *ProductPostgres) Update(ctx context.Context, row entity.Product) (int3
 }
 
 // UpdateStatus - comment method.
-func (re *ProductPostgres) UpdateStatus(ctx context.Context, row entity.Product) (int32, error) {
-	sql := `
-		UPDATE
-			` + module.DBSchema + `.` + module.DBTableNameProducts + `
-		SET
-			tag_version = tag_version + 1,
-			updated_at = NOW(),
-			product_status = $3
-		WHERE
-			product_id = $1 AND tag_version = $2 AND deleted_at IS NULL
-		RETURNING
-			tag_version;`
-
-	var tagVersion int32
-
-	err := re.client.Conn(ctx).QueryRow(
-		ctx,
-		sql,
-		row.ID,
-		row.TagVersion,
-		row.Status,
-	).Scan(
-		&tagVersion,
-	)
-
-	return tagVersion, err
+func (re *ProductPostgres) UpdateStatus(ctx context.Context, row entity.Product) (tagVersion uint32, err error) {
+	return re.repoStatus.Update(ctx, row.ID, row.TagVersion, row.Status)
 }
 
 // Delete - comment method.
-func (re *ProductPostgres) Delete(ctx context.Context, rowID mrtype.KeyInt32) error {
-	sql := `
-		UPDATE
-			` + module.DBSchema + `.` + module.DBTableNameProducts + `
-		SET
-			tag_version = tag_version + 1,
-			deleted_at = NOW()
-		WHERE
-			product_id = $1 AND deleted_at IS NULL;`
+func (re *ProductPostgres) Delete(ctx context.Context, rowID uint64) error {
+	return re.repoSoftDeleter.Delete(ctx, rowID)
+}
 
-	return re.client.Conn(ctx).Exec(
-		ctx,
-		sql,
-		rowID,
+func (re *ProductPostgres) fetchCondition(filter entity.ProductListFilter) mrstorage.SQLPartFunc {
+	return re.sqlBuilder.Condition().HelpFunc(
+		func(c mrstorage.SQLConditionHelper) mrstorage.SQLPartFunc {
+			return c.JoinAnd(
+				c.Expr("deleted_at IS NULL"),
+				c.FilterEqual("category_id", filter.CategoryID),
+				c.FilterLikeFields([]string{"UPPER(product_article)", "UPPER(product_caption)"}, strings.ToUpper(filter.SearchText)),
+				c.FilterAnyOf("trademark_id", filter.TrademarkIDs),
+				c.FilterRangeInt64("product_price", filter.Price, 0),
+				c.FilterAnyOf("product_status", filter.Statuses),
+			)
+		},
+	)
+}
+
+func (re *ProductPostgres) fetchOrderBy(sorter mrtype.SortParams) mrstorage.SQLPartFunc {
+	return re.sqlBuilder.OrderBy().HelpFunc(
+		func(o mrstorage.SQLOrderByHelper) mrstorage.SQLPartFunc {
+			return o.JoinComma(
+				o.Field(sorter.FieldName, sorter.Direction),
+				o.Field("product_id", mrenum.SortDirectionASC),
+			)
+		},
 	)
 }

@@ -4,7 +4,7 @@ Catalog.Categories.PublicAPI.Request.Path.CategoryID:
   in: path
   required: true
   schema:
-    type: integer
-    format: int32
+    type: string
+    format: uuid
     minimum: 1
-  example: 1000
+  example: "de7ad549-0515-4564-bb0c-a9b465b948d9"

@@ -37,7 +37,7 @@ type (
 		AppSections     `yaml:"app_sections"`
 		AccessControl   `yaml:"access_control"`
 		ModulesSettings `yaml:"modules_settings"`
-		MimeTypes       `yaml:"mime_types"`
+		Validation      `yaml:"validation"`
 		TaskSchedule    `yaml:"task_schedule"`
 	}
 
@@ -67,7 +67,7 @@ type (
 	// ErrorCaller - comment struct.
 	ErrorCaller struct {
 		Enable       bool     `yaml:"enable" env:"APPX_ERR_CALLER_ENABLE"`
-		Depth        int      `yaml:"depth" env:"APPX_ERR_CALLER_DEPTH"`
+		Depth        uint8    `yaml:"depth" env:"APPX_ERR_CALLER_DEPTH"`
 		ShowFuncName bool     `yaml:"show_func_name"`
 		UpperBounds  []string `yaml:"upper_bounds"`
 	}
@@ -244,9 +244,36 @@ type (
 		} `yaml:"file_station"`
 	}
 
+	// Validation - comment struct.
+	Validation struct {
+		// Files struct {
+		// } `yaml:"files"`
+		Images struct {
+			Image ImageType `yaml:"image"`
+		} `yaml:"images"`
+		MimeTypes []mrlib.MimeType `yaml:"mime_types"`
+	}
+
+	// FileType - comment struct.
+	FileType struct {
+		MinSize                 uint64   `yaml:"min_size"`
+		MaxSize                 uint64   `yaml:"max_size"`
+		MaxFiles                uint32   `yaml:"max_files"`
+		CheckRequestContentType bool     `yaml:"check_request_content_type"`
+		Extensions              []string `yaml:"extensions"`
+	}
+
+	// ImageType - comment struct.
+	ImageType struct {
+		MaxWidth  uint64   `yaml:"max_width"`
+		MaxHeight uint64   `yaml:"max_height"`
+		CheckBody bool     `yaml:"check_body"`
+		File      FileType `yaml:"file"`
+	}
+
 	// TaskSchedule - comment struct.
 	TaskSchedule struct {
-		SettingsReloader SchedulerTask `yaml:"settings_reloader"`
+		ReloadSettings SchedulerTask `yaml:"reload_settings"`
 	}
 
 	// SchedulerTask - comment struct.
@@ -256,7 +283,4 @@ type (
 		Period  time.Duration `yaml:"period"`
 		Timeout time.Duration `yaml:"timeout"`
 	}
-
-	// MimeTypes - comment struct.
-	MimeTypes []mrlib.MimeType
 )

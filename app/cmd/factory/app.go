@@ -7,11 +7,9 @@ import (
 	"net/http"
 
 	"github.com/mondegor/go-storage/mrredislock"
-	"github.com/mondegor/go-webcore/mrcore/mrcoreerr"
 	"github.com/mondegor/go-webcore/mrlib"
 	"github.com/mondegor/go-webcore/mrlog"
 	"github.com/mondegor/go-webcore/mrrun"
-	"github.com/mondegor/go-webcore/mrsender/mrlogadapter"
 
 	"github.com/mondegor/go-sample/cmd/factory/catalog"
 	"github.com/mondegor/go-sample/cmd/factory/filestation"
@@ -76,15 +74,11 @@ func InitAppEnvironment(ctx context.Context, opts app.Options) (context.Context,
 
 	opts.AppHealth = mrrun.NewAppHealth()
 	opts.ErrorHandler = NewErrorHandler(logger, opts.Cfg)
-	opts.EventEmitter = mrlogadapter.NewEventEmitter(logger)
 
 	opts, err = createAppEnvironment(ctx, opts)
 	if err != nil {
 		return nil, app.Options{}, err
 	}
-
-	// Register errors (!!! only after create environment)
-	registerAppErrors(opts)
 
 	// Shared APIs init section (!!! only after create environment)
 	if opts, err = createAppAPI(ctx, opts); err != nil {
@@ -101,10 +95,6 @@ func InitAppEnvironment(ctx context.Context, opts app.Options) (context.Context,
 
 // createAppEnvironment - создаёт, и настраивает внешнее окружение приложения.
 func createAppEnvironment(ctx context.Context, opts app.Options) (enrichedOpts app.Options, err error) {
-	opts.ErrorManager = NewErrorManager(opts)
-	opts.UseCaseErrorWrapper = mrcoreerr.NewUseCaseErrorWrapper()
-	opts.InternalRouter = http.NewServeMux()
-
 	if opts.Cfg.Sentry.DSN != "" {
 		sentry, err := NewSentry(ctx, opts.Cfg)
 		if err != nil {
@@ -115,7 +105,12 @@ func createAppEnvironment(ctx context.Context, opts app.Options) (enrichedOpts a
 		opts.Sentry = sentry
 	}
 
+	opts.InternalRouter = http.NewServeMux()
 	opts.Prometheus = NewPrometheusRegistry(ctx, opts)
+
+	// !!! only after init Sentry and Prometheus
+	InitProtoAppErrors(opts)
+	opts.EventEmitter = NewEventEmitter(opts)
 
 	if opts.PostgresConnManager == nil {
 		postgresAdapter, err := NewPostgres(ctx, opts)
@@ -181,22 +176,14 @@ func createAppEnvironment(ctx context.Context, opts app.Options) (enrichedOpts a
 	return opts, nil
 }
 
-func registerAppErrors(opts app.Options) {
-	catalog.RegisterCategoryErrors(opts.ErrorManager)
-	catalog.RegisterProductErrors(opts.ErrorManager)
-	catalog.RegisterTrademarkErrors(opts.ErrorManager)
-}
-
 func createAppAPI(ctx context.Context, opts app.Options) (enrichedOpts app.Options, err error) {
-	opts.OrdererAPI = NewOrdererAPI(ctx, opts)
-
 	{
-		getter, task := NewSettingsGetterAndTask(ctx, opts)
+		getter, task := NewSettingsGetterAPI(ctx, opts)
 		opts.SettingsGetterAPI = getter
 		opts.SchedulerTasks = append(opts.SchedulerTasks, task)
 	}
 
-	opts.SettingsSetterAPI = NewSettingsSetter(ctx, opts)
+	opts.SettingsSetterAPI = NewSettingsSetterAPI(ctx, opts)
 
 	if opts.CatalogCategoryAvailabilityAPI, err = catalog.NewCategoryAvailabilityAPI(ctx, opts); err != nil {
 		return opts, err

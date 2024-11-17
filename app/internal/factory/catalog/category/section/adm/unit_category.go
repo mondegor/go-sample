@@ -3,8 +3,9 @@ package adm
 import (
 	"context"
 
-	"github.com/mondegor/go-storage/mrpostgres"
+	"github.com/mondegor/go-storage/mrpostgres/builder"
 	"github.com/mondegor/go-storage/mrsql"
+	"github.com/mondegor/go-webcore/mrlog"
 	"github.com/mondegor/go-webcore/mrserver"
 
 	"github.com/mondegor/go-sample/internal/catalog/category/section/adm/controller/httpv1"
@@ -33,25 +34,24 @@ func createUnitCategory(ctx context.Context, opts category.Options) ([]mrserver.
 }
 
 func newUnitCategory(ctx context.Context, opts category.Options) (*httpv1.Category, error) {
-	metaOrderBy, err := mrsql.NewEntityMetaOrderBy(ctx, entity.Category{})
+	entityMeta, err := mrsql.ParseEntity(mrlog.Ctx(ctx), entity.Category{})
 	if err != nil {
 		return nil, err
 	}
 
 	storage := repository.NewCategoryPostgres(
 		opts.DBConnManager,
-		mrpostgres.NewSQLBuilderSelect(
-			mrpostgres.NewSQLBuilderWhere(),
-			mrpostgres.NewSQLBuilderOrderBy(ctx, metaOrderBy.DefaultSort()),
-			mrpostgres.NewSQLBuilderLimit(opts.PageSizeMax),
+		builder.NewSQL(
+			builder.WithSQLOrderByDefaultSort(entityMeta.MetaOrderBy().DefaultSort()),
+			builder.WithSQLLimitMaxSize(opts.PageSizeMax),
 		),
 	)
-	useCase := usecase.NewCategory(storage, opts.EventEmitter, opts.UseCaseHelper, opts.UnitCategory.ImageURLBuilder)
+	useCase := usecase.NewCategory(storage, opts.EventEmitter, opts.UseCaseErrorWrapper, opts.UnitCategory.ImageURLBuilder)
 	controller := httpv1.NewCategory(
 		opts.RequestParsers.ModuleParser,
 		opts.ResponseSender,
 		useCase,
-		metaOrderBy,
+		entityMeta.MetaOrderBy(),
 	)
 
 	return controller, nil
@@ -64,7 +64,7 @@ func newUnitCategoryImage(_ context.Context, opts category.Options) (*httpv1.Cat
 		opts.UnitCategory.ImageFileAPI,
 		opts.Locker,
 		opts.EventEmitter,
-		opts.UseCaseHelper,
+		opts.UseCaseErrorWrapper,
 	)
 	controller := httpv1.NewCategoryImage(
 		opts.RequestParsers.ModuleParser,

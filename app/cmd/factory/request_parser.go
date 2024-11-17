@@ -30,14 +30,9 @@ func CreateRequestParsers(ctx context.Context, cfg config.Config) (app.RequestPa
 	// поэтому её можно менять только при смене самого роутера
 	pathFunc := mrchi.URLPathParam
 
-	registeredMimeTypes := mrlib.NewMimeTypeList(logger, cfg.MimeTypes)
+	registeredMimeTypes := mrlib.NewMimeTypeList(logger, cfg.Validation.MimeTypes)
 
-	// jsonMimeTypeList, err := registeredMimeTypes.NewListByExts(logger, ".json")
-	// if err != nil {
-	// 	return app.RequestParsers{}, err
-	// }
-
-	imageMimeTypeList, err := registeredMimeTypes.NewListByExts(logger, ".jpeg", ".jpg", ".png")
+	imageMimeTypes, err := registeredMimeTypes.MimeTypesByExts(cfg.Validation.Images.Image.File.Extensions)
 	if err != nil {
 		return app.RequestParsers{}, err
 	}
@@ -47,7 +42,7 @@ func CreateRequestParsers(ctx context.Context, cfg config.Config) (app.RequestPa
 		// DateTime:  mrparser.NewDateTime(),
 		Int64:      mrparser.NewInt64(pathFunc),
 		ItemStatus: mrparser.NewItemStatus(),
-		KeyInt32:   mrparser.NewKeyInt32(pathFunc),
+		Uint64:     mrparser.NewUint64(pathFunc),
 		ListSorter: mrparser.NewListSorter(mrparser.ListSorterOptions{}),
 		ListPager: mrparser.NewListPager(
 			mrparser.ListPagerOptions{
@@ -58,34 +53,24 @@ func CreateRequestParsers(ctx context.Context, cfg config.Config) (app.RequestPa
 		String:    mrparser.NewString(pathFunc),
 		UUID:      mrparser.NewUUID(pathFunc),
 		Validator: mrparser.NewValidator(mrjson.NewDecoder(), validator),
-		// File: mrparser.NewFile(
-		// 	logger,
-		// 	mrparser.FileOptions{
-		// 		AllowedMimeTypes:        jsonMimeTypeList,
-		// 		MinSize:                 512,
-		// 		MaxSize:                 10 * 1024 * 1024,
-		// 		CheckRequestContentType: true,
-		// 	},
-		// ),
 		Image: mrparser.NewImage(
 			logger,
-			mrparser.ImageOptions{
-				File: mrparser.FileOptions{
-					AllowedMimeTypes:        imageMimeTypeList,
-					MinSize:                 512,
-					MaxSize:                 256 * 1024,
-					CheckRequestContentType: true,
-				},
-				MaxWidth:  1024,
-				MaxHeight: 1024,
-				CheckBody: true,
-			},
+			mrparser.WithImageMaxWidth(cfg.Validation.Images.Image.MaxWidth),
+			mrparser.WithImageMaxHeight(cfg.Validation.Images.Image.MaxHeight),
+			mrparser.WithImageCheckBody(cfg.Validation.Images.Image.CheckBody),
+			mrparser.WithImageFileOptions(
+				mrparser.WithFileMinSize(cfg.Validation.Images.Image.File.MinSize),
+				mrparser.WithFileMaxSize(cfg.Validation.Images.Image.File.MaxSize),
+				mrparser.WithFileMaxFiles(cfg.Validation.Images.Image.File.MaxFiles),
+				mrparser.WithFileCheckRequestContentType(cfg.Validation.Images.Image.File.CheckRequestContentType),
+				mrparser.WithFileAllowedMimeTypes(imageMimeTypes),
+			),
 		),
 	}
 
 	parsers.Parser = validate.NewParser(
 		parsers.Int64,
-		parsers.KeyInt32,
+		parsers.Uint64,
 		parsers.String,
 		parsers.UUID,
 		parsers.Validator,

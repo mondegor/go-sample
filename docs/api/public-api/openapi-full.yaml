@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.3
 info:
-  version: v0.1.13
+  version: v0.1.14
   title: Public API go-sample
   license:
     name: Apache-2.0
@@ -15,7 +15,7 @@ info:
 
     #### Ограничения полей
     - required - поле обязательно для заполнения;
-    - omitempty - поле может быть не указано (не будет использоваться методом, в который было передано);
+    - omitempty - поле может не указываться (будет игнорироваться при обновлении записи целиком);
     - unique - уникальное значение поля;
     - min=N - поле должно быть не менее N символов;
     - max=N - поле должно быть не более N символов;
@@ -170,6 +170,7 @@ components:
       required: false
       schema:
         type: integer
+        # format: uint64
         minimum: 0
         maximum: 1024
         default: 0
@@ -182,6 +183,7 @@ components:
       required: false
       schema:
         type: integer
+        # format: uint64
         minimum: 1
         maximum: 1024
         default: 50
@@ -219,10 +221,10 @@ components:
       in: path
       required: true
       schema:
-        type: integer
-        format: int32
+        type: string
+        format: uuid
         minimum: 1
-      example: 1000
+      example: "de7ad549-0515-4564-bb0c-a9b465b948d9"
 
     FileStation.PublicAPI.Request.Path.FilePath:
       description: Относительный путь к файлу
@@ -251,6 +253,7 @@ components:
     App.Field.ListPager.Total:
       description: Количество записей в БД с учётом указанных в запросе фильтров
       type: integer
+      # format: uint64
       minimum: 0
       example: 584
 
@@ -317,7 +320,7 @@ components:
       description: Идентификатор категории (модуль - Catalog.Category)
       type: string
       format: uuid
-      example: "21de1e21-0a4a-47a5-b60d-67c7f78a3278"
+      example: "de7ad549-0515-4564-bb0c-a9b465b948d9"
 
     Catalog.Categories.PublicAPI.Response.Model.CategoryList:
       description: public DTO список категорий

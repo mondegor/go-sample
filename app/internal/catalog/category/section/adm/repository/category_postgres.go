@@ -5,55 +5,86 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/mondegor/go-storage/mrpostgres/db"
 	"github.com/mondegor/go-storage/mrstorage"
 	"github.com/mondegor/go-webcore/mrenum"
+	"github.com/mondegor/go-webcore/mrtype"
 
 	"github.com/mondegor/go-sample/internal/catalog/category/module"
 	"github.com/mondegor/go-sample/internal/catalog/category/section/adm/entity"
-	"github.com/mondegor/go-sample/internal/catalog/category/shared/repository"
 )
 
 type (
 	// CategoryPostgres - comment struct.
 	CategoryPostgres struct {
-		client    mrstorage.DBConnManager
-		sqlSelect mrstorage.SQLBuilderSelect
+		client          mrstorage.DBConnManager
+		sqlBuilder      mrstorage.SQLBuilder
+		repoStatus      db.FieldWithVersionUpdater[uuid.UUID, uint32, mrenum.ItemStatus]
+		repoSoftDeleter db.RowSoftDeleter[uuid.UUID]
+		repoTotalRows   db.TotalRowsFetcher[uint64]
 	}
 )
 
 // NewCategoryPostgres - создаёт объект CategoryPostgres.
-func NewCategoryPostgres(client mrstorage.DBConnManager, sqlSelect mrstorage.SQLBuilderSelect) *CategoryPostgres {
+func NewCategoryPostgres(client mrstorage.DBConnManager, sqlBuilder mrstorage.SQLBuilder) *CategoryPostgres {
 	return &CategoryPostgres{
-		client:    client,
-		sqlSelect: sqlSelect,
+		client:     client,
+		sqlBuilder: sqlBuilder,
+		repoStatus: db.NewFieldWithVersionUpdater[uuid.UUID, uint32, mrenum.ItemStatus](
+			client,
+			module.DBTableNameCategories,
+			"category_id",
+			module.DBFieldTagVersion,
+			"category_status",
+			module.DBFieldDeletedAt,
+		),
+		repoSoftDeleter: db.NewRowSoftDeleter[uuid.UUID](
+			client,
+			module.DBTableNameCategories,
+			"category_id",
+			module.DBFieldTagVersion,
+			module.DBFieldDeletedAt,
+		),
+		repoTotalRows: db.NewTotalRowsFetcher[uint64](
+			client,
+			module.DBTableNameCategories,
+		),
 	}
 }
 
-// NewSelectParams - comment method.
-func (re *CategoryPostgres) NewSelectParams(params entity.CategoryParams) mrstorage.SQLSelectParams {
-	return mrstorage.SQLSelectParams{
-		Where: re.sqlSelect.Where(func(w mrstorage.SQLBuilderWhere) mrstorage.SQLBuilderPartFunc {
-			return w.JoinAnd(
-				w.Expr("deleted_at IS NULL"),
-				w.FilterLike("UPPER(category_caption)", strings.ToUpper(params.Filter.SearchText)),
-				w.FilterAnyOf("category_status", params.Filter.Statuses),
-			)
-		}),
-		OrderBy: re.sqlSelect.OrderBy(func(s mrstorage.SQLBuilderOrderBy) mrstorage.SQLBuilderPartFunc {
-			return s.Join(
-				s.Field(params.Sorter.FieldName, params.Sorter.Direction),
-				s.Field("category_id", mrenum.SortDirectionASC),
-			)
-		}),
-		Limit: re.sqlSelect.Limit(func(p mrstorage.SQLBuilderLimit) mrstorage.SQLBuilderPartFunc {
-			return p.OffsetLimit(params.Pager.Index, params.Pager.Size)
-		}),
+// FetchWithTotal - comment method.
+func (re *CategoryPostgres) FetchWithTotal(ctx context.Context, params entity.CategoryParams) (rows []entity.Category, countRows uint64, err error) {
+	condition := re.sqlBuilder.Condition().Build(re.fetchCondition(params.Filter))
+
+	total, err := re.repoTotalRows.Fetch(ctx, condition)
+	if err != nil || total == 0 {
+		return nil, 0, err
 	}
+
+	if params.Pager.Size > total {
+		params.Pager.Size = total
+	}
+
+	orderBy := re.sqlBuilder.OrderBy().Build(re.fetchOrderBy(params.Sorter))
+	limit := re.sqlBuilder.Limit().Build(params.Pager.Index, params.Pager.Size)
+
+	rows, err = re.fetch(ctx, condition, orderBy, limit, params.Pager.Size)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return rows, total, nil
 }
 
 // Fetch - comment method.
-func (re *CategoryPostgres) Fetch(ctx context.Context, params mrstorage.SQLSelectParams) ([]entity.Category, error) {
-	whereStr, whereArgs := params.Where.ToSQL()
+func (re *CategoryPostgres) fetch(
+	ctx context.Context,
+	condition mrstorage.SQLPart,
+	orderBy mrstorage.SQLPart,
+	limit mrstorage.SQLPart,
+	maxRows uint64,
+) ([]entity.Category, error) {
+	whereStr, whereArgs := condition.ToSQL()
 
 	sql := `
 		SELECT
@@ -65,11 +96,11 @@ func (re *CategoryPostgres) Fetch(ctx context.Context, params mrstorage.SQLSelec
 			created_at as createdAt,
 			updated_at as updatedAt
 		FROM
-			` + module.DBSchema + `.` + module.DBTableNameCategories + `
+			` + module.DBTableNameCategories + `
 		WHERE
 			` + whereStr + `
 		ORDER BY
-			` + params.OrderBy.String() + params.Limit.String() + `;`
+			` + orderBy.String() + limit.String() + `;`
 
 	cursor, err := re.client.Conn(ctx).Query(
 		ctx,
@@ -82,7 +113,7 @@ func (re *CategoryPostgres) Fetch(ctx context.Context, params mrstorage.SQLSelec
 
 	defer cursor.Close()
 
-	rows := make([]entity.Category, 0)
+	rows := make([]entity.Category, 0, maxRows)
 
 	for cursor.Next() {
 		var row entity.Category
@@ -106,31 +137,6 @@ func (re *CategoryPostgres) Fetch(ctx context.Context, params mrstorage.SQLSelec
 	return rows, cursor.Err()
 }
 
-// FetchTotal - comment method.
-func (re *CategoryPostgres) FetchTotal(ctx context.Context, where mrstorage.SQLBuilderPart) (int64, error) {
-	whereStr, whereArgs := where.ToSQL()
-
-	sql := `
-		SELECT
-			COUNT(*)
-		FROM
-			` + module.DBSchema + `.` + module.DBTableNameCategories + `
-		WHERE
-			` + whereStr + `;`
-
-	var totalRow int64
-
-	err := re.client.Conn(ctx).QueryRow(
-		ctx,
-		sql,
-		whereArgs...,
-	).Scan(
-		&totalRow,
-	)
-
-	return totalRow, err
-}
-
 // FetchOne - comment method.
 func (re *CategoryPostgres) FetchOne(ctx context.Context, rowID uuid.UUID) (entity.Category, error) {
 	sql := `
@@ -142,7 +148,7 @@ func (re *CategoryPostgres) FetchOne(ctx context.Context, rowID uuid.UUID) (enti
 			created_at,
 			updated_at
 		FROM
-			` + module.DBSchema + `.` + module.DBTableNameCategories + `
+			` + module.DBTableNameCategories + `
 		WHERE
 			category_id = $1 AND deleted_at IS NULL
 		LIMIT 1;`
@@ -168,13 +174,13 @@ func (re *CategoryPostgres) FetchOne(ctx context.Context, rowID uuid.UUID) (enti
 // FetchStatus - comment method.
 // result: mrenum.ItemStatus - exists, ErrStorageNoRowFound - not exists, error - query error.
 func (re *CategoryPostgres) FetchStatus(ctx context.Context, rowID uuid.UUID) (mrenum.ItemStatus, error) {
-	return repository.CategoryFetchStatusPostgres(ctx, re.client, rowID)
+	return re.repoStatus.Fetch(ctx, rowID)
 }
 
 // Insert - comment method.
-func (re *CategoryPostgres) Insert(ctx context.Context, row entity.Category) (uuid.UUID, error) {
+func (re *CategoryPostgres) Insert(ctx context.Context, row entity.Category) (rowID uuid.UUID, err error) {
 	sql := `
-		INSERT INTO ` + module.DBSchema + `.` + module.DBTableNameCategories + `
+		INSERT INTO ` + module.DBTableNameCategories + `
 			(
 				category_id,
 				category_caption,
@@ -185,7 +191,7 @@ func (re *CategoryPostgres) Insert(ctx context.Context, row entity.Category) (uu
 		RETURNING
 			category_id;`
 
-	err := re.client.Conn(ctx).QueryRow(
+	err = re.client.Conn(ctx).QueryRow(
 		ctx,
 		sql,
 		row.Caption,
@@ -198,10 +204,10 @@ func (re *CategoryPostgres) Insert(ctx context.Context, row entity.Category) (uu
 }
 
 // Update - comment method.
-func (re *CategoryPostgres) Update(ctx context.Context, row entity.Category) (int32, error) {
+func (re *CategoryPostgres) Update(ctx context.Context, row entity.Category) (tagVersion uint32, err error) {
 	sql := `
 		UPDATE
-			` + module.DBSchema + `.` + module.DBTableNameCategories + `
+			` + module.DBTableNameCategories + `
 		SET
 			tag_version = tag_version + 1,
 			updated_at = NOW(),
@@ -211,9 +217,7 @@ func (re *CategoryPostgres) Update(ctx context.Context, row entity.Category) (in
 		RETURNING
 			tag_version;`
 
-	var tagVersion int32
-
-	err := re.client.Conn(ctx).QueryRow(
+	err = re.client.Conn(ctx).QueryRow(
 		ctx,
 		sql,
 		row.ID,
@@ -227,48 +231,34 @@ func (re *CategoryPostgres) Update(ctx context.Context, row entity.Category) (in
 }
 
 // UpdateStatus - comment method.
-func (re *CategoryPostgres) UpdateStatus(ctx context.Context, row entity.Category) (int32, error) {
-	sql := `
-		UPDATE
-			` + module.DBSchema + `.` + module.DBTableNameCategories + `
-		SET
-			tag_version = tag_version + 1,
-			updated_at = NOW(),
-			category_status = $3
-		WHERE
-			category_id = $1 AND tag_version = $2 AND deleted_at IS NULL
-		RETURNING
-			tag_version;`
-
-	var tagVersion int32
-
-	err := re.client.Conn(ctx).QueryRow(
-		ctx,
-		sql,
-		row.ID,
-		row.TagVersion,
-		row.Status,
-	).Scan(
-		&tagVersion,
-	)
-
-	return tagVersion, err
+func (re *CategoryPostgres) UpdateStatus(ctx context.Context, row entity.Category) (tagVersion uint32, err error) {
+	return re.repoStatus.Update(ctx, row.ID, row.TagVersion, row.Status)
 }
 
 // Delete - comment method.
 func (re *CategoryPostgres) Delete(ctx context.Context, rowID uuid.UUID) error {
-	sql := `
-		UPDATE
-			` + module.DBSchema + `.` + module.DBTableNameCategories + `
-		SET
-			tag_version = tag_version + 1,
-			deleted_at = NOW()
-		WHERE
-			category_id = $1 AND deleted_at IS NULL;`
+	return re.repoSoftDeleter.Delete(ctx, rowID)
+}
 
-	return re.client.Conn(ctx).Exec(
-		ctx,
-		sql,
-		rowID,
+func (re *CategoryPostgres) fetchCondition(filter entity.CategoryListFilter) mrstorage.SQLPartFunc {
+	return re.sqlBuilder.Condition().HelpFunc(
+		func(c mrstorage.SQLConditionHelper) mrstorage.SQLPartFunc {
+			return c.JoinAnd(
+				c.Expr("deleted_at IS NULL"),
+				c.FilterLike("UPPER(category_caption)", strings.ToUpper(filter.SearchText)),
+				c.FilterAnyOf("category_status", filter.Statuses),
+			)
+		},
+	)
+}
+
+func (re *CategoryPostgres) fetchOrderBy(sorter mrtype.SortParams) mrstorage.SQLPartFunc {
+	return re.sqlBuilder.OrderBy().HelpFunc(
+		func(o mrstorage.SQLOrderByHelper) mrstorage.SQLPartFunc {
+			return o.JoinComma(
+				o.Field(sorter.FieldName, sorter.Direction),
+				o.Field("category_id", mrenum.SortDirectionASC),
+			)
+		},
 	)
 }

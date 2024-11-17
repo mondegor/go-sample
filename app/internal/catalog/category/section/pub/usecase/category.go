@@ -39,21 +39,14 @@ func NewCategory(
 }
 
 // GetList - comment method.
-func (uc *Category) GetList(ctx context.Context, params entity.CategoryParams) ([]entity.Category, int64, error) {
-	fetchParams := uc.storage.NewSelectParams(params)
-
-	total, err := uc.storage.FetchTotal(ctx, fetchParams.Where)
+func (uc *Category) GetList(ctx context.Context, params entity.CategoryParams) (items []entity.Category, countItems uint64, err error) {
+	items, countItems, err = uc.storage.FetchWithTotal(ctx, params)
 	if err != nil {
 		return nil, 0, uc.errorWrapper.WrapErrorFailed(err, entity.ModelNameCategory)
 	}
 
-	if total < 1 {
+	if countItems == 0 {
 		return make([]entity.Category, 0), 0, nil
-	}
-
-	items, err := uc.storage.Fetch(ctx, fetchParams)
-	if err != nil {
-		return nil, 0, uc.errorWrapper.WrapErrorFailed(err, entity.ModelNameCategory)
 	}
 
 	dict := uc.getDict(ctx, params.LanguageID)
@@ -62,7 +55,7 @@ func (uc *Category) GetList(ctx context.Context, params entity.CategoryParams) (
 		uc.prepareItem(&items[i], dict)
 	}
 
-	return items, total, nil
+	return items, countItems, nil
 }
 
 // GetItem - comment method.
