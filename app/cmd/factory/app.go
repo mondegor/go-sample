@@ -181,9 +181,9 @@ func createAppAPI(ctx context.Context, opts app.Options) (enrichedOpts app.Optio
 		getter, task := NewSettingsGetterAPI(ctx, opts)
 		opts.SettingsGetterAPI = getter
 		opts.SchedulerTasks = append(opts.SchedulerTasks, task)
-	}
 
-	opts.SettingsSetterAPI = NewSettingsSetterAPI(ctx, opts)
+		opts.SettingsSetterAPI = NewSettingsSetterAPI(ctx, opts)
+	}
 
 	if opts.CatalogCategoryAvailabilityAPI, err = catalog.NewCategoryAvailabilityAPI(ctx, opts); err != nil {
 		return opts, err

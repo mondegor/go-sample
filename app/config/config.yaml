@@ -18,9 +18,13 @@ debugging:
       - github.com/mondegor/go-webcore/mrcore/mrapp.(*ErrorHandler).Perform
       - github.com/mondegor/go-webcore/mrcore/mrapp.(*ErrorHandler).PerformWithCommit
       - github.com/mondegor/go-webcore/mrlog/zerolog.(*eventAdapter).Err
-      - github.com/mondegor/go-storage/mrpostgres.(*ConnAdapter).Query
+      - github.com/mondegor/go-storage/mrpostgres.(*ConnAdapter).begin
       - github.com/mondegor/go-storage/mrpostgres.(*ConnAdapter).Exec
+      - github.com/mondegor/go-storage/mrpostgres.(*ConnAdapter).Query
+      - github.com/mondegor/go-storage/mrpostgres.(*queryRow).Scan
+      - github.com/mondegor/go-storage/mrpostgres.(*queryRows).Err
       - github.com/mondegor/go-storage/mrpostgres.(*queryRows).Scan
+      - github.com/mondegor/go-storage/mrpostgres.(*transaction).Exec
 
 logger:
   level: trace # info, warn, error, fatal, debug, trace
@@ -191,7 +195,7 @@ validation:
 
 task_schedule:
   reload_settings:
-    caption: "Reload settings"
+    caption: "Settings.Reload"
     startup: true
     period: 5m
-    timeout: 30s
+    timeout: 15s
